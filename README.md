@@ -19,10 +19,7 @@
 
 <div align="center">
 
-<!-- TODO before publishing: replace this line with a real screenshot or short GIF —
-     repos with a visible screenshot get meaningfully more stars. A screenshot of the
-     filter bar + an expanded conversation tree is the strongest single image to show. -->
-`[ screenshot / demo GIF goes here ]`
+<img src="docs/screenshots/overview.png" width="820" alt="Filter bar and an expanded conversation tree, showing turns, tags, signal, and category" />
 
 </div>
 
@@ -96,6 +93,10 @@ browser:
 Every path is provider-agnostic: it looks for the conversation area by shape (a wide
 scroll region, not a narrow list sidebar), not by a provider's specific CSS classes —
 so it doesn't break every time a provider redesigns their UI.
+
+<div align="center">
+<img src="docs/screenshots/paste-dialog.png" width="480" alt="The Paste a chat dialog, with provider picker and one-time bookmarklet" />
+</div>
 
 ---
 
