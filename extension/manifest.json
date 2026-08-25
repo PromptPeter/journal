@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Journal Chat holen",
+  "version": "1.0.0",
+  "description": "Holt den sichtbaren KI-Chat (mit automatischem Hochscrollen) und liefert ihn ans Journal — läuft nur beim Klick, keine dauerhafte Beobachtung, kein Server, keine gespeicherten Zugangsdaten.",
+  "permissions": ["activeTab", "scripting", "tabs"],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://chat.deepseek.com/*",
+    "https://grok.com/*",
+    "file:///*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Chat holen"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://chat.deepseek.com/*",
+        "https://grok.com/*"
+      ],
+      "js": ["content-provider.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["file:///*/index.html", "file:///*/Dribble_Journal_Filter/*"],
+      "js": ["content-journal.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

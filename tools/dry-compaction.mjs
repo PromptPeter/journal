@@ -60,6 +60,7 @@ globalThis.results=[];globalThis.FACETS={};globalThis.serverOnline=false;
 globalThis.toast=()=>{};globalThis.dateLabel=()=>'';
 globalThis.localStorage={_d:{},getItem(k){return this._d[k]??null},setItem(){}};
 globalThis.document={createElement:()=>({append(){},click(){},remove(){},style:{},setAttribute(){},addEventListener(){}}),body:{append(){}}};
+globalThis.window={addEventListener(){}};
 ` + src + '\nexport { compactOkf, compactByAge };');
   const mod = await import('file://' + tmp.replace(/\\/g, '/'));
   fs.unlinkSync(tmp);
