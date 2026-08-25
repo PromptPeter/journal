@@ -26,32 +26,42 @@
 (function () {
   'use strict';
 
-  var MAX_STABLE = 3;      // so oft hintereinander unverändert, bevor wir aufhören
-  var MAX_ITER = 60;       // Notbremse gegen Endlosschleifen
-  var DELAY_MS = 400;      // Wartezeit zwischen Scroll-Versuchen (Nachladen braucht Zeit)
+  var MAX_STABLE = 5;      // so oft hintereinander unverändert, bevor wir aufhören
+  var MAX_ITER = 90;       // Notbremse gegen Endlosschleifen
+  var DELAY_MS = 500;      // Wartezeit zwischen Scroll-Versuchen (Nachladen braucht Zeit)
 
   /**
-   * Sucht den Chat-Scrollbereich. Erst nach echten Scroll-Containern
-   * filtern (overflow-y: auto/scroll, ausreichend groß) — NICHT einfach
-   * nach dem größten aktuellen Überlauf, denn der kann im Moment des
-   * Klicks noch klein sein, wenn ältere Nachrichten erst beim Scrollen
-   * selbst nachgeladen werden (genau der Fall, den dieses Skript lösen
-   * soll). Unter den echten Kandidaten dann den mit dem meisten Inhalt.
+   * Sucht den Chat-Scrollbereich — NICHT die Chat-Liste in einer
+   * Seitenleiste. Beide sind scrollbar, aber eine Seitenleiste ist
+   * schmal (Chat-Titel passen in wenig Breite), der eigentliche
+   * Gesprächsverlauf nimmt den breiten Hauptbereich ein. Dieses Muster
+   * (schmale Seitenleiste + breiter Hauptbereich) gilt praktisch
+   * universell, nicht nur bei einem Anbieter.
+   *
+   * Deshalb zweistufig: erst nach echten Scroll-Containern filtern
+   * (overflow-y: auto/scroll) UND eine Mindestbreite verlangen (schließt
+   * Seitenleisten aus), dann unter den verbliebenen Kandidaten die
+   * größte Fläche wählen — NICHT einfach den größten aktuellen Überlauf,
+   * denn der kann im Moment des Klicks noch klein sein, wenn ältere
+   * Nachrichten erst beim Scrollen selbst nachgeladen werden (genau der
+   * Fall, den dieses Skript lösen soll).
    */
   function findScrollable() {
     var candidates = [];
     var all = document.querySelectorAll('*');
+    var minWidth = Math.min(480, window.innerWidth * 0.4);
     for (var i = 0; i < all.length; i++) {
       var el = all[i];
       var cs;
       try { cs = getComputedStyle(el); } catch (e) { continue; }
       if (!/(auto|scroll)/.test(cs.overflowY)) continue;
-      if (el.clientHeight < 100) continue; // zu klein fuer den Hauptbereich
+      if (el.clientHeight < 100) continue;   // zu klein fuer den Hauptbereich
+      if (el.clientWidth < minWidth) continue; // zu schmal -> vermutlich Seitenleiste
       candidates.push(el);
     }
     if (!candidates.length) return document.scrollingElement || document.documentElement;
     candidates.sort(function (a, b) {
-      return (b.scrollHeight - b.clientHeight) - (a.scrollHeight - a.clientHeight);
+      return (b.clientWidth * b.clientHeight) - (a.clientWidth * a.clientHeight);
     });
     return candidates[0];
   }
