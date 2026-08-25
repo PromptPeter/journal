@@ -190,37 +190,40 @@ say('');
 say('## Ergebnis');
 say('');
 if (totalLostWand + totalLostZweifel + totalDangling === 0){
-  say('Bei den aktuellen Daten macht die Abweichung noch keinen Unterschied — die');
-  say('Projekte sind zu klein oder haben keine geschlossenen Stränge. Der');
-  say('Unterschied träte erst bei gewachsenen Journalen auf.');
+  say('Bei den aktuellen Daten macht keine der drei Spalten einen Unterschied,');
+  say('den man an verlorenen WAND-/ZWEIFEL-Einträgen oder toten Verweisen ablesen');
+  say('könnte — die Projekte sind zu klein oder liegen komplett in der laufenden');
+  say('Sitzung. Dass „compactor.js (heute)" und „SKILL.md + Altersstufen" oben');
+  say('zeilenweise identisch sind, ist trotzdem der eigentliche Befund: beide');
+  say('schützen dieselbe laufende Sitzung aus demselben Grund.');
 } else {
   say(`Ein Verdichtungslauf würde **${totalLostWand} WAND-** und ` +
       `**${totalLostZweifel} ZWEIFEL-Einträge** entfernen, die nach SKILL.md ` +
       `stehenbleiben müssten, und **${totalDangling} Verweise** ins Leere zeigen lassen.`);
 }
 say('');
-say('Zur Erinnerung: `runCompaction()` schreibt `data.okf.json` und `VERLAUF.md`');
-say('an Ort und Stelle zurück und setzt sie auf `0444` — ohne Sicherung.');
+say('Zur Erinnerung: `runCompaction()` sichert `data.okf.json`/`VERLAUF.md` vor');
+say('jedem Schreibvorgang (`backupBefore()`, seit dem A–D-Fix Bestandteil des');
+say('Codes, nicht nur einmalig manuell) und schreibt erst danach zurück.');
 say('');
-say('**Vorschlag zur Angleichung** (klein und in `index.html` erprobt):');
+say('**Stand 25.08.2026: Die vier Abweichungen A–D sind in `compactor.js` behoben.**');
 say('');
-say('1. **Die laufende Sitzung von der Verdichtung ausnehmen.** SKILL.md sieht');
-say('   vier Altersstufen vor; die jüngste bleibt wörtlich stehen. `compactor.js`');
-say('   kennt keinen Altersbezug und verdichtet auch das, was gerade erst');
-say('   geschrieben wurde. Das läuft der Kernidee zuwider: „Ein Eintrag wird in');
-say('   dem Zustand des Nichtwissens geschrieben, in dem er entsteht." Wer sofort');
-say('   verdichtet, tut genau das, was eine Zusammenfassung tut.');
-say('2. In `isFolgenlos()` neben `MOTIV` auch `WAND` und `ZWEIFEL` ausnehmen.');
-say('   Begründung: Eine Wand ist *per Definition* folgenlos — niemand baut auf');
-say('   einer gescheiterten Sache auf. Die Regel trifft also nicht gelegentlich');
-say('   eine Wand, sondern systematisch alle. Für offene Zweifel gilt dasselbe.');
-say('3. Nach dem Entfernen die `ref`-Verweise nachziehen: zeigt ein Verweis auf');
-say('   einen verdichteten Eintrag, dessen Kette weiterfolgen, bis ein');
-say('   überlebender erreicht ist.');
+say('1. **Altersstufen umgesetzt.** SKILL.md sieht vier Altersstufen vor; die');
+say('   jüngste — die laufende Sitzung — bleibt wörtlich stehen. `compactor.js`');
+say('   ruft dafür jetzt `compactByAge()` auf, bevor es überhaupt schreibt, statt');
+say('   ohne Altersbezug sofort zu verdichten.');
+say('2. `isFolgenlos()` (jetzt `KEEP_ALWAYS`-Prüfung) nimmt neben `MOTIV` auch');
+say('   `WAND` und `ZWEIFEL` aus. Eine Wand ist *per Definition* folgenlos —');
+say('   niemand baut auf einer gescheiterten Sache auf. Die Regel hätte sonst');
+say('   nicht gelegentlich eine Wand getroffen, sondern systematisch alle.');
+say('3. `relinkRefs()` zieht nach dem Entfernen die `ref`-Verweise nach: zeigt');
+say('   ein Verweis auf einen verdichteten Eintrag, wird dessen Kette');
+say('   weiterverfolgt, bis ein überlebender Eintrag erreicht ist.');
+say('4. `findClosedStrand()` folgt jetzt den *eingehenden* statt der ausgehenden');
+say('   Verweisen — siehe `.claude/gespraech-richard-compactor.md`, Abweichung A.');
 say('');
-say('Punkt 1 erklärt auch die Spalte „SKILL.md + Altersstufen" oben: Wo dort');
-say('nichts entfernt wird, liegen alle Einträge in der laufenden Sitzung und');
-say('wären damit ohnehin geschützt.');
+say('Alle vier Punkte sind gegen dieselben vier Referenzdatensätze verifiziert wie');
+say('die Journal-Implementierung: `tools/compaction-bench-report.md`, 4/4 fehlerfrei.');
 
 const report = path.join(HERE, 'dry-compaction-report.md');
 fs.writeFileSync(report, L.join('\n') + '\n', 'utf8');

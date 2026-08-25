@@ -10,8 +10,7 @@ Datei: `tools/fixtures/testprojekt-real.json` · 4 Einträge · erwartet: `e01, 
 
 | Version | vorher | nachher | Kompression | Verweise ins Leere | Schutzverletzung | = Referenz? |
 |---|---|---|---|---|---|---|
-| compactor.js (OKF_MD_LOG, unverändert) | 4 | 4 | 0% | – | – | **NEIN** |
-  Abweichung: erhalten `e01, e02, e03, e04`
+| compactor.js (OKF_MD_LOG, Regeln + Altersstufen seit 25.08.2026) | 4 | 4 | 0% | – | – | ja |
 | Journal compactOkf() (Regeln, Richtung korrigiert) | 4 | 3 | 25% | – | – | ja |
 | Journal compactByAge() (Regeln + Altersstufen) | 4 | 4 | 0% | – | – | ja |
 
@@ -23,8 +22,7 @@ Datei: `tools/fixtures/bloedeleini-real.json` · 4 Einträge · erwartet: `e03`
 
 | Version | vorher | nachher | Kompression | Verweise ins Leere | Schutzverletzung | = Referenz? |
 |---|---|---|---|---|---|---|
-| compactor.js (OKF_MD_LOG, unverändert) | 4 | 4 | 0% | – | – | **NEIN** |
-  Abweichung: erhalten `e01, e02, e03, e04`
+| compactor.js (OKF_MD_LOG, Regeln + Altersstufen seit 25.08.2026) | 4 | 4 | 0% | – | – | ja |
 | Journal compactOkf() (Regeln, Richtung korrigiert) | 4 | 1 | 75% | – | – | ja |
 | Journal compactByAge() (Regeln + Altersstufen) | 4 | 4 | 0% | – | – | ja |
 
@@ -36,8 +34,7 @@ Datei: `tools/fixtures/strang-synthetic-12.json` · 12 Einträge · erwartet: `e
 
 | Version | vorher | nachher | Kompression | Verweise ins Leere | Schutzverletzung | = Referenz? |
 |---|---|---|---|---|---|---|
-| compactor.js (OKF_MD_LOG, unverändert) | 12 | 12 | 0% | – | – | **NEIN** |
-  Abweichung: erhalten `e01, e02, e03, e04, e05, e06, e07, e08, e09, e10, e11, e12`
+| compactor.js (OKF_MD_LOG, Regeln + Altersstufen seit 25.08.2026) | 12 | 12 | 0% | – | – | ja |
 | Journal compactOkf() (Regeln, Richtung korrigiert) | 12 | 10 | 17% | – | – | ja |
 | Journal compactByAge() (Regeln + Altersstufen) | 12 | 12 | 0% | – | – | ja |
 
@@ -49,8 +46,7 @@ Datei: `tools/fixtures/strang-synthetic-altersstufen.json` · 12 Einträge · er
 
 | Version | vorher | nachher | Kompression | Verweise ins Leere | Schutzverletzung | = Referenz? |
 |---|---|---|---|---|---|---|
-| compactor.js (OKF_MD_LOG, unverändert) | 12 | 12 | 0% | – | – | **NEIN** |
-  Abweichung: erhalten `e01, e02, e03, e04, e05, e06, e07, e08, e09, e10, e11, e12`
+| compactor.js (OKF_MD_LOG, Regeln + Altersstufen seit 25.08.2026) | 12 | 7 | 42% | – | – | ja |
 | Journal compactOkf() (Regeln, Richtung korrigiert) | 12 | 9 | 25% | – | – | ja |
 | Journal compactByAge() (Regeln + Altersstufen) | 12 | 7 | 42% | – | – | ja |
 
@@ -60,7 +56,7 @@ Datei: `tools/fixtures/strang-synthetic-altersstufen.json` · 12 Einträge · er
 
 | Version | fehlerfrei | Ø Kompression |
 |---|---|---|
-| compactor.js (OKF_MD_LOG, unverändert) | 0 / 4 Datensätze | 0% |
+| compactor.js (OKF_MD_LOG, Regeln + Altersstufen seit 25.08.2026) | 4 / 4 Datensätze | 11% |
 | Journal compactOkf() (Regeln, Richtung korrigiert) | 4 / 4 Datensätze | 36% |
 | Journal compactByAge() (Regeln + Altersstufen) | 4 / 4 Datensätze | 11% |
 

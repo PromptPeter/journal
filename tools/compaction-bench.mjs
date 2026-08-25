@@ -66,12 +66,14 @@ globalThis.document={createElement:()=>({append(){},click(){},remove(){},style:{
 /* ── 2. Datensätze ────────────────────────────────────────────────── */
 
 /*
- * `expected` gilt für regelbasierte Versionen (compactor.js, compactOkf).
- * `expectedAged` gilt für compactByAge(): alle drei Fixtures liegen an
- * einem einzigen Kalendertag, zählen also komplett als "laufende Sitzung"
- * — die bleibt laut SKILL.md unverändert stehen. 0 % Kompression ist hier
- * das RICHTIGE Ergebnis, keine Abweichung (siehe fixtures/README.md,
- * Abschnitt "Bekannte Lücke").
+ * `expected` gilt für die rein regelbasierte Version (Journal compactOkf(),
+ * ohne Altersbezug). `expectedAged` gilt für beide altersbewussten Versionen
+ * — Journal compactByAge() und seit dem A-D-Fix (25.08.2026) auch
+ * compactor.js/runCompaction(): alle drei ersten Fixtures liegen an einem
+ * einzigen Kalendertag, zählen also komplett als "laufende Sitzung" — die
+ * bleibt laut SKILL.md unverändert stehen. 0 % Kompression ist hier das
+ * RICHTIGE Ergebnis, keine Abweichung (siehe fixtures/README.md, Abschnitt
+ * "Bekannte Lücke").
  */
 const FIXTURES = [
   {
@@ -161,7 +163,10 @@ function runCompactorJs(entries){
   const mod = { exports: {} };
   new Function('require', 'module', 'exports', '__dirname', '__filename', src)(
     n => (n === 'fs' ? safeFs : require(n)), mod, mod.exports, OKF_ROOT, path.join(OKF_ROOT, 'compactor.js'));
-  mod.exports.runCompaction(tmpDir);
+  // backup:false -- die Sandbox mockt kein copyFileSync, und hier werden
+  // ausschliesslich die Verdichtungsregeln verglichen, nicht die Sicherung
+  // (die hat einen eigenen Test, siehe unten).
+  mod.exports.runCompaction(tmpDir, { backup: false });
 
   fs.rmSync(tmpDir, { recursive: true, force: true });
   const written = writes.find(w => w.path.endsWith('data.okf.json'));
@@ -169,7 +174,7 @@ function runCompactorJs(entries){
 }
 
 const VERSIONS = [
-  { id:'compactor',  label:'compactor.js (OKF_MD_LOG, unverändert)',        run: e => runCompactorJs(structuredClone(e)) },
+  { id:'compactor',  label:'compactor.js (OKF_MD_LOG, Regeln + Altersstufen seit 25.08.2026)', run: e => runCompactorJs(structuredClone(e)) },
   { id:'journal',    label:'Journal compactOkf() (Regeln, Richtung korrigiert)', run: e => journal.compactOkf(structuredClone(e)) },
   { id:'journalAge', label:'Journal compactByAge() (Regeln + Altersstufen)', run: e => journal.compactByAge(structuredClone(e)).map(({ _stage, ...x }) => x) },
 ];
@@ -207,13 +212,18 @@ for (const fx of FIXTURES){
       continue;
     }
 
-    const wantFor = v.id === 'journalAge'
+    // compactor.js wendet seit dem A-D-Fix (25.08.2026) selbst Altersstufen an --
+    // runCompaction() ruft intern compactByAge(), ist also gegen dieselbe
+    // Erwartung zu pruefen wie Journal compactByAge(), nicht gegen die
+    // regelbasierte ohne Altersbezug.
+    const isAgeAware = v.id === 'journalAge' || v.id === 'compactor';
+    const wantFor = isAgeAware
       ? (fx.expectedAged === 'unchanged' ? entries.map(e => e.id) : fx.expectedAged)
       : fx.expected;
     const res = evaluate(entries, after, wantFor);
 
     // Zeitstempel-Format je Altersstufe prüfen (nur wo definiert)
-    if (v.id === 'journalAge' && fx.expectedAgedTs){
+    if (isAgeAware && fx.expectedAgedTs){
       const tsErrors = [];
       for (const [id, want] of Object.entries(fx.expectedAgedTs)){
         const e = after.find(x => x.id === id);
