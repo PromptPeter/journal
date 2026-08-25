@@ -138,10 +138,10 @@ moves.
 - ✅ Filter engine, tree view, eleven export formats, OKF read/write
 - ✅ Manual chat import: paste dialog, bookmarklet, browser extension — with duplicate
   detection
+- ✅ Logo and visual identity — PromptPeter, plus a live demo and a proper README
 - ⬜ **Agent / Skill / Workflow / Prompt library** — take the snippets already sitting in
   your journal and turn them into reusable prompts, agent instructions, and workflows,
   without leaving the app
-- ⬜ Logo and visual identity
 - ⬜ Official data-export parsers (e.g. ChatGPT's `conversations.json`) as a fourth,
   higher-fidelity import path
 - ⬜ Community-suggested formats, filters, and OKF types — see [Contributing](#contributing)
@@ -185,8 +185,9 @@ PromptPeter has social skills now — no idea how that happened either.
 </div>
 
 Bug reports and "this broke on my chat export" reports travel fastest as a
-[GitHub issue](../../issues) — everything else (a build screenshot, a stray idea at
-1am, "does it handle *this* model") is exactly what the two links above are for.
+[GitHub issue](https://github.com/PromptPeter/journal/issues) — everything else (a
+build screenshot, a stray idea at 1am, "does it handle *this* model") is exactly what
+the two links above are for.
 
 ---
 
