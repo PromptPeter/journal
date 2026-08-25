@@ -477,6 +477,20 @@ mark{background:var(--accent-soft);color:#a9c2ff;border-radius:2px;padding:0 1px
 .secret-tag{font-size:var(--card-meta);color:var(--danger);border:1px solid currentColor;
   border-radius:var(--r-sm);padding:1px 6px;flex:none;cursor:help}
 
+/* ---------- Chat einfügen (Paste-Import) ---------- */
+.paste-dlg{width:min(560px,calc(100vw - 32px));display:flex;flex-direction:column;
+  background:var(--panel);border-radius:var(--r-lg);box-shadow:var(--shadow-pop);
+  transform:translateY(8px) scale(.99);transition:transform .2s var(--ease)}
+.scrim.open .paste-dlg{transform:none}
+.paste-body{padding:16px 22px;display:flex;flex-direction:column;gap:12px}
+.paste-hint{margin:0;font-size:12.5px;line-height:1.55;color:var(--text-3)}
+.paste-field{display:flex;flex-direction:column;gap:5px}
+.paste-field label{font-size:12px;color:var(--text-2);font-weight:600}
+.paste-field select,.paste-field textarea{background:var(--surface);border:1px solid var(--line-soft);
+  border-radius:var(--r-sm);padding:8px 10px;font-size:13px;color:var(--text);resize:vertical}
+.paste-field textarea{min-height:220px;font-family:var(--mono);line-height:1.5}
+.paste-field select:focus,.paste-field textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+
 /* ---------- Toast ---------- */
 .toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:600;
   display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
@@ -521,6 +535,7 @@ mark{background:var(--accent-soft);color:#a9c2ff;border-radius:2px;padding:0 1px
   <symbol id="i-folder" viewBox="0 0 16 16"><path d="M2.5 4.2c0-.6.5-1 1-1h2.8c.3 0 .6.1.8.4l.7.8h4.7c.6 0 1 .5 1 1v6.4c0 .6-.4 1-1 1h-9c-.5 0-1-.4-1-1V4.2Z" stroke="currentColor" stroke-width="1.3" fill="none"/></symbol>
   <symbol id="i-dl" viewBox="0 0 16 16"><path d="M8 2v8m0 0 3-3m-3 3L5 7M2.8 12.5h10.4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   <symbol id="i-up" viewBox="0 0 16 16"><path d="M8 13V5m0 0 3 3M8 5 5 8M2.8 2.5h10.4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-paste" viewBox="0 0 16 16"><path d="M6 2.5h4c.3 0 .5.2.5.5v.5H5.5V3c0-.3.2-.5.5-.5Z" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M4.5 3.5h7c.6 0 1 .4 1 1v8c0 .6-.4 1-1 1h-7c-.6 0-1-.4-1-1v-8c0-.6.4-1 1-1Z" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M5.5 7h5M5.5 9.3h5M5.5 11.6h3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></symbol>
   <symbol id="i-dense" viewBox="0 0 16 16"><path d="M2.5 3h11M2.5 6h11M2.5 9h11M2.5 12h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
   <symbol id="i-cosy" viewBox="0 0 16 16"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
   <symbol id="i-book" viewBox="0 0 16 16"><path d="M2.5 3.2c0-.4.3-.7.7-.7H7c.6 0 1 .4 1 1v9.8c0-.6-.4-1-1-1H3.2a.7.7 0 0 1-.7-.7V3.2Zm11 0c0-.4-.3-.7-.7-.7H9c-.6 0-1 .4-1 1v9.8c0-.6.4-1 1-1h3.8c.4 0 .7-.3.7-.7V3.2Z" stroke="currentColor" stroke-width="1.2" fill="none"/></symbol>
@@ -601,6 +616,7 @@ mark{background:var(--accent-soft);color:#a9c2ff;border-radius:2px;padding:0 1px
     <span class="result-count" id="count">–</span>
     <span class="spacer"></span>
     <button class="link-btn" id="import-btn"><svg width="13" height="13"><use href="#i-up"/></svg> <span></span></button>
+    <button class="link-btn" id="paste-btn"><svg width="13" height="13"><use href="#i-paste"/></svg> <span></span></button>
     <span class="timing" id="timing"></span>
   </div>
 
@@ -787,6 +803,22 @@ const T = {
                      de:'{f} exportiert · {n} Chats · {ms} ms' },
   nbDownloaded:    { en:'NotebookLM file downloaded — upload it as a source at notebooklm.google.com.',
                      de:'NotebookLM-Datei heruntergeladen — in notebooklm.google.com als Quelle hochladen.' },
+
+  pasteBtn:        { en:'Paste chat',   de:'Chat einfügen' },
+  pasteTitle:      { en:'Paste a chat', de:'Chat einfügen' },
+  pasteHint:       { en:'Copy the conversation text yourself from the provider\'s site and paste it below. Already-imported turns are recognised automatically and skipped — pasting the same chat again just adds what\'s new.',
+                     de:'Kopiere den Gesprächstext selbst von der Anbieter-Seite und füge ihn unten ein. Bereits importierte Turns werden automatisch erkannt und übersprungen — erneutes Einfügen desselben Chats ergänzt nur das Neue.' },
+  pasteProvider:   { en:'Provider',     de:'Anbieter' },
+  pasteText:       { en:'Chat text',    de:'Chat-Text' },
+  pastePlaceholder:{ en:'Paste the copied conversation here…', de:'Hier den kopierten Gesprächsverlauf einfügen…' },
+  pasteSubmit:     { en:'Import',       de:'Importieren' },
+  pasteEmpty:      { en:'Please paste some text first.', de:'Bitte zuerst Text einfügen.' },
+  pasteNoText:     { en:'No recognisable chat text found in the pasted content.',
+                     de:'Im eingefügten Text wurde kein erkennbarer Chat-Inhalt gefunden.' },
+  pasteAddedNew:   { en:'{n} new turn(s) added to the existing chat.',  de:'{n} neue(r) Turn(s) zum bestehenden Chat ergänzt.' },
+  pasteNoNew:      { en:'Nothing new — this chat is already fully imported.',
+                     de:'Nichts Neues — dieser Chat ist bereits vollständig importiert.' },
+  pasteImported:   { en:'Chat imported ({n} turns).', de:'Chat importiert ({n} Turns).' },
 
   dayToday:        { en:'Today',                      de:'Heute' },
   dayYesterday:    { en:'Yesterday',                  de:'Gestern' },
@@ -2987,6 +3019,110 @@ function openScanDialog(scan, chats, leavesDevice, proceed){
   document.addEventListener('keydown', scanKey, true);
 }
 
+/* ---------- Chat einfügen (Paste-Import) -----------------------------
+   Ersetzt die alte, dauerhaft im Hintergrund mitschneidende Extension:
+   der Nutzer loggt sich selbst beim Anbieter ein, kopiert den sichtbaren
+   Verlauf von Hand (oder per Ein-Klick-Lesezeichen, das nur in diesem
+   Moment läuft) und fügt ihn hier ein. Kein Server, kein Konto, keine
+   gespeicherten Zugangsdaten — die Anbieter-Wahl dient nur dem Parser,
+   nicht dem Zugriff auf die Seite selbst.                              */
+let pasteDlg = null;
+function closePasteDialog(){
+  if (!pasteDlg) return;
+  const el = pasteDlg; pasteDlg = null;
+  document.removeEventListener('keydown', pasteKey, true);
+  el.classList.remove('open');
+  setTimeout(() => el.remove(), 200);
+}
+function pasteKey(e){ if (e.key === 'Escape'){ e.stopPropagation(); closePasteDialog(); } }
+
+/** Zeichenanzahl/Tokenschätzung/Zähler nach einer Turns-Änderung neu ziehen. */
+function recomputeDerived(c){
+  const chars = c.turns.reduce((a,t) => a + t.text.length + (t.thought?.length || 0), 0);
+  c.msgs = c.turns.length;
+  c.thoughts = c.turns.filter(t => t.thought).length;
+  c.tokens = Math.round(chars / 3.6);
+}
+
+/**
+ * Fügt einen frisch eingefügten Chat ein oder ergänzt einen bestehenden
+ * um nur die neuen Turns — erkannt über chatKey() (Modell+Startzeit+Titel
+ * bleiben bei einer fortgesetzten Unterhaltung gleich) plus einem
+ * Textvergleich der einzelnen Turns, da eingefügter Text keine
+ * verlässlichen Einzel-Zeitstempel mitbringt.
+ * @returns {{added:number, mode:'merged'|'new'|'none'}}
+ */
+function mergeOrAddChat(fresh){
+  const key = chatKey(fresh);
+  const existing = CHATS.find(c => chatKey(c) === key);
+
+  if (!existing){
+    reindex([...CHATS, fresh].sort((a,b) => b.ts - a.ts));
+    return { added: fresh.turns.length, mode:'new' };
+  }
+
+  const known = new Set(existing.turns.map(t => t.text));
+  const freshTurns = fresh.turns.filter(t => !known.has(t.text));
+  if (!freshTurns.length) return { added:0, mode:'none' };
+
+  existing.turns.push(...freshTurns);
+  recomputeDerived(existing);
+  reindex(CHATS);
+  return { added: freshTurns.length, mode:'merged' };
+}
+
+function submitPastedChat(){
+  const modelSel = pasteDlg.querySelector('select');
+  const textArea = pasteDlg.querySelector('textarea');
+  const modelId = modelSel.value;
+  const raw = textArea.value;
+
+  if (!raw.trim()){ toast(t('pasteEmpty'), 'err'); return; }
+
+  const chat = parseChatMarkdown(raw, { folder: modelId, filename:'Eingefügter Chat', ts: Date.now() });
+  if (!chat){ toast(t('pasteNoText'), 'err'); return; }
+  if (modelId && MODEL_BY_ID.has(modelId)) chat.modelId = modelId;
+
+  const { added, mode } = mergeOrAddChat(chat);
+  closePasteDialog();
+  resetFilters(false);
+  apply();
+  updateCorpusLine();
+
+  if (mode === 'none') toast(t('pasteNoNew'), 'ok');
+  else if (mode === 'merged') toast(t('pasteAddedNew', { n: added }), 'ok');
+  else toast(t('pasteImported', { n: added }), 'ok');
+}
+
+function openPasteDialog(){
+  closePasteDialog();
+
+  const select = h('select', {},
+    h('option', { value:'' }, t('pasteProvider') + ' …'),
+    ...MODELS.filter(m => m.id !== 'unbekannt').map(m =>
+      h('option', { value:m.id }, `${m.name} · ${m.vendor}`)));
+
+  const textarea = h('textarea', { placeholder:t('pastePlaceholder'), spellcheck:'false' });
+
+  const body = h('div', { class:'paste-body' },
+    h('p', { class:'paste-hint' }, t('pasteHint')),
+    h('div', { class:'paste-field' }, h('label', {}, t('pasteProvider')), select),
+    h('div', { class:'paste-field' }, h('label', {}, t('pasteText')), textarea));
+
+  pasteDlg = h('div', { class:'scrim', onClick: e => { if (e.target === pasteDlg) closePasteDialog(); } },
+    h('div', { class:'paste-dlg', role:'dialog', 'aria-modal':'true', 'aria-label':t('pasteTitle') },
+      h('div', { class:'scan-head' }, h('h2', {}, t('pasteTitle'))),
+      body,
+      h('div', { class:'scan-foot' },
+        h('button', { class:'btn btn-ghost', onClick: closePasteDialog }, t('cancel')),
+        h('button', { class:'btn btn-primary', onClick: submitPastedChat }, t('pasteSubmit')))));
+
+  document.body.append(pasteDlg);
+  requestAnimationFrame(() => pasteDlg.classList.add('open'));
+  select.focus();
+  document.addEventListener('keydown', pasteKey, true);
+}
+
 /**
  * NotebookLM ist der einzige Weg, auf dem Inhalte das Gerät verlassen —
  * als Datei, die anschließend von Hand zu Google hochgeladen wird.
@@ -3569,6 +3705,7 @@ window.addEventListener('drop', async e => {
 });
 
 document.getElementById('import-btn').addEventListener('click', () => document.getElementById('file-input').click());
+document.getElementById('paste-btn').addEventListener('click', openPasteDialog);
 document.getElementById('file-input').addEventListener('change', async e => {
   await importFiles([...e.target.files]); e.target.value = '';
 });
@@ -3970,6 +4107,7 @@ function applyLang(){
   opTrigger.title = t('searchOpTitle');
   document.querySelector('#reset span').textContent = t('reset');
   document.querySelector('#import-btn span').textContent = t('importFiles');
+  document.querySelector('#paste-btn span').textContent = t('pasteBtn');
   document.querySelector('#dropzone h3').textContent = t('dropTitle');
   document.querySelector('#dropzone p').textContent  = t('dropSub');
 
