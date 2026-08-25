@@ -2099,6 +2099,17 @@ function extractWeil(text){
   return m ? m[1].trim() : text;
 }
 /**
+ * Kurzform eines Eintragstexts ohne die "weil …"-Begründung — für die
+ * Strang-Zusammenführung, damit die Begründung nicht doppelt im
+ * zusammengeführten Text auftaucht (einmal als "Kurzform", einmal über
+ * extractWeil()). Ohne Komma im Text (der Normalfall bei "X — weil Y")
+ * wäre `text.split(',')[0]` sonst der gesamte Text inklusive Begründung.
+ */
+function stripWeilClause(text){
+  const s = String(text).replace(/\s*[—-]?\s*weil\s+.+$/i, '').trim();
+  return s || text;
+}
+/**
  * @param {Array}  entries  OKF-Einträge
  * @param {Set}    protect  IDs, die unverändert bleiben müssen
  *                          (die laufende Sitzung — sie steht wörtlich)
@@ -2154,7 +2165,7 @@ function compactOkf(entries, protect = new Set()){
     if (wand){
       const target = byId.get(wand.endId);
       if (!protect.has(wand.endId))
-        update.set(wand.endId, `${target.text} (${e.text.split(',')[0]}, weil ${extractWeil(e.text)})`);
+        update.set(wand.endId, `${target.text} (${stripWeilClause(e.text).split(',')[0]}, weil ${extractWeil(e.text)})`);
       for (const id of wand.chain) if (id !== wand.endId) drop(id);
       continue;
     }
