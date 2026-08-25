@@ -1,0 +1,20 @@
+Ich möchte einen logging skill, der die Konversation einer Unterhaltung mit dir erfasst. Es soll eine bessere Art des compacting sein und hilfreicher als andere Art der Zusammenfassungen.
+
+Ich erinnere mich an das klassische  logging, wo mit Zeitstempel jede Aktion abgelegt wird. Das besser: Also eine Mischung aus logging, summary und autocompacting. 
+
+Jede Diskussion hat bestimmte features: 
+
+- Information
+- Planung
+- Abschweifungen
+- Erklärungen
+- Entscheidungen
+usw. 
+
+Jetzt haben Zusammenfassungen von Diskussionen das Problem, dass sie oft die Motivation und Genese des Projekts überdecken. Er gibt eine Assymetrie nach vorne zum Ziel, aber keine Rekonstruktion von der Motivationlage. 
+
+- Zeitstempel helfen ungemein bei der Einordnung. 
+- ein Logging über mehrere context kann sehr lang werden
+- eine inhaltiche Ordnung mit Tabellen und Argumentationssträngen hilft beim Lesen
+- der inhaltliche Verlauf: Ausgang, Abzweigung, Intensivierung, Entscheidung, Zweifel, Kompromiss usw. kann bei dem Verständnis worum es geht unheimlich helfen. 
+- völlig nutzlose Sackgassen und Abschweifungen können stillschweigend gekürzt werden. Kannst du das nachvollziehen? Macht es Sinn? Ist es vielleicht überflüssig? Mein Ziel ist es wirklich eine bessere und gezieltere Art des autocompacting zu haben. Idealerweise ist nach einem clear sofort wieder Einsatzbereitschaft, aber das ist ein mittelfristiges Ziel, wenn sich der Skill über die Zeit verbessert. 

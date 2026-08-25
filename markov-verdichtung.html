@@ -1,0 +1,554 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<title>Der Compactor als Markov-Kette</title>
+
+<style>
+  :root {
+    --bg: #F6F1E7; --surface: #FFFFFF; --sunken: #EFE8D9;
+    --ink: #2A2318; --soft: #6E6252; --line: #DED2B8;
+    --rust: #B24A2A; --rust-soft: #F0DED4;
+    --teal: #2C6E63; --teal-soft: #DCEAE6;
+    --focus: #1B4E8C;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1C1712; --surface: #241E17; --sunken: #171310;
+      --ink: #EDE4D3; --soft: #A99D86; --line: #3C3324;
+      --rust: #E08A5F; --rust-soft: #3D2A20;
+      --teal: #7FC2B3; --teal-soft: #1E332E;
+      --focus: #7FB0E0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1C1712; --surface: #241E17; --sunken: #171310;
+    --ink: #EDE4D3; --soft: #A99D86; --line: #3C3324;
+    --rust: #E08A5F; --rust-soft: #3D2A20;
+    --teal: #7FC2B3; --teal-soft: #1E332E;
+    --focus: #7FB0E0;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif; line-height: 1.62;
+  }
+  .page { max-width: 800px; margin: 0 auto; padding: 4rem 1.5rem 5rem; }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.76rem;
+    letter-spacing: 0.07em; text-transform: uppercase; color: var(--rust); margin: 0 0 0.9rem;
+  }
+  h1 {
+    font-family: "Source Serif 4", Georgia, serif; font-weight: 700;
+    font-size: clamp(2rem, 5.2vw, 2.75rem); line-height: 1.08;
+    margin: 0 0 1.1rem; text-wrap: balance; max-width: 16ch;
+  }
+  h2 {
+    font-family: "Source Serif 4", Georgia, serif; font-weight: 600;
+    font-size: 1.42rem; margin: 3rem 0 0.85rem; text-wrap: balance;
+  }
+  h3 {
+    font-family: "IBM Plex Sans", sans-serif; font-weight: 600;
+    font-size: 0.95rem; margin: 1.6rem 0 0.6rem;
+  }
+  p { max-width: 64ch; margin: 0 0 0.9rem; }
+  .lede { font-size: 1.06rem; }
+
+  code {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.9em;
+    background: var(--sunken); border: 1px solid var(--line);
+    border-radius: 4px; padding: 0.05em 0.35em;
+  }
+
+  figure {
+    margin: 2.2rem 0 0; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 14px; padding: 1.4rem;
+  }
+  figcaption {
+    margin-top: 1rem; font-size: 0.9rem; color: var(--soft); max-width: 62ch;
+  }
+
+  /* ---- controls ---- */
+  .controls { display: flex; flex-wrap: wrap; gap: 0.8rem 1.4rem; align-items: center; margin-bottom: 1.2rem; }
+  .ctl { display: flex; align-items: center; gap: 0.6rem; }
+  .ctl-label {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.72rem;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--soft); white-space: nowrap;
+  }
+  .chip-row { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  button.chip {
+    appearance: none; border: none; background: transparent; color: var(--ink);
+    font-family: inherit; font-size: 0.86rem; padding: 0.42rem 0.95rem; cursor: pointer;
+  }
+  button.chip + button.chip { border-left: 1px solid var(--line); }
+  button.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  button.chip:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+  input[type="range"] { width: 190px; accent-color: var(--rust); }
+  .val {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.85rem;
+    font-variant-numeric: tabular-nums; min-width: 3.2em; text-align: right;
+  }
+
+  /* ---- matrix ---- */
+  table.mx { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+  table.mx th, table.mx td { padding: 0.5rem 0.6rem; border: 1px solid var(--line); text-align: center; }
+  table.mx th {
+    font-family: "IBM Plex Mono", monospace; font-size: 0.7rem;
+    letter-spacing: 0.05em; text-transform: uppercase; color: var(--soft); font-weight: 500;
+  }
+  table.mx th.rowh { text-align: left; color: var(--ink); font-size: 0.78rem; }
+  td.live { background: var(--teal-soft); color: var(--teal); font-weight: 600; }
+  td.dead { background: var(--rust-soft); color: var(--rust); font-weight: 600; }
+  tr.odd td.rowh, tr.odd th.rowh { position: relative; }
+  tr.odd th.rowh::after {
+    content: "einzige Zeile, die abweicht"; display: block;
+    font-family: "IBM Plex Sans", sans-serif; font-weight: 400;
+    font-size: 0.68rem; color: var(--teal); text-transform: none; letter-spacing: 0;
+  }
+
+  /* ---- chain svg ---- */
+  .svg-wrap { overflow-x: auto; }
+  svg.chain { width: 100%; height: auto; display: block; }
+  .st circle { fill: var(--surface); stroke: var(--soft); stroke-width: 1.4; }
+  .st.absorb circle { stroke: var(--rust); stroke-width: 2.4; fill: var(--rust-soft); }
+  .st.keep circle { stroke: var(--teal); stroke-width: 2.4; }
+  .st text.nm {
+    font-family: "IBM Plex Mono", monospace; font-size: 12px;
+    fill: var(--ink); text-anchor: middle; dominant-baseline: central;
+  }
+  .st text.ct {
+    font-family: "IBM Plex Sans", sans-serif; font-size: 11px;
+    fill: var(--soft); text-anchor: middle; font-variant-numeric: tabular-nums;
+  }
+  .edge { fill: none; stroke: var(--soft); stroke-width: 1.4; opacity: 0.5; }
+  .edge.hot { stroke: var(--rust); opacity: 1; }
+  .edge.cool { stroke: var(--teal); opacity: 1; }
+  .elabel { font-family: "IBM Plex Mono", monospace; font-size: 10px; fill: var(--soft); }
+  #token { fill: var(--rust); }
+  @media (prefers-reduced-motion: reduce) { #token { display: none; } }
+
+  /* ---- bars ---- */
+  .bars { display: grid; gap: 0.4rem; margin-top: 1.1rem; }
+  .bar { display: grid; grid-template-columns: 6.2rem 1fr 3.2rem; align-items: center; gap: 0.6rem; font-size: 0.84rem; }
+  .bar .nm { font-family: "IBM Plex Mono", monospace; font-size: 0.76rem; color: var(--soft); }
+  .bar .track { height: 16px; background: var(--sunken); border-radius: 3px; overflow: hidden; }
+  .bar .fill { height: 100%; background: var(--teal); transition: width 0.35s ease; }
+  .bar.gone .fill { background: var(--rust); }
+  .bar .n { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; text-align: right; }
+
+  .readout {
+    margin-top: 1.2rem; border-radius: 10px; padding: 0.95rem 1.15rem;
+    border: 1px solid var(--line); background: var(--sunken); font-size: 0.94rem;
+  }
+  .readout[data-tone="wrong"] { border-color: var(--rust); background: var(--rust-soft); }
+  .readout[data-tone="right"] { border-color: var(--teal); background: var(--teal-soft); }
+
+  .callout {
+    margin-top: 1.4rem; padding: 1.1rem 1.3rem; border-left: 3px solid var(--rust);
+    background: var(--surface); border-radius: 0 10px 10px 0; font-size: 0.95rem;
+  }
+  .callout.good { border-left-color: var(--teal); }
+  .callout p { margin: 0.55rem 0; }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  pre.trace {
+    background: var(--sunken); border: 1px solid var(--line); border-radius: 8px;
+    padding: 0.9rem 1rem; overflow-x: auto; font-family: "IBM Plex Mono", monospace;
+    font-size: 0.8rem; line-height: 1.7; margin: 1rem 0 0;
+  }
+  pre.trace .del { color: var(--rust); }
+  pre.trace .ok { color: var(--teal); }
+
+  footer {
+    margin-top: 3rem; padding-top: 1.15rem; border-top: 1px solid var(--line);
+    font-size: 0.85rem; color: var(--soft);
+  }
+</style>
+
+<div class="page">
+  <p class="eyebrow">Verdichtung als Zustandsübergang · gemessen am Quelltext</p>
+  <h1>Eine Kette mit nur einem Ziel</h1>
+
+  <p class="lede">
+    Eine Verdichtung ist ein Zustandsübergang: jeder Eintrag geht in den nächsten
+    Lauf und kommt entweder unverändert, zusammengezogen oder gar nicht wieder
+    heraus. Das ist eine Markov-Kette — und als solche lässt sich fragen, wo sie
+    auf lange Sicht landet.
+  </p>
+  <p class="lede">
+    Ich habe die Übergänge nicht aus <code>SKILL.md</code> abgelesen, sondern
+    <code>compactor.js</code> mit erfundenen Einträgen gefüttert und beobachtet,
+    was zurückkommt. Das Ergebnis unten ist gemessen, nicht vermutet.
+  </p>
+
+  <h2>Die gemessene Übergangsmatrix</h2>
+
+  <p>
+    Je ein Eintrag pro Typ, einmal ohne <code>ref</code> und einmal mit — sonst
+    identisch. Überlebt oder nicht:
+  </p>
+
+  <figure>
+    <table class="mx">
+      <thead>
+        <tr>
+          <th class="rowh">Typ</th>
+          <th>ohne <code>ref</code></th>
+          <th>mit <code>ref</code></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="odd">
+          <th class="rowh">MOTIV</th>
+          <td class="live">überlebt</td>
+          <td class="live">überlebt</td>
+        </tr>
+        <tr><th class="rowh">FUND</th><td class="dead">entfernt</td><td class="live">überlebt</td></tr>
+        <tr><th class="rowh">WEG</th><td class="dead">entfernt</td><td class="live">überlebt</td></tr>
+        <tr><th class="rowh">WAND</th><td class="dead">entfernt</td><td class="live">überlebt</td></tr>
+        <tr><th class="rowh">SETZUNG</th><td class="dead">entfernt</td><td class="live">überlebt</td></tr>
+        <tr><th class="rowh">ZWEIFEL</th><td class="dead">entfernt</td><td class="live">überlebt</td></tr>
+      </tbody>
+    </table>
+    <figcaption>
+      Sechs Typen, zwei Spalten, und außer bei MOTIV steht überall dasselbe. Der
+      Typ eines Eintrags spielt für sein Überleben keine Rolle — es entscheidet
+      allein, ob ein <code>ref</code> gesetzt ist.
+    </figcaption>
+  </figure>
+
+  <div class="callout">
+    <p>
+      <strong>Die effektive Regel von <code>compactor.js</code> lautet:</strong>
+      Ein Eintrag überlebt genau dann, wenn er <code>MOTIV</code> ist oder ein
+      <code>ref</code> trägt.
+    </p>
+    <p>
+      Das ist keine Zusammenfassung der sieben Regeln, das ist alles, was von
+      ihnen übrig ist. Regel 2 und 3 laufen nie (Abweichung A), Regel 5 und 6
+      haben keine Wirkung, weil kein Typ geprüft wird (Abweichung C), und Regel 7
+      übernimmt den gesamten Rest. Sechs Typen und ein Regelwerk, das faktisch
+      eine einzige Ja/Nein-Frage stellt.
+    </p>
+  </div>
+
+  <h2>Die Kette, und wo sie landet</h2>
+
+  <p>
+    Damit lässt sich die Kette simulieren. Der Regler stellt ein, wie viele
+    Einträge im Korpus ein <code>ref</code> tragen — der einzige Wert, auf den
+    <code>compactor.js</code> reagiert.
+  </p>
+
+  <figure>
+    <div class="controls">
+      <div class="ctl">
+        <span class="ctl-label">Regelwerk</span>
+        <div class="chip-row" role="group" aria-label="Regelwerk wählen">
+          <button class="chip" id="m-code" aria-pressed="true">compactor.js</button>
+          <button class="chip" id="m-skill" aria-pressed="false">SKILL.md</button>
+        </div>
+      </div>
+      <div class="ctl">
+        <span class="ctl-label"><code>ref</code>-Dichte</span>
+        <input type="range" id="dens" min="0" max="100" step="5" value="60" aria-label="Anteil der Einträge mit ref, in Prozent">
+        <span class="val" id="dens-v">60 %</span>
+      </div>
+      <div class="ctl">
+        <span class="ctl-label">Läufe</span>
+        <input type="range" id="passes" min="1" max="8" step="1" value="1" aria-label="Anzahl der Verdichtungsläufe">
+        <span class="val" id="passes-v">1</span>
+      </div>
+    </div>
+
+    <div class="svg-wrap">
+      <svg class="chain" viewBox="0 0 860 260" role="img"
+           aria-label="Zustandsdiagramm der Verdichtung: sechs Eintragstypen als Kreise, deren Übergangspfeile bei compactor.js alle im absorbierenden Zustand entfernt enden, sofern kein ref gesetzt ist.">
+        <defs>
+          <marker id="a-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--soft)" opacity="0.6"></path>
+          </marker>
+          <marker id="a-hot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--rust)"></path>
+          </marker>
+          <marker id="a-cool" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--teal)"></path>
+          </marker>
+        </defs>
+        <g id="edges"></g>
+        <g id="states"></g>
+        <circle id="token" r="5" cx="-50" cy="-50"></circle>
+      </svg>
+    </div>
+
+    <div class="bars" id="bars"></div>
+
+    <div class="readout" id="readout" data-tone="wrong"></div>
+
+    <figcaption>
+      Ein Korpus aus 120 Einträgen in typischer Mischung. Der Kreis
+      <strong>entfernt</strong> ist absorbierend: was dort ankommt, kommt nicht
+      zurück. Der wandernde Punkt zeigt einen einzelnen Eintrag auf seinem Weg
+      durch die Kette.
+    </figcaption>
+  </figure>
+
+  <div class="callout">
+    <p>
+      <strong>Verschieb den Regler über den ganzen Bereich.</strong> Bei 0 %
+      bleibt nur das MOTIV übrig, bei 100 % bleibt alles stehen. Dazwischen
+      verschiebt sich nur das Verhältnis — aber die Zahl der
+      <em>zusammengezogenen</em> Einträge bleibt an jeder Stelle null.
+    </p>
+    <p>
+      Es gibt keine Einstellung, bei der <code>compactor.js</code> verdichtet.
+      Er löscht viel oder wenig. Genau das ist der Unterschied zwischen dem Skill
+      und einer gewöhnlichen Zusammenfassung — und er hängt an einer Kante, die
+      in der Kette fehlt.
+    </p>
+  </div>
+
+  <h2>Der Fund, der nicht in der Gesprächsgrundlage steht</h2>
+
+  <p>
+    Naheliegender Schluss aus alldem: Abweichung A beheben, also die Strang-Suche
+    auf eingehende Verweise umstellen — dann greift Regel 2. Ich habe das
+    durchgespielt, indem ich die <code>ref</code>-Richtung in den Testdaten
+    umgedreht habe, sodass die Suche die Wand findet. Das kommt dabei heraus:
+  </p>
+
+  <figure>
+    <h3>Fall 1 — die WAND trägt selbst keinen <code>ref</code></h3>
+<pre class="trace">e01 MOTIV
+e03 WEG   ref→e04        "Weg, weil X"
+e04 WAND                 "Die Wand"
+
+  Regel 2 greift:  e03 wird in e04 hineingezogen
+                   e04 heisst jetzt "Die Wand (Weg, weil X)"   <span class="ok">✓ richtig</span>
+  Regel 7 greift:  e04 hat jetzt keinen eingehenden Verweis mehr
+                   und selbst keinen ausgehenden  →  folgenlos  <span class="del">✗ geloescht</span>
+
+Ergebnis:  3 → 1     <span class="del">Wand und Weil sind beide weg</span></pre>
+
+    <h3>Fall 2 — dieselbe Lage, die WAND trägt zufällig einen <code>ref</code></h3>
+<pre class="trace">e01 MOTIV
+e03 WEG   ref→e04        "Weg, weil X"
+e04 WAND  ref→e01        "Die Wand"
+
+  Regel 2 greift:  wie oben
+  Regel 7 greift nicht:  e04 hat einen ausgehenden Verweis
+
+Ergebnis:  3 → 2     <span class="ok">e04 "Die Wand (Weg, weil X)" — so soll es sein</span></pre>
+
+    <figcaption>
+      Beides gemessen, mit dem echten <code>compactor.js</code>.
+    </figcaption>
+  </figure>
+
+  <div class="callout">
+    <p>
+      <strong>Abweichung A lässt sich nicht allein beheben.</strong> Sobald Regel 2
+      greift, verliert die WAND ihren einzigen eingehenden Verweis — den vom WEG,
+      den sie gerade geschluckt hat. Damit ist sie für <code>isFolgenlos()</code>
+      folgenlos und fällt im selben Lauf weg. Die Regel zerstört genau das, was
+      sie eben erzeugt hat.
+    </p>
+    <p>
+      Ob die zusammengezogene Wand überlebt, hängt an etwas völlig Unbeteiligtem:
+      ob sie zufällig selbst einen <code>ref</code> trägt. <strong>A und C müssen
+      zusammen behoben werden</strong>, sonst macht der Fix die Sache schlimmer —
+      aus 4 → 4 wird 4 → 2, und was verlorengeht, sind die Wände.
+    </p>
+  </div>
+
+  <h2>Was das für das Gespräch heißt</h2>
+
+  <div class="callout good">
+    <p>
+      Die Liste der vier Abweichungen legt nahe, man könne sie einzeln abarbeiten.
+      Die Messung sagt: nein. <strong>A ohne C angewandt verschlechtert das
+      Ergebnis.</strong> Das gehört auf die Tagesordnung, bevor jemand anfängt.
+    </p>
+    <p>
+      Und die Reihenfolge ergibt sich daraus von selbst: erst C
+      (<code>isFolgenlos()</code> auch WAND und offene ZWEIFEL ausnehmen), dann A
+      (Strang-Suche umdrehen), dann D (Verweise nachziehen), dann B (Altersstufen).
+      C zuerst, weil es das Sicherheitsnetz ist, in das A hineinfällt.
+    </p>
+  </div>
+
+  <footer>
+    Übergangsmatrix und beide Fälle gemessen am 24.08.2026, direkt gegen
+    <code>C:\DEV\OKF_MD_LOG\compactor.js</code>, mit Wegwerf-Projekten statt echter
+    Daten. Die SKILL.md-Kette ist aus den geschriebenen Regeln abgeleitet — dafür
+    gibt es keine Implementierung, an der man messen könnte. Darstellung nach dem
+    Muster der Markov-Ketten-Erklärung von Setosa.
+  </footer>
+</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var TYPES = ['MOTIV', 'FUND', 'WEG', 'WAND', 'SETZUNG', 'ZWEIFEL'];
+  var MIX   = { MOTIV: 0.06, FUND: 0.18, WEG: 0.24, WAND: 0.12, SETZUNG: 0.24, ZWEIFEL: 0.16 };
+  var N = 120;
+
+  var mode = 'code', density = 0.6, passes = 1;
+
+  // deterministische Pseudozufallsfolge, damit die Anzeige beim Schieben ruhig bleibt
+  function corpus() {
+    var out = [], seed = 12345;
+    function rnd() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; }
+    for (var i = 0; i < N; i++) {
+      var r = rnd(), acc = 0, t = 'SETZUNG';
+      for (var k = 0; k < TYPES.length; k++) {
+        acc += MIX[TYPES[k]];
+        if (r <= acc) { t = TYPES[k]; break; }
+      }
+      out.push({ type: t, ref: rnd() < density });
+    }
+    return out;
+  }
+
+  // compactor.js: gemessen — ueberlebt gdw. MOTIV oder ref
+  function stepCode(es) {
+    var kept = [], removed = 0;
+    for (var i = 0; i < es.length; i++) {
+      if (es[i].type === 'MOTIV' || es[i].ref) kept.push(es[i]); else removed++;
+    }
+    return { kept: kept, removed: removed, merged: 0 };
+  }
+
+  // SKILL.md: aus den Regeln abgeleitet
+  function stepSkill(es) {
+    var kept = [], removed = 0, merged = 0;
+    for (var i = 0; i < es.length; i++) {
+      var e = es[i];
+      if (e.type === 'MOTIV' || e.type === 'WAND' || e.type === 'ZWEIFEL') { kept.push(e); continue; }
+      if (e.type === 'WEG') {
+        if (e.ref) { merged++; continue; }          // Regel 2/3: zieht auf WAND bzw. SETZUNG zusammen
+        kept.push(e); continue;
+      }
+      if (e.type === 'FUND') {                       // Regel 6: ueberlebt, solange er traegt
+        if (e.ref) kept.push(e); else removed++;
+        continue;
+      }
+      kept.push(e);                                  // SETZUNG
+    }
+    return { kept: kept, removed: removed, merged: merged };
+  }
+
+  function simulate() {
+    var es = corpus(), removed = 0, merged = 0;
+    for (var p = 0; p < passes; p++) {
+      var r = (mode === 'code' ? stepCode : stepSkill)(es);
+      es = r.kept; removed += r.removed; merged += r.merged;
+    }
+    var counts = {}; TYPES.forEach(function (t) { counts[t] = 0; });
+    es.forEach(function (e) { counts[e.type]++; });
+    return { counts: counts, left: es.length, removed: removed, merged: merged };
+  }
+
+  /* ---- Diagramm ---- */
+  var POS = {
+    MOTIV:   [90,  60], FUND:    [250, 60], WEG:     [410, 60],
+    WAND:    [90, 175], SETZUNG: [250, 175], ZWEIFEL: [410, 175],
+    ENTFERNT:[720, 118]
+  };
+
+  function drawStatic() {
+    var eg = document.getElementById('edges'), out = '';
+    TYPES.forEach(function (t) {
+      if (t === 'MOTIV') return;
+      var p = POS[t], q = POS.ENTFERNT;
+      out += '<path class="edge" id="e-' + t + '" marker-end="url(#a-soft)" d="M' +
+             (p[0] + 34) + ',' + p[1] + ' Q' + ((p[0] + q[0]) / 2) + ',' +
+             ((p[1] + q[1]) / 2 - 26) + ' ' + (q[0] - 42) + ',' + q[1] + '"></path>';
+    });
+    out += '<text class="elabel" x="560" y="36">kein <tspan font-style="italic">ref</tspan> → entfernt</text>';
+    eg.innerHTML = out;
+  }
+
+  function drawStates(counts) {
+    var sg = document.getElementById('states'), out = '';
+    TYPES.forEach(function (t) {
+      var p = POS[t], cls = 'st' + (t === 'MOTIV' ? ' keep' : '');
+      out += '<g class="' + cls + '"><circle cx="' + p[0] + '" cy="' + p[1] + '" r="34"></circle>' +
+             '<text class="nm" x="' + p[0] + '" y="' + p[1] + '">' + t.slice(0, 4) + '</text>' +
+             '<text class="ct" x="' + p[0] + '" y="' + (p[1] + 50) + '">' + counts[t] + '</text></g>';
+    });
+    var q = POS.ENTFERNT;
+    out += '<g class="st absorb"><circle cx="' + q[0] + '" cy="' + q[1] + '" r="42"></circle>' +
+           '<text class="nm" x="' + q[0] + '" y="' + q[1] + '">entfernt</text></g>';
+    sg.innerHTML = out;
+  }
+
+  function drawBars(s) {
+    var max = N * 0.3, html = '';
+    TYPES.forEach(function (t) {
+      var n = s.counts[t], w = Math.min(100, (n / max) * 100);
+      html += '<div class="bar' + (n === 0 ? ' gone' : '') + '"><span class="nm">' + t +
+              '</span><span class="track"><span class="fill" style="width:' + w +
+              '%"></span></span><span class="n">' + n + '</span></div>';
+    });
+    document.getElementById('bars').innerHTML = html;
+  }
+
+  var tokenTimer = null;
+  function animateToken() {
+    if (reduce) return;
+    if (tokenTimer) clearInterval(tokenTimer);
+    var tk = document.getElementById('token');
+    var order = TYPES.slice(), i = 0;
+    tokenTimer = setInterval(function () {
+      var t = order[i % order.length];
+      var dies = (mode === 'code') ? (t !== 'MOTIV') : (t === 'WEG' || t === 'FUND');
+      var p = (i % 2 === 0 || !dies) ? POS[t] : POS.ENTFERNT;
+      tk.setAttribute('cx', p[0]); tk.setAttribute('cy', p[1]);
+      tk.style.transition = 'cx .5s ease, cy .5s ease';
+      i++;
+    }, 620);
+  }
+
+  function render() {
+    document.getElementById('m-code').setAttribute('aria-pressed', String(mode === 'code'));
+    document.getElementById('m-skill').setAttribute('aria-pressed', String(mode === 'skill'));
+    document.getElementById('dens-v').textContent = Math.round(density * 100) + ' %';
+    document.getElementById('passes-v').textContent = passes;
+
+    var s = simulate();
+    drawStates(s.counts);
+    drawBars(s);
+
+    TYPES.forEach(function (t) {
+      var el = document.getElementById('e-' + t);
+      if (!el) return;
+      el.setAttribute('class', 'edge' + (mode === 'code' && t !== 'MOTIV' ? ' hot' : ''));
+      el.setAttribute('marker-end', 'url(#' + (mode === 'code' ? 'a-hot' : 'a-soft') + ')');
+    });
+
+    var r = document.getElementById('readout');
+    if (mode === 'code') {
+      r.setAttribute('data-tone', 'wrong');
+      r.innerHTML = '<strong>' + s.left + ' von ' + N + ' Einträgen übrig</strong> — ' +
+        s.removed + ' gelöscht, <strong>' + s.merged + ' zusammengezogen</strong>. ' +
+        'Der Zusammenzug bleibt bei jeder <code>ref</code>-Dichte null: die Kette hat keine Kante dorthin.';
+    } else {
+      r.setAttribute('data-tone', 'right');
+      r.innerHTML = '<strong>' + s.left + ' von ' + N + ' Einträgen übrig</strong> — ' +
+        s.removed + ' gelöscht, <strong>' + s.merged + ' zusammengezogen</strong>. ' +
+        'MOTIV, WAND und offene ZWEIFEL bleiben unangetastet; verdichtet wird über die WEGe, ' +
+        'die in ihre WAND oder SETZUNG hineinwandern.';
+    }
+  }
+
+  document.getElementById('m-code').addEventListener('click', function () { mode = 'code'; render(); animateToken(); });
+  document.getElementById('m-skill').addEventListener('click', function () { mode = 'skill'; render(); animateToken(); });
+  document.getElementById('dens').addEventListener('input', function (e) { density = e.target.value / 100; render(); });
+  document.getElementById('passes').addEventListener('input', function (e) { passes = +e.target.value; render(); });
+
+  drawStatic(); render(); animateToken();
+})();
+</script>

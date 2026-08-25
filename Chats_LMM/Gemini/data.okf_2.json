@@ -1,0 +1,29 @@
+[
+  {
+    "id": "e01",
+    "type": "MOTIV",
+    "text": "Ich will ein funktionierendes Journal-System aufbauen - weil ich sonst Gedanken verliere und nie trailf�hig arbeite.",
+    "timestamp": "2026-08-18T22:26:07.066Z"
+  },
+  {
+    "id": "e02",
+    "type": "FUND",
+    "text": "Express.js mit fs-extra kombiniert funktioniert fuer persistente JSON-Logs - weil es die simpelste Loesung ist die ohne Datenbank auskommt.",
+    "timestamp": "2026-08-19T03:00:31.582Z",
+    "ref": "e01"
+  },
+  {
+    "id": "e03",
+    "type": "WEG",
+    "text": "Wir bauen einen Express-Server mit zwei Endpunkten und fs-extra fuer Persistenz — weil das die simpelste Architektur ist die ohne externe Datenbank auskommt.",
+    "timestamp": "2026-08-19T03:09:42.663Z",
+    "ref": "e02"
+  },
+  {
+    "id": "e04",
+    "type": "WAND",
+    "text": "Wir brauchen zusaetzlich eine Browser-Extension die den Chat-DOM beobachtet — weil manuelles Mitschreiben jeden Turn abbruch-anfaellig macht und oft vergessen wird.",
+    "timestamp": "2026-08-19T03:12:28.400Z",
+    "ref": "e03"
+  }
+]

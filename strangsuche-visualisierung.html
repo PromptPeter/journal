@@ -1,0 +1,549 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<title>Die Wand liegt rechts</title>
+
+<style>
+  :root {
+    --bg: #F6F1E7;
+    --surface: #FFFFFF;
+    --surface-sunken: #EFE8D9;
+    --ink: #2A2318;
+    --ink-soft: #6E6252;
+    --line: #DED2B8;
+    --rust: #B24A2A;
+    --rust-soft: #F0DED4;
+    --teal: #2C6E63;
+    --teal-soft: #DCEAE6;
+    --focus: #1B4E8C;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1C1712;
+      --surface: #241E17;
+      --surface-sunken: #171310;
+      --ink: #EDE4D3;
+      --ink-soft: #A99D86;
+      --line: #3C3324;
+      --rust: #E08A5F;
+      --rust-soft: #3D2A20;
+      --teal: #7FC2B3;
+      --teal-soft: #1E332E;
+      --focus: #7FB0E0;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #1C1712;
+    --surface: #241E17;
+    --surface-sunken: #171310;
+    --ink: #EDE4D3;
+    --ink-soft: #A99D86;
+    --line: #3C3324;
+    --rust: #E08A5F;
+    --rust-soft: #3D2A20;
+    --teal: #7FC2B3;
+    --teal-soft: #1E332E;
+    --focus: #7FB0E0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    line-height: 1.62;
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 5rem;
+  }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.76rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin: 0 0 0.9rem;
+  }
+
+  h1 {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 5.2vw, 2.75rem);
+    line-height: 1.08;
+    margin: 0 0 1.1rem;
+    text-wrap: balance;
+    max-width: 15ch;
+  }
+
+  .lede {
+    font-size: 1.06rem;
+    max-width: 64ch;
+    margin: 0 0 0.85rem;
+  }
+
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.9em;
+    background: var(--surface-sunken);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.05em 0.35em;
+  }
+
+  h2 {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-weight: 600;
+    font-size: 1.42rem;
+    margin: 3rem 0 0.85rem;
+  }
+
+  figure {
+    margin: 2.3rem 0 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.4rem 1.4rem 1.5rem;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .control-label {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .chip-row {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  button.chip {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--ink);
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 0.87rem;
+    padding: 0.44rem 1rem;
+    cursor: pointer;
+  }
+
+  button.chip + button.chip { border-left: 1px solid var(--line); }
+
+  button.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+  button.chip:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+  .svg-wrap { overflow-x: auto; }
+
+  svg.diagram { width: 100%; height: auto; display: block; }
+
+  .node rect {
+    fill: var(--surface);
+    stroke: var(--ink-soft);
+    stroke-width: 1.3;
+  }
+  .node text.id {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 14px;
+    fill: var(--ink);
+  }
+  .node text.type {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    fill: var(--ink-soft);
+  }
+  .node.start rect { stroke: var(--ink); stroke-width: 2.4; }
+  .node.goal rect { stroke: var(--teal); stroke-width: 2.4; }
+
+  .ref-static {
+    fill: none;
+    stroke: var(--ink-soft);
+    stroke-width: 1.2;
+    opacity: 0.5;
+  }
+
+  .axis-label, .ref-label {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    fill: var(--ink-soft);
+  }
+
+  .annot {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 12px;
+  }
+
+  .arc {
+    fill: none;
+    stroke-width: 2.8;
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+    opacity: 0;
+    transition: stroke-dashoffset 0.5s ease, opacity 0.15s ease;
+  }
+  .arc.show { opacity: 1; stroke-dashoffset: 0; }
+  .arc.code { stroke: var(--rust); }
+  .arc.check { stroke: var(--teal); }
+
+  .flag { opacity: 0; transition: opacity 0.3s ease; }
+  .flag.show { opacity: 1; }
+  .flag text { font-family: "IBM Plex Sans", sans-serif; font-size: 12px; font-weight: 500; }
+  .flag.dead text { fill: var(--rust); }
+  .flag.hit text { fill: var(--teal); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .arc, .flag { transition: none; }
+  }
+
+  figcaption {
+    margin-top: 1.05rem;
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    max-width: 62ch;
+  }
+
+  .verdict {
+    margin-top: 1.15rem;
+    border-radius: 10px;
+    padding: 0.95rem 1.15rem;
+    font-size: 0.94rem;
+    border: 1px solid var(--line);
+    background: var(--surface-sunken);
+  }
+  .verdict[data-tone="wrong"] { border-color: var(--rust); background: var(--rust-soft); }
+  .verdict[data-tone="right"] { border-color: var(--teal); background: var(--teal-soft); }
+
+  table.measure {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.3rem;
+    font-size: 0.92rem;
+    font-variant-numeric: tabular-nums;
+  }
+  table.measure th, table.measure td {
+    text-align: left;
+    padding: 0.55rem 0.7rem;
+    border-bottom: 1px solid var(--line);
+  }
+  table.measure th {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  table.measure td.num { text-align: right; }
+  table.measure tr.miss td { color: var(--rust); font-weight: 500; }
+
+  .callout {
+    margin-top: 1.4rem;
+    padding: 1.1rem 1.3rem;
+    border-left: 3px solid var(--rust);
+    background: var(--surface);
+    border-radius: 0 10px 10px 0;
+    font-size: 0.95rem;
+  }
+  .callout p { margin: 0.55rem 0; }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  .note {
+    margin-top: 1.3rem;
+    padding: 1rem 1.2rem;
+    border-radius: 10px;
+    border: 1px solid var(--teal);
+    background: var(--teal-soft);
+    font-size: 0.93rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.15rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+</style>
+
+<div class="page">
+  <p class="eyebrow">compactor.js gegen SKILL.md · Abweichung A</p>
+  <h1>Die Wand liegt rechts</h1>
+  <p class="lede">
+    <strong>Regel 2</strong> verlangt: ein geschlossener Strang <code>WEG → WAND</code>
+    wird auf die WAND zusammengezogen, die WAND erbt das Weil des WEG. Damit das
+    greifen kann, muss der Code von einem WEG aus seine Wand finden.
+  </p>
+  <p class="lede">
+    In den Daten zeigt <code>ref</code> vom <em>neueren</em> auf den
+    <em>älteren</em> Eintrag. <code>findClosedStrand()</code> startet beim WEG und
+    folgt den <strong>ausgehenden</strong> Verweisen — sucht die Wand also in der
+    Vergangenheit, wo sie nie liegen kann. Sie liegt immer in der Zukunft des WEG.
+  </p>
+
+  <h2>Der Strang aus <code>Gemini/TestProjekt</code></h2>
+
+  <figure>
+    <div class="controls">
+      <span class="control-label">Suche ab e03 WEG</span>
+      <div class="chip-row" role="group" aria-label="Suchrichtung wählen">
+        <button class="chip" id="btn-code" aria-pressed="true">ausgehend — compactor.js</button>
+        <button class="chip" id="btn-check" aria-pressed="false">eingehend — index.html</button>
+      </div>
+    </div>
+
+    <div class="svg-wrap">
+      <svg class="diagram" viewBox="0 0 900 400" role="img"
+           aria-label="Vier Journal-Einträge auf einer Zeitleiste: e01 MOTIV, e02 FUND, e03 WEG, e04 WAND. Die ref-Verweise zeigen jeweils vom neueren auf den älteren Eintrag. Die ausgehende Suche ab e03 läuft nach links zu e02 und e01 und endet ohne Wand; die eingehende Suche findet e04 WAND direkt rechts von e03.">
+        <defs>
+          <marker id="ah-soft" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-soft)" opacity="0.65"></path>
+          </marker>
+          <marker id="ah-rust" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--rust)"></path>
+          </marker>
+          <marker id="ah-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--teal)"></path>
+          </marker>
+        </defs>
+
+        <text class="axis-label" x="60" y="34">älter</text>
+        <text class="axis-label" x="840" y="34" text-anchor="end">neuer</text>
+        <line x1="60" y1="46" x2="840" y2="46" stroke="var(--line)" stroke-width="1"></line>
+
+        <!-- incoming-search arc (above), teal -->
+        <path id="arc-check" class="arc check" marker-end="url(#ah-teal)" d="M735,188 C735,110 465,110 465,188"></path>
+        <g id="flag-hit" class="flag hit">
+          <text x="600" y="100" text-anchor="middle">e04 WAND — gefunden, Strang geschlossen</text>
+        </g>
+
+        <!-- static ref arrows (below), the real data model -->
+        <path class="ref-static" marker-end="url(#ah-soft)" d="M255,252 C255,312 135,312 135,252"></path>
+        <path class="ref-static" marker-end="url(#ah-soft)" d="M465,252 C465,312 345,312 345,252"></path>
+        <path class="ref-static" marker-end="url(#ah-soft)" d="M735,252 C735,312 615,312 615,252"></path>
+        <text class="ref-label" x="195" y="330" text-anchor="middle">ref</text>
+        <text class="ref-label" x="405" y="330" text-anchor="middle">ref</text>
+        <text class="ref-label" x="675" y="330" text-anchor="middle">ref</text>
+
+        <!-- outgoing-search arcs (below), rust -->
+        <path id="arc-code-1" class="arc code" marker-end="url(#ah-rust)" d="M465,252 C465,312 345,312 345,252"></path>
+        <path id="arc-code-2" class="arc code" marker-end="url(#ah-rust)" d="M255,252 C255,312 135,312 135,252"></path>
+        <g id="flag-dead" class="flag dead">
+          <text x="135" y="368" text-anchor="middle">Ende — keine WAND</text>
+        </g>
+
+        <!-- nodes -->
+        <g class="node" id="node-e01" transform="translate(60,190)">
+          <rect width="150" height="62" rx="10"></rect>
+          <text class="id" x="75" y="26" text-anchor="middle">e01</text>
+          <text class="type" x="75" y="45" text-anchor="middle">MOTIV</text>
+        </g>
+        <g class="node" id="node-e02" transform="translate(270,190)">
+          <rect width="150" height="62" rx="10"></rect>
+          <text class="id" x="75" y="26" text-anchor="middle">e02</text>
+          <text class="type" x="75" y="45" text-anchor="middle">FUND</text>
+        </g>
+        <g class="node start" id="node-e03" transform="translate(480,190)">
+          <rect width="150" height="62" rx="10"></rect>
+          <text class="id" x="75" y="26" text-anchor="middle">e03</text>
+          <text class="type" x="75" y="45" text-anchor="middle">WEG</text>
+        </g>
+        <g class="node goal" id="node-e04" transform="translate(690,190)">
+          <rect width="150" height="62" rx="10"></rect>
+          <text class="id" x="75" y="26" text-anchor="middle">e04</text>
+          <text class="type" x="75" y="45" text-anchor="middle">WAND</text>
+        </g>
+
+        <text class="annot" x="555" y="278" text-anchor="middle" fill="var(--ink-soft)">Start der Suche</text>
+        <text class="annot" x="765" y="278" text-anchor="middle" fill="var(--teal)">das Ziel von Regel 2</text>
+      </svg>
+    </div>
+
+    <div class="verdict" id="verdict" data-tone="wrong">
+      <strong>Ausgehend (was der Code tut):</strong> e03 → e02 → e01 → Ende.
+      Der Weg führt in die eigene Vorgeschichte, an FUND und MOTIV vorbei. e04 WAND
+      steht die ganze Zeit direkt daneben — in der anderen Richtung, die nie
+      betreten wird. Regel 2 findet keinen Strang und feuert nicht.
+    </div>
+
+    <figcaption>
+      Die dünnen Pfeile unten sind die tatsächlichen <code>ref</code>-Verweise:
+      jeder Eintrag zeigt auf den älteren, auf den er antwortet — e04 WAND zeigt auf
+      e03 WEG, den Weg, der gegen sie lief. Der Umschalter spielt die beiden
+      Suchrichtungen ab dem WEG ab.
+    </figcaption>
+  </figure>
+
+  <h2>Was der Trockenlauf misst</h2>
+
+  <table class="measure">
+    <thead>
+      <tr>
+        <th>Variante</th>
+        <th class="num">Einträge nachher</th>
+        <th>Regel 2 gegriffen?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Vorher</td>
+        <td class="num">4</td>
+        <td>—</td>
+      </tr>
+      <tr class="miss">
+        <td><code>compactor.js</code> (heute)</td>
+        <td class="num">4</td>
+        <td>nein, kein einziges Mal</td>
+      </tr>
+      <tr>
+        <td>nach <code>SKILL.md</code>, Regel 2</td>
+        <td class="num">3</td>
+        <td>ja — e03 zieht auf e04 zusammen</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="lede" style="margin-top:1.1rem">
+    <code>TestProjekt</code> enthält den lehrbuchhaften Strang <code>e03 WEG → e04 WAND</code>.
+    Nach Regel 2 müssten daraus drei Einträge werden. Gemessen: 4 → 4. Das ist der
+    Beleg, nicht die Vermutung.
+  </p>
+
+  <h2>Warum A schwerer wiegt als B, C und D</h2>
+
+  <div class="callout">
+    <p>
+      Regel 2 und 3 sind die <strong>einzigen, die zusammenziehen</strong>. Fallen
+      sie aus, bleiben nur 6 und 7 — und die löschen. Genau das erklärt
+      <code>Gemini/Blödeleini</code>: 4 → 0, kein einziger Zusammenzug, nur
+      Wegnahme.
+    </p>
+    <p>
+      Der Unterschied zwischen dem Skill und einer gewöhnlichen Zusammenfassung
+      hängt an den beiden Regeln, die nicht laufen. Ohne sie verdichtet der
+      Compactor nicht, er kürzt.
+    </p>
+  </div>
+
+  <h2>Die eine Frage an Richard</h2>
+
+  <div class="callout">
+    <p>
+      <code>SKILL.md</code> legt die Richtung von <code>ref</code> nirgends
+      ausdrücklich fest. Deshalb ist A die einzige der vier Abweichungen, die
+      wirklich eine Entscheidung ist:
+    </p>
+    <p>
+      <strong>Ist <code>ref</code> so gemeint, wie die Daten es zeigen — neu zeigt
+      auf alt?</strong>
+    </p>
+    <p>
+      <em>Falls ja:</em> ein Zeilen-Fix — die Strang-Suche auf eingehende Verweise
+      umstellen.<br>
+      <em>Falls nein:</em> die Erzeuger (<code>journal-store.js</code>,
+      <code>auto-tagger.js</code>) schreiben verkehrt herum, und der Fix gehört
+      dorthin.
+    </p>
+    <p>
+      B, C und D dagegen widersprechen dem, was in <code>SKILL.md</code> bereits
+      ausdrücklich steht — die vier Altersstufen, das „außer WAND" in Regel 7, das
+      Nachziehen der Verweise. Das sind keine Entscheidungen, sondern Abweichungen
+      von einer vorhandenen Spezifikation: sie brauchen Richards Durchsicht, nicht
+      seine Erlaubnis.
+    </p>
+  </div>
+
+  <div class="note">
+    <strong>Das Journal macht es bereits richtig.</strong> In
+    <code>index.html</code> sind B, C und D umgesetzt und gegen diese Daten
+    getestet (<code>compactByAge()</code>, <code>KEEP_ALWAYS</code>,
+    <code>relinkRefs()</code>); der Code ließe sich übernehmen. A ist dort gar
+    nicht betroffen, weil das Journal seine Stränge über die
+    <em>eingehenden</em> Verweise bildet — genau den Weg, den der grüne Bogen oben
+    zeigt.
+  </div>
+
+  <div class="note" style="border-color:var(--rust); background:var(--rust-soft)">
+    <strong>Unabhängig vom Ausgang des Gesprächs:</strong> <code>runCompaction()</code>
+    setzt <code>data.okf.json</code> und <code>VERLAUF.md</code> auf <code>0666</code>,
+    überschreibt sie an Ort und Stelle und setzt sie zurück auf <code>0444</code> —
+    keine Sicherung, keine Historie. Was ein Lauf wegnimmt, ist weg, und es fällt
+    erst Monate später auf, wenn die Wand fehlt, die einen zweiten Anlauf verhindert
+    hätte. Eine Kopie vor dem Schreiben wäre billig.
+  </div>
+
+  <footer>
+    Belege: <code>tools/dry-compaction.mjs</code> führt den echten
+    <code>compactor.js</code> mit abgefangenen Schreibvorgängen aus und verändert
+    keine Datei; Bericht in <code>tools/dry-compaction-report.md</code>.
+    Gesprächsgrundlage: <code>.claude/gespraech-richard-compactor.md</code>.
+    <code>compactor.js</code> selbst liegt in <code>C:\DEV\OKF_MD_LOG</code>.
+  </footer>
+</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var mode = 'code';
+
+  var btnCode = document.getElementById('btn-code');
+  var btnCheck = document.getElementById('btn-check');
+  var verdict = document.getElementById('verdict');
+
+  var ids = ['arc-code-1', 'arc-code-2', 'arc-check', 'flag-dead', 'flag-hit'];
+
+  var copy = {
+    code: {
+      tone: 'wrong',
+      html: '<strong>Ausgehend (was der Code tut):</strong> e03 → e02 → e01 → Ende. Der Weg führt in die eigene Vorgeschichte, an FUND und MOTIV vorbei. e04 WAND steht die ganze Zeit direkt daneben — in der anderen Richtung, die nie betreten wird. Regel 2 findet keinen Strang und feuert nicht.'
+    },
+    check: {
+      tone: 'right',
+      html: '<strong>Eingehend (was Regel 2 braucht):</strong> Ein Schritt genügt — welcher Eintrag zeigt auf e03? e04 WAND. Der Strang <code>WEG → WAND</code> ist gefunden und geschlossen, e03 zieht auf e04 zusammen, die WAND erbt das Weil des WEG. Aus vier Einträgen werden drei.'
+    }
+  };
+
+  function render() {
+    ids.forEach(function (id) { document.getElementById(id).classList.remove('show'); });
+
+    btnCode.setAttribute('aria-pressed', String(mode === 'code'));
+    btnCheck.setAttribute('aria-pressed', String(mode === 'check'));
+
+    var step = reduce ? 0 : 300;
+    var seq = mode === 'code'
+      ? ['arc-code-1', 'arc-code-2', 'flag-dead']
+      : ['arc-check', 'flag-hit'];
+
+    seq.forEach(function (id, i) {
+      setTimeout(function () { document.getElementById(id).classList.add('show'); }, i * step);
+    });
+
+    verdict.setAttribute('data-tone', copy[mode].tone);
+    verdict.innerHTML = copy[mode].html;
+  }
+
+  btnCode.addEventListener('click', function () { mode = 'code'; render(); });
+  btnCheck.addEventListener('click', function () { mode = 'check'; render(); });
+
+  render();
+})();
+</script>

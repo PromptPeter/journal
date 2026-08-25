@@ -1,0 +1,593 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<title>Strangsuche rückwärts</title>
+
+<style>
+  :root {
+    --bg: #F6F1E7;
+    --surface: #FFFFFF;
+    --surface-sunken: #EFE8D9;
+    --ink: #2A2318;
+    --ink-soft: #6E6252;
+    --line: #DED2B8;
+    --rust: #B24A2A;
+    --rust-soft: #E4D2C5;
+    --teal: #2C6E63;
+    --teal-soft: #D3E3DE;
+    --focus: #1B4E8C;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1C1712;
+      --surface: #241E17;
+      --surface-sunken: #171310;
+      --ink: #EDE4D3;
+      --ink-soft: #A99D86;
+      --line: #3C3324;
+      --rust: #E08A5F;
+      --rust-soft: #3D2A20;
+      --teal: #7FC2B3;
+      --teal-soft: #1E332E;
+      --focus: #7FB0E0;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #1C1712;
+    --surface: #241E17;
+    --surface-sunken: #171310;
+    --ink: #EDE4D3;
+    --ink-soft: #A99D86;
+    --line: #3C3324;
+    --rust: #E08A5F;
+    --rust-soft: #3D2A20;
+    --teal: #7FC2B3;
+    --teal-soft: #1E332E;
+    --focus: #7FB0E0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    line-height: 1.6;
+  }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 6rem;
+  }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin: 0 0 0.9rem;
+  }
+
+  h1 {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 2.7rem);
+    line-height: 1.1;
+    margin: 0 0 1.1rem;
+    text-wrap: balance;
+    max-width: 14ch;
+  }
+
+  .lede {
+    font-size: 1.08rem;
+    color: var(--ink);
+    max-width: 62ch;
+    margin: 0 0 1rem;
+  }
+
+  .lede + .lede { margin-top: -0.3rem; }
+
+  code, .mono {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.92em;
+  }
+
+  code {
+    background: var(--surface-sunken);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 0.05em 0.35em;
+  }
+
+  h2 {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-weight: 600;
+    font-size: 1.4rem;
+    margin: 3.2rem 0 0.9rem;
+  }
+
+  /* ---- diagram card ---- */
+
+  figure {
+    margin: 2.2rem 0 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.4rem 1.4rem 1.6rem;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem 1.6rem;
+    align-items: center;
+    margin-bottom: 1.1rem;
+  }
+
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .control-label {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    color: var(--ink-soft);
+    font-size: 0.76rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  .chip-row {
+    display: inline-flex;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  button.chip {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-size: 0.86rem;
+    padding: 0.42rem 0.95rem;
+    cursor: pointer;
+    font-family: "IBM Plex Sans", sans-serif;
+  }
+
+  button.chip + button.chip { border-left: 1px solid var(--line); }
+
+  button.chip[aria-pressed="true"] {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  button.chip:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: -2px;
+  }
+
+  .svg-wrap { overflow-x: auto; }
+
+  svg.diagram {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    display: block;
+  }
+
+  .node rect {
+    fill: var(--surface);
+    stroke: var(--ink-soft);
+    stroke-width: 1.3;
+  }
+
+  .node text.id {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13px;
+    fill: var(--ink);
+  }
+
+  .node text.type {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    fill: var(--ink-soft);
+  }
+
+  .node.candidate rect {
+    stroke: var(--ink);
+    stroke-width: 2.4;
+  }
+
+  .ref-static {
+    fill: none;
+    stroke: var(--ink-soft);
+    stroke-width: 1.2;
+    opacity: 0.55;
+  }
+
+  .ref-label {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px;
+    fill: var(--ink-soft);
+  }
+
+  .walk-arc, .probe-arc {
+    fill: none;
+    stroke-width: 2.6;
+    stroke-dasharray: 340;
+    stroke-dashoffset: 340;
+    opacity: 0;
+    transition: stroke-dashoffset 0.55s ease, opacity 0.15s ease;
+  }
+
+  .walk-arc { stroke: var(--rust); }
+  .probe-arc { stroke: var(--ink-soft); stroke-dasharray: 5 5; }
+  .probe-arc.match { stroke: var(--teal); stroke-dasharray: none; }
+  .probe-arc.nomatch { opacity: 0.35 !important; }
+
+  .walk-arc.show, .probe-arc.show { opacity: 1; stroke-dashoffset: 0; }
+
+  .badge {
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .badge.show { opacity: 1; }
+  .badge circle { fill: var(--surface); stroke-width: 1.6; }
+  .badge.match circle { stroke: var(--teal); }
+  .badge.nomatch circle { stroke: var(--ink-soft); }
+  .badge text {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 12px;
+    text-anchor: middle;
+    dominant-baseline: central;
+  }
+  .badge.match text { fill: var(--teal); }
+  .badge.nomatch text { fill: var(--ink-soft); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .walk-arc, .probe-arc, .badge { transition: none; }
+  }
+
+  figcaption {
+    margin-top: 1rem;
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    max-width: 60ch;
+  }
+
+  .verdict {
+    margin-top: 1.1rem;
+    border-radius: 10px;
+    padding: 0.9rem 1.1rem;
+    font-size: 0.94rem;
+    border: 1px solid var(--line);
+    background: var(--surface-sunken);
+  }
+
+  .verdict[data-tone="wrong"] {
+    border-color: color-mix(in srgb, var(--rust) 45%, var(--line));
+    background: var(--rust-soft);
+  }
+
+  .verdict[data-tone="right"] {
+    border-color: color-mix(in srgb, var(--teal) 45%, var(--line));
+    background: var(--teal-soft);
+  }
+
+  .verdict strong { font-weight: 600; }
+
+  /* ---- rule callout ---- */
+
+  .callout {
+    margin-top: 1.4rem;
+    padding: 1.1rem 1.3rem;
+    border-left: 3px solid var(--rust);
+    background: var(--surface);
+    border-radius: 0 10px 10px 0;
+    font-size: 0.95rem;
+  }
+
+  .callout p { margin: 0.5rem 0; }
+  .callout p:first-child { margin-top: 0; }
+  .callout p:last-child { margin-bottom: 0; }
+
+  ul.checklist {
+    margin: 0.6rem 0 0;
+    padding-left: 1.2rem;
+    font-size: 0.95rem;
+  }
+  ul.checklist li { margin: 0.35rem 0; }
+
+  footer {
+    margin-top: 3.2rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--line);
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+</style>
+
+<div class="page">
+  <p class="eyebrow">compactor.js · Abweichung 1 von 4</p>
+  <h1>Die Strangsuche läuft rückwärts</h1>
+  <p class="lede">
+    Jeder Eintrag zeigt mit <code>ref</code> auf den älteren Eintrag, auf den er
+    antwortet — neu zeigt auf alt. <code>findClosedStrand()</code> folgt genau
+    dieser Richtung: von einem Eintrag aus zu seinem <code>ref</code>-Ziel und von
+    dort weiter zurück.
+  </p>
+  <p class="lede">
+    Nur beantwortet das keine der Fragen, die die Regeln 2 und 3 stellen. Ob ein
+    Strang <strong>geschlossen</strong> ist, hängt nicht davon ab, worauf ein
+    Eintrag selbst zeigt, sondern davon, ob <em>etwas Neueres noch auf ihn
+    zeigt</em>. Das ist die umgekehrte Richtung — und die prüft der Code nirgends.
+  </p>
+
+  <h2>Zwei Stränge, zwei Fragen</h2>
+
+  <figure>
+    <div class="controls">
+      <div class="control-group">
+        <span class="control-label">Strang</span>
+        <div class="chip-row" role="group" aria-label="Strang wählen">
+          <button class="chip" id="btn-e03" aria-pressed="true">e01–e03</button>
+          <button class="chip" id="btn-e06" aria-pressed="false">e05–e06</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Prüfung</span>
+        <div class="chip-row" role="group" aria-label="Prüfung wählen">
+          <button class="chip" id="btn-code" aria-pressed="true">Code-Pfad</button>
+          <button class="chip" id="btn-check" aria-pressed="false">Eigentliche Frage</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="svg-wrap">
+      <svg class="diagram" viewBox="0 0 1000 400" role="img"
+           aria-label="Zeitleiste der Journal-Einträge e01 bis e07 mit ref-Pfeilen von jedem Eintrag zum älteren Eintrag, auf den er antwortet; interaktive Markierung zeigt den vom Code begangenen Rückwärtspfad gegenüber der eigentlich nötigen Prüfung auf neuere, hereinzeigende Einträge.">
+        <defs>
+          <marker id="arrow-soft" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--ink-soft)" opacity="0.7"></path>
+          </marker>
+          <marker id="arrow-rust" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--rust)"></path>
+          </marker>
+          <marker id="arrow-teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--teal)"></path>
+          </marker>
+        </defs>
+
+        <!-- timeline axis label -->
+        <text x="90" y="40" class="ref-label">älter</text>
+        <text x="900" y="40" class="ref-label" text-anchor="end">neuer</text>
+        <line x1="60" y1="52" x2="960" y2="52" stroke="var(--line)" stroke-width="1"></line>
+
+        <!-- static ref arrows (the real data model) -->
+        <path class="ref-static" marker-end="url(#arrow-soft)" d="M230,268 C230,320 90,320 90,268"></path>
+        <text class="ref-label" x="160" y="336" text-anchor="middle">ref</text>
+        <path class="ref-static" marker-end="url(#arrow-soft)" d="M370,268 C370,320 230,320 230,268"></path>
+        <path class="ref-static" marker-end="url(#arrow-soft)" d="M790,268 C790,320 650,320 650,268"></path>
+        <path class="ref-static" marker-end="url(#arrow-soft)" d="M930,268 C930,320 790,320 790,268"></path>
+
+        <!-- animated code-path walks (reuse same geometry, drawn in rust) -->
+        <path id="walk-e03-a" class="walk-arc" d="M370,268 C370,320 230,320 230,268"></path>
+        <path id="walk-e03-b" class="walk-arc" d="M230,268 C230,320 90,320 90,268"></path>
+        <path id="walk-e06-a" class="walk-arc" d="M790,268 C790,320 650,320 650,268"></path>
+
+        <!-- animated incoming-check probes (above timeline) -->
+        <path id="probe-e03-e04" class="probe-arc" d="M510,212 C510,150 370,150 370,212"></path>
+        <path id="probe-e03-e05" class="probe-arc" d="M650,212 C650,150 370,150 370,212"></path>
+        <path id="probe-e03-e06" class="probe-arc" d="M790,212 C790,140 370,140 370,212"></path>
+        <path id="probe-e03-e07" class="probe-arc" d="M930,212 C930,130 370,130 370,212"></path>
+        <path id="probe-e06-e07" class="probe-arc" d="M930,212 C930,150 790,150 790,212"></path>
+
+        <!-- badges for probe results -->
+        <g id="badge-e03-e04" class="badge nomatch"><circle cx="440" cy="150" r="11"></circle><text x="440" y="151">✕</text></g>
+        <g id="badge-e03-e05" class="badge nomatch"><circle cx="510" cy="150" r="11"></circle><text x="510" y="151">✕</text></g>
+        <g id="badge-e03-e06" class="badge nomatch"><circle cx="580" cy="140" r="11"></circle><text x="580" y="141">✕</text></g>
+        <g id="badge-e03-e07" class="badge nomatch"><circle cx="650" cy="130" r="11"></circle><text x="650" y="131">✕</text></g>
+        <g id="badge-e06-e07" class="badge match"><circle cx="860" cy="150" r="11"></circle><text x="860" y="151">✓</text></g>
+
+        <!-- nodes -->
+        <g class="node" id="node-e01" transform="translate(40,212)">
+          <rect width="100" height="56" rx="10"></rect>
+          <text class="id" x="50" y="24" text-anchor="middle">e01</text>
+          <text class="type" x="50" y="40" text-anchor="middle">MOTIV</text>
+        </g>
+        <g class="node" id="node-e02" transform="translate(180,212)">
+          <rect width="100" height="56" rx="10"></rect>
+          <text class="id" x="50" y="24" text-anchor="middle">e02</text>
+          <text class="type" x="50" y="40" text-anchor="middle">ZWEIFEL</text>
+        </g>
+        <g class="node" id="node-e03" transform="translate(320,212)">
+          <rect width="100" height="56" rx="10"></rect>
+          <text class="id" x="50" y="24" text-anchor="middle">e03</text>
+          <text class="type" x="50" y="40" text-anchor="middle">SETZUNG</text>
+        </g>
+        <g class="node" id="node-e04" transform="translate(460,212)">
+          <rect width="100" height="56" rx="10"></rect>
+          <text class="id" x="50" y="24" text-anchor="middle">e04</text>
+          <text class="type" x="50" y="40" text-anchor="middle">WAND</text>
+        </g>
+        <g class="node" id="node-e05" transform="translate(600,212)">
+          <rect width="100" height="56" rx="10"></rect>
+          <text class="id" x="50" y="24" text-anchor="middle">e05</text>
+          <text class="type" x="50" y="40" text-anchor="middle">FUND</text>
+        </g>
+        <g class="node" id="node-e06" transform="translate(740,212)">
+          <rect width="100" height="56" rx="10"></rect>
+          <text class="id" x="50" y="24" text-anchor="middle">e06</text>
+          <text class="type" x="50" y="40" text-anchor="middle">SETZUNG</text>
+        </g>
+        <g class="node" id="node-e07" transform="translate(880,212)">
+          <rect width="100" height="56" rx="10"></rect>
+          <text class="id" x="50" y="24" text-anchor="middle">e07</text>
+          <text class="type" x="50" y="40" text-anchor="middle">ZWEIFEL</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="verdict" id="verdict" data-tone="wrong">
+      <strong>Code-Pfad, Strang e01–e03:</strong> Der Rückwärtsgang von e03 über
+      e02 nach e01 zeigt nur, worauf e03 selbst antwortet — die eigene
+      Vorgeschichte. Ob e04, e05, e06 oder e07 auf e03 zeigen, kommt dabei nie
+      zur Sprache.
+    </div>
+
+    <figcaption>
+      <code>ref</code> zeigt immer von neu nach alt (dünne Pfeile unten). Links
+      wählst du den Strang, rechts die Prüfung: <em>Code-Pfad</em> spielt ab, was
+      <code>findClosedStrand()</code> tatsächlich tut — den eigenen
+      <code>ref</code> rückwärts verfolgen. <em>Eigentliche Frage</em> prüft
+      stattdessen jeden neueren Eintrag: Zeigt er hierher?
+    </figcaption>
+  </figure>
+
+  <h2>Was das für Regel 2 und 3 heißt</h2>
+
+  <div class="callout">
+    <p>
+      Für die letzten zwei Sitzungen sollen zusammenhängende Stränge zu einem
+      Block zusammengezogen werden, Zeitstempel bleiben erhalten — dafür muss
+      der Strang <strong>geschlossen</strong> sein: Niemand Neueres baut noch auf
+      ihm auf. Weil <code>findClosedStrand()</code> die falsche Richtung prüft,
+      findet die Funktion nie einen geschlossenen Strang. Die Regeln 2 und 3
+      feuern deshalb nie.
+    </p>
+    <p>
+      Offen für das Gespräch mit Richard (siehe <code>checkliste-richard.md</code>,
+      Abschnitt 2):
+    </p>
+    <ul class="checklist">
+      <li>Zeigt <code>ref</code> tatsächlich immer neu → alt? Dann ist es ein
+        Zeilen-Fix: <code>findClosedStrand()</code> müsste eingehende statt
+        ausgehende Verweise prüfen.</li>
+      <li>War die Rückwärtsrichtung Absicht — verfolgt der Code etwas anderes
+        als geplant?</li>
+      <li>Wer gleicht an, und braucht <code>runCompaction</code> vorher eine
+        Sicherung?</li>
+    </ul>
+  </div>
+
+  <footer>
+    Grundlage: der schreibfreie Trockenlauf <code>node tools/dry-compaction.mjs</code>,
+    Bericht in <code>tools/dry-compaction-report.md</code>. Änderung erst nach
+    Rücksprache mit Richard, vor der finalen Fertigstellung.
+  </footer>
+</div>
+
+<script>
+(function () {
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var state = { strand: 'e03', mode: 'code' };
+
+  var btnE03 = document.getElementById('btn-e03');
+  var btnE06 = document.getElementById('btn-e06');
+  var btnCode = document.getElementById('btn-code');
+  var btnCheck = document.getElementById('btn-check');
+  var verdict = document.getElementById('verdict');
+
+  var allWalks = ['walk-e03-a', 'walk-e03-b', 'walk-e06-a'];
+  var allProbes = ['probe-e03-e04', 'probe-e03-e05', 'probe-e03-e06', 'probe-e03-e07', 'probe-e06-e07'];
+  var allBadges = ['badge-e03-e04', 'badge-e03-e05', 'badge-e03-e06', 'badge-e03-e07', 'badge-e06-e07'];
+  var allNodes = ['node-e01', 'node-e02', 'node-e03', 'node-e04', 'node-e05', 'node-e06', 'node-e07'];
+
+  var walksByStrand = {
+    e03: ['walk-e03-a', 'walk-e03-b'],
+    e06: ['walk-e06-a']
+  };
+  var probesByStrand = {
+    e03: ['probe-e03-e04', 'probe-e03-e05', 'probe-e03-e06', 'probe-e03-e07'],
+    e06: ['probe-e06-e07']
+  };
+  var badgesByStrand = {
+    e03: ['badge-e03-e04', 'badge-e03-e05', 'badge-e03-e06', 'badge-e03-e07'],
+    e06: ['badge-e06-e07']
+  };
+
+  var verdictCopy = {
+    'e03-code': {
+      tone: 'wrong',
+      html: '<strong>Code-Pfad, Strang e01–e03:</strong> Der Rückwärtsgang von e03 über e02 nach e01 zeigt nur, worauf e03 selbst antwortet — die eigene Vorgeschichte. Ob e04, e05, e06 oder e07 auf e03 zeigen, kommt dabei nie zur Sprache.'
+    },
+    'e03-check': {
+      tone: 'right',
+      html: '<strong>Eigentliche Frage, Strang e01–e03:</strong> e04, e05, e06 und e07 zeigen alle nicht auf e03. Niemand Neueres baut auf dem Strang auf — <strong>geschlossen</strong>. Genau das müsste Regel 2/3 zum Zusammenziehen bringen.'
+    },
+    'e06-code': {
+      tone: 'wrong',
+      html: '<strong>Code-Pfad, Strang e05–e06:</strong> Der Rückwärtsgang von e06 nach e05 zeigt wieder nur die eigene Vorgeschichte. Dass e07 auf e06 antwortet, taucht in dieser Richtung gar nicht auf.'
+    },
+    'e06-check': {
+      tone: 'right',
+      html: '<strong>Eigentliche Frage, Strang e05–e06:</strong> e07 zeigt auf e06 — ein Treffer beim ersten Prüfschritt. Der Strang ist noch <strong>offen</strong>, jemand baut gerade erst darauf auf. Zusammenziehen wäre hier falsch.'
+    }
+  };
+
+  function reset() {
+    allWalks.concat(allProbes).forEach(function (id) {
+      var el = document.getElementById(id);
+      el.classList.remove('show', 'match', 'nomatch');
+    });
+    allBadges.forEach(function (id) {
+      document.getElementById(id).classList.remove('show');
+    });
+    allNodes.forEach(function (id) {
+      document.getElementById(id).classList.remove('candidate');
+    });
+  }
+
+  function render() {
+    reset();
+    document.getElementById('node-' + state.strand).classList.add('candidate');
+
+    btnE03.setAttribute('aria-pressed', String(state.strand === 'e03'));
+    btnE06.setAttribute('aria-pressed', String(state.strand === 'e06'));
+    btnCode.setAttribute('aria-pressed', String(state.mode === 'code'));
+    btnCheck.setAttribute('aria-pressed', String(state.mode === 'check'));
+
+    var delayStep = reduceMotion ? 0 : 260;
+
+    if (state.mode === 'code') {
+      walksByStrand[state.strand].forEach(function (id, i) {
+        setTimeout(function () {
+          document.getElementById(id).classList.add('show');
+        }, i * delayStep);
+      });
+    } else {
+      var probes = probesByStrand[state.strand];
+      var badges = badgesByStrand[state.strand];
+      probes.forEach(function (id, i) {
+        setTimeout(function () {
+          var isMatch = id === 'probe-e06-e07';
+          var el = document.getElementById(id);
+          el.classList.add('show');
+          el.classList.add(isMatch ? 'match' : 'nomatch');
+          document.getElementById(badges[i]).classList.add('show');
+        }, i * delayStep);
+      });
+    }
+
+    var copy = verdictCopy[state.strand + '-' + state.mode];
+    verdict.setAttribute('data-tone', copy.tone);
+    verdict.innerHTML = copy.html;
+  }
+
+  btnE03.addEventListener('click', function () { state.strand = 'e03'; render(); });
+  btnE06.addEventListener('click', function () { state.strand = 'e06'; render(); });
+  btnCode.addEventListener('click', function () { state.mode = 'code'; render(); });
+  btnCheck.addEventListener('click', function () { state.mode = 'check'; render(); });
+
+  render();
+})();
+</script>

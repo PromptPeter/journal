@@ -1,0 +1,3995 @@
+<!DOCTYPE html>
+<!-- lang wird beim Start auf die gewählte Sprache gesetzt (Default: en).
+     Dadurch bietet der Browser Nicht-Englisch-Sprechern die Übersetzung an. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PromptEngineer · Journal</title>
+<style>
+/* ============================================================
+   Design Tokens
+   ============================================================ */
+:root{
+  --bg:            #05070d;
+  --bg-grad:       radial-gradient(1200px 600px at 20% -10%, #16203a 0%, transparent 60%),
+                   radial-gradient(900px 500px at 100% 0%, #0d1830 0%, transparent 55%);
+  --surface:       #0b101c;
+  --surface-2:     #111827;
+  --surface-3:     #172033;
+  --panel:         #0c1220;
+  --line:          #1e2739;
+  --line-soft:     #161e2e;
+  --text:          #e8edf7;
+  --text-2:        #9aa6bd;
+  --text-3:        #66718a;
+  --accent:        #4d7cfe;
+  --accent-soft:   #4d7cfe22;
+  --danger:        #f2555a;
+  --ok:            #3ecf8e;
+  --warn:          #e6a44e;
+
+  --r-sm: 6px; --r-md: 9px; --r-lg: 14px; --r-pill: 999px;
+
+  /* Anzeigedichte — Voreinstellung ist kompakt, damit mehr Einträge
+     gleichzeitig lesbar sind. Umschaltbar im Kopf. */
+  --card-py: 9px;  --card-px: 13px;
+  --card-gap: 5px;
+  --card-title: 13.5px;
+  --card-snippet: 12.5px;
+  --snippet-lines: 1;
+  --card-meta: 10.5px;
+  --card-date-size: 10px;
+  --card-est: 58px;      /* Schätzhöhe für content-visibility (2 Zeilen) */
+  --day-top: 7px;
+  /* Symbolgrößen laufen mit der Dichte mit */
+  --ico-expand: 12px;    /* Chevron auf der Karte      */
+  --ico-ampel: 6px;      /* Ampelpunkt                 */
+  --ico-dot: 5px;        /* Punkt im Modell-Badge      */
+  --ico-node: 12px;      /* Chevron im Baum            */
+  --ico-ring: 6px;       /* Ring am Ast                */
+  --shadow-pop: 0 18px 48px -12px rgba(0,0,0,.75), 0 0 0 1px var(--line);
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --ease: cubic-bezier(.16,1,.3,1);
+}
+
+/* Weite Darstellung: mehr Luft, zweizeiliger Auszug */
+[data-density="cosy"]{
+  --card-py: 14px; --card-px: 16px;
+  --card-gap: 8px;
+  --card-title: 14.5px;
+  --card-snippet: 13px;
+  --snippet-lines: 2;
+  --card-meta: 11px;
+  --card-date-size: 11px;
+  --card-est: 122px;
+  --day-top: 14px;
+  --ico-expand: 15px;
+  --ico-ampel: 7px;
+  --ico-dot: 6px;
+  --ico-node: 13px;
+  --ico-ring: 7px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;font-family:var(--font);font-size:14px;line-height:1.5;color:var(--text);
+  background:var(--bg);background-image:var(--bg-grad);background-attachment:fixed;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:none;padding:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:var(--r-sm)}
+
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:#2a3448;border-radius:99px;border:3px solid transparent;background-clip:content-box}
+*::-webkit-scrollbar-thumb:hover{background:#3a4761;background-clip:content-box}
+
+.app{max-width:1180px;margin:0 auto;padding:0 24px 80px}
+
+/* ---------- Masthead ---------- */
+.masthead{display:flex;align-items:center;gap:14px;padding:26px 0 18px}
+.logo{width:34px;height:34px;border-radius:10px;flex:none;
+  background:linear-gradient(145deg,var(--accent),#8b5cf6);display:grid;place-items:center;color:#fff;
+  box-shadow:0 6px 20px -6px var(--accent)}
+.masthead h1{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.masthead p{margin:1px 0 0;font-size:12.5px;color:var(--text-3)}
+.masthead .spacer{flex:1}
+.langswitch{display:inline-flex;border:1px solid var(--line);border-radius:var(--r-pill);
+  padding:2px;background:var(--surface);gap:2px}
+.langswitch button{font-size:11px;font-weight:650;letter-spacing:.05em;color:var(--text-3);
+  padding:4px 10px;border-radius:var(--r-pill);transition:background .15s,color .15s;
+  display:grid;place-items:center;min-height:21px}
+.langswitch button:hover{color:var(--text)}
+.langswitch button.on{background:var(--accent);color:#fff}
+
+.srv{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--text-3);
+  border:1px solid var(--line);border-radius:var(--r-pill);padding:4px 11px;background:var(--surface)}
+.srv .dot{width:7px;height:7px;border-radius:50%;background:var(--text-3);flex:none;transition:background .2s}
+.srv.on .dot{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.srv.off .dot{background:var(--danger)}
+
+/* ---------- Filterbar ---------- */
+.filterbar{position:sticky;top:0;z-index:60;margin:0 -24px;padding:12px 24px;
+  background:rgba(5,7,13,.82);backdrop-filter:blur(14px) saturate(160%);
+  border-bottom:1px solid var(--line-soft)}
+.filterbar-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+.searchbox{position:relative;display:flex;align-items:center;gap:8px;height:38px;
+  padding:0 10px 0 34px;min-width:250px;flex:1 1 280px;max-width:440px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);
+  transition:border-color .15s,box-shadow .15s}
+.searchbox:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.searchbox.invalid{border-color:var(--danger);box-shadow:0 0 0 3px #f2555a22}
+.searchbox.invalid .op-tag{color:var(--danger)}
+.searchbox>.ico{position:absolute;left:11px;color:var(--text-3);pointer-events:none}
+.searchbox input{flex:1;min-width:0;background:none;border:none;outline:none;font-size:13.5px}
+.searchbox input::placeholder{color:var(--text-3)}
+.searchbox .op-tag{flex:none;font-size:11px;color:var(--text-2);background:var(--surface-3);
+  border-radius:var(--r-sm);padding:2px 7px;white-space:nowrap}
+
+.trigger{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 12px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);
+  color:var(--text-2);font-size:13.5px;white-space:nowrap;
+  transition:border-color .15s,color .15s,background .15s}
+.trigger:hover{border-color:#2b3752;color:var(--text)}
+.trigger[aria-expanded="true"]{border-color:var(--accent);color:var(--text);box-shadow:0 0 0 3px var(--accent-soft)}
+.trigger.is-active{color:var(--text);border-color:#33415c;background:var(--surface-2)}
+.trigger.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.trigger.primary:hover{background:#5f8aff;border-color:#5f8aff}
+.trigger .chev{transition:transform .18s var(--ease);color:var(--text-3);margin-left:-2px}
+.trigger[aria-expanded="true"] .chev{transform:rotate(180deg);color:var(--text-2)}
+.trigger .count{font-size:11px;font-weight:600;line-height:1;background:var(--accent);color:#fff;
+  border-radius:var(--r-pill);padding:3px 6px;min-width:18px;text-align:center}
+.trigger.primary .count{background:rgba(255,255,255,.25)}
+
+.bar-sep{width:1px;height:22px;background:var(--line);flex:none}
+.link-btn{font-size:12.5px;color:var(--text-3);padding:6px 8px;border-radius:var(--r-sm);
+  display:inline-flex;align-items:center;gap:6px}
+.link-btn:hover{color:var(--text);background:var(--surface-2)}
+.link-btn[hidden]{display:none}
+
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0 2px}
+.chips:empty{display:none}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--text-2);
+  background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-pill);padding:3px 4px 3px 10px}
+.chip b{font-weight:600;color:var(--text)}
+.chip .x{width:17px;height:17px;display:grid;place-items:center;border-radius:50%;color:var(--text-3)}
+.chip .x:hover{background:var(--surface-3);color:var(--text)}
+
+/* ---------- Popover ---------- */
+.pop{position:fixed;z-index:200;min-width:220px;max-width:min(360px,calc(100vw - 24px));
+  background:var(--panel);border-radius:var(--r-lg);box-shadow:var(--shadow-pop);padding:6px;
+  opacity:0;transform:translateY(-6px) scale(.985);
+  transition:opacity .14s var(--ease),transform .16s var(--ease);
+  display:flex;flex-direction:column;overflow:hidden;overscroll-behavior:contain}
+.pop.open{opacity:1;transform:none}
+.pop-search{position:relative;display:flex;align-items:center;margin:2px 2px 6px;flex:none}
+.pop-search .ico{position:absolute;left:9px;color:var(--text-3);pointer-events:none}
+.pop-search input{width:100%;height:32px;padding:0 10px 0 30px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-sm);outline:none;font-size:13px}
+.pop-search input:focus{border-color:var(--accent)}
+.pop-list{overflow-y:auto;max-height:290px;min-height:0;margin:0;padding:0;list-style:none;flex:1 1 auto}
+.opt{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--r-sm);
+  font-size:13.5px;color:var(--text-2);cursor:pointer;user-select:none;width:100%;text-align:left}
+.opt:hover,.opt.cursor{background:var(--surface-3);color:var(--text)}
+.opt[aria-selected="true"],.opt[aria-checked="true"]{color:var(--text)}
+.opt .label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.opt .sub{font-size:11px;color:var(--text-3);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.opt .n{font-size:11.5px;color:var(--text-3);font-variant-numeric:tabular-nums;flex:none}
+.opt .tick{color:var(--accent);flex:none;opacity:0}
+.opt[aria-selected="true"] .tick{opacity:1}
+.opt .dot{width:7px;height:7px;border-radius:50%;flex:none}
+.opt .fmt{width:34px;flex:none;font-family:var(--mono);font-size:10px;font-weight:700;
+  color:var(--text-3);letter-spacing:.04em}
+.cb{width:16px;height:16px;flex:none;border-radius:4px;border:1.5px solid #3a4661;
+  display:grid;place-items:center;color:transparent;transition:background .12s,border-color .12s}
+.opt[aria-checked="true"] .cb,.opt[aria-checked="mixed"] .cb{background:var(--accent);border-color:var(--accent);color:#fff}
+.pop-sep{height:1px;background:var(--line);margin:6px 2px}
+.pop-foot{display:flex;align-items:center;gap:8px;justify-content:flex-end;padding:4px 2px 2px;flex:none}
+.pop-foot .fill{flex:1;font-size:11.5px;color:var(--text-3)}
+.btn{height:29px;padding:0 12px;border-radius:var(--r-sm);font-size:12.5px;font-weight:500;
+  display:inline-flex;align-items:center;gap:6px}
+.btn-ghost{color:var(--text-2)}
+.btn-ghost:hover{background:var(--surface-3);color:var(--text)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#5f8aff}
+.pop-empty{padding:16px 10px;text-align:center;font-size:12.5px;color:var(--text-3)}
+.pop-hint{font-size:11px;color:var(--text-3);padding:2px 4px 6px}
+.range{display:flex;gap:6px;padding:2px 2px 4px}
+.range input{width:100%;height:31px;padding:0 8px;font-size:12.5px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-sm);outline:none;color-scheme:dark}
+.range input:focus{border-color:var(--accent)}
+
+/* ---------- Toolbar + Liste ---------- */
+.toolbar{display:flex;align-items:center;gap:12px;padding:18px 2px 12px}
+.result-count{font-size:13px;color:var(--text-2)}
+.result-count b{color:var(--text);font-variant-numeric:tabular-nums}
+.toolbar .spacer{flex:1}
+.timing{font-family:var(--mono);font-size:11px;color:var(--text-3)}
+
+.daygroup{margin-bottom:var(--day-top)}
+.dayhead{position:sticky;top:60px;z-index:20;display:flex;align-items:center;gap:9px;
+  padding:5px 2px;margin-bottom:5px;background:linear-gradient(180deg,rgba(5,7,13,.95) 65%,transparent)}
+.dayhead h2{margin:0;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
+.dayhead .rule{flex:1;height:1px;background:var(--line-soft)}
+.dayhead .n{font-size:11px;color:var(--text-3);font-variant-numeric:tabular-nums}
+
+.list{display:flex;flex-direction:column;gap:var(--card-gap)}
+
+/* Die Karte ist ein Raster. Kompakt wandern die Metadaten in die
+   Titelzeile und füllen den Platz, den der Titel rechts frei lässt —
+   das spart je Eintrag eine ganze Zeile. Weit stehen sie eigenständig
+   darunter. Beide Fälle unterscheiden sich nur in den grid-areas. */
+.card{display:grid;width:100%;text-align:left;background:var(--surface);
+  border:1px solid var(--line-soft);border-radius:var(--r-md);
+  padding:var(--card-py) var(--card-px);cursor:pointer;
+  align-items:center;column-gap:8px;row-gap:2px;
+  grid-template-columns:auto minmax(4em,1fr) minmax(0,auto) auto auto;
+  grid-template-areas:
+    "model title meta date exp"
+    "snip  snip  snip snip snip";
+  transition:border-color .14s,background .14s}
+[data-density="cosy"] .card{
+  row-gap:4px;
+  grid-template-areas:
+    "model title title date exp"
+    "snip  snip  snip  snip snip"
+    "meta  meta  meta  meta meta";}
+.card:hover{border-color:#2a3651;background:var(--surface-2)}
+
+.model{grid-area:model;display:inline-flex;align-items:center;gap:5px;
+  font-size:10.5px;font-weight:650;padding:2px 7px;border-radius:var(--r-pill);
+  border:1px solid currentColor;letter-spacing:.01em;white-space:nowrap}
+.model .dot{width:var(--ico-dot);height:var(--ico-dot);border-radius:50%;background:currentColor}
+.card-title{grid-area:title;min-width:0;font-size:var(--card-title);font-weight:550;
+  color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.35}
+/* Voller Zeitstempel je Eintrag — monospace, damit die Spalte über alle
+   Karten hinweg exakt untereinander steht */
+.card-date{grid-area:date;font-family:var(--mono);font-size:var(--card-date-size);
+  color:var(--text-3);white-space:nowrap;letter-spacing:-.02em}
+.card-snippet{grid-area:snip;font-size:var(--card-snippet);color:var(--text-2);margin:0;
+  line-height:1.45;display:-webkit-box;-webkit-line-clamp:var(--snippet-lines);
+  -webkit-box-orient:vertical;overflow:hidden}
+
+/* Kompakt: rechtsbündig an den Titel geschoben, überzählige Tags werden
+   abgeschnitten statt umzubrechen. Weit: normale Zeile unter dem Auszug. */
+.card-meta{grid-area:meta;display:flex;align-items:center;gap:5px;
+  font-size:var(--card-meta);min-width:0;overflow:hidden;
+  justify-self:end;flex-wrap:nowrap}
+[data-density="cosy"] .card-meta{justify-self:start;flex-wrap:wrap;overflow:visible}
+.tag{font-size:var(--card-meta);color:var(--text-3);background:var(--surface-3);
+  border-radius:var(--r-sm);padding:1px 6px}
+.tag:hover{color:var(--text)}
+.cat{font-size:var(--card-meta);color:var(--text-2);border:1px solid var(--line);
+  border-radius:var(--r-sm);padding:1px 6px}
+.ampel{width:var(--ico-ampel);height:var(--ico-ampel);border-radius:50%;display:inline-block;flex:none}
+.ampel-ico{width:13px;height:13px;flex:none;border-radius:50%;
+  background:conic-gradient(#3ecf8e 0 25%,#e6a44e 0 50%,#f2555a 0 75%,#4d7cfe 0)}
+.okf-type{font-size:var(--card-meta);font-weight:700;letter-spacing:.05em;padding:1px 6px;
+  border-radius:var(--r-sm);border:1px solid currentColor;flex:none}
+/* Kennzeichnet Verläufe, deren Sprecherwechsel nicht ermittelbar waren */
+.warn-tag{font-size:var(--card-meta);color:var(--warn);border:1px dashed currentColor;
+  border-radius:var(--r-sm);padding:1px 6px;flex:none;cursor:help}
+.opt .desc{font-size:11px;color:var(--text-3);display:block;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+/* Optionen mit Leitfrage brauchen mehr Luft und Ausrichtung nach oben */
+.opt.rich{align-items:flex-start;padding:9px 10px}
+.opt.rich .cb,.opt.rich .dot{margin-top:2px}
+.opt.rich .label{font-weight:650;letter-spacing:.03em;font-size:11.5px}
+.opt.rich .desc{font-weight:400;letter-spacing:0;font-size:11.5px;white-space:normal;
+  margin-top:2px;color:var(--text-2);line-height:1.42}
+.opt .lead-q{display:block;font-size:11px;font-style:italic;color:var(--text-3);
+  margin-top:3px;white-space:normal;line-height:1.4}
+.opt.rich .n{margin-top:2px}
+.pop-group{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text-3);padding:8px 10px 4px}
+.card-meta .stat{font-size:var(--card-meta);color:var(--text-3);
+  font-variant-numeric:tabular-nums;white-space:nowrap}
+[data-density="cosy"] .card-meta .stat{margin-left:auto}
+/* In der Titelzeile ist die Kennzahl das Erste, was weichen darf */
+.card-meta .tag,.card-meta .cat,.card-meta .okf-type,.card-meta .stat{flex:none}
+mark{background:var(--accent-soft);color:#a9c2ff;border-radius:2px;padding:0 1px}
+
+.empty{text-align:center;padding:70px 20px;color:var(--text-3);border:1px dashed var(--line);border-radius:var(--r-lg)}
+.empty h3{color:var(--text-2);font-size:15px;font-weight:550;margin:0 0 6px}
+.empty p{margin:0 0 16px;font-size:13px}
+.sentinel{height:1px}
+.more{text-align:center;padding:16px;font-size:12.5px;color:var(--text-3)}
+
+/* ---------- Inline-Baum (Gesprächsverlauf im selben Frame) ---------- */
+.entry{display:flex;flex-direction:column}
+.entry:not(.open){content-visibility:auto;contain-intrinsic-size:auto var(--card-est)}
+.entry.open>.card{border-color:var(--accent);border-bottom-left-radius:0;border-bottom-right-radius:0;
+  background:var(--surface-2)}
+/* Aufgeklappt gilt immer die weite Darstellung — dort wird gelesen, nicht überflogen */
+.entry.open>.card .card-snippet{-webkit-line-clamp:2;font-size:13px}
+/* Breite/Höhe hier überschreiben die width/height-Attribute des SVG */
+.card .expand{grid-area:exp;color:var(--text-3);transition:transform .2s var(--ease);
+  width:var(--ico-expand);height:var(--ico-expand)}
+.entry.open .card .expand{transform:rotate(180deg);color:var(--accent)}
+
+.tree-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .26s var(--ease)}
+.entry.open .tree-wrap{grid-template-rows:1fr}
+.tree-clip{overflow:hidden;min-height:0}
+.tree{border:1px solid var(--accent);border-top:none;
+  border-radius:0 0 var(--r-md) var(--r-md);background:var(--surface);padding:4px 16px 14px}
+
+.tree-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:10px 0 12px;border-bottom:1px solid var(--line-soft);margin-bottom:6px}
+.tree-bar .meta{font-size:11.5px;color:var(--text-3);margin-right:auto;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tree-bar .meta a{color:var(--text-2);text-decoration:none;border-bottom:1px dotted var(--text-3)}
+.tree-bar .meta a:hover{color:var(--accent);border-color:var(--accent)}
+.mini{height:25px;padding:0 9px;border-radius:var(--r-sm);font-size:11px;font-weight:600;
+  font-family:var(--mono);letter-spacing:.03em;color:var(--text-3);border:1px solid var(--line)}
+.mini:hover{color:var(--text);border-color:#33415c;background:var(--surface-2)}
+.mini.nb{font-family:var(--font);letter-spacing:0;color:var(--accent);border-color:#2c3d66}
+.mini.nb:hover{background:var(--accent-soft);color:#a9c2ff}
+
+/* Strang: Zeitachse waagerecht, älter links, dieser Eintrag hervorgehoben.
+   ref führt nach links (Vorgänger), refBy nach rechts (Nachfolger) —
+   dieselbe Richtung, die im LLM-Wiki-Export zu [[Verweisen]] wird. */
+.strand{display:flex;align-items:center;gap:9px;padding:9px 0 12px;
+  border-bottom:1px solid var(--line-soft);margin-bottom:6px;
+  overflow-x:auto}
+.strand-caption{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text-3);flex:none}
+.strand-row{display:flex;align-items:center;gap:6px;flex:none}
+.strand-fan{display:flex;flex-direction:column;gap:4px;flex:none}
+.strand-pill{display:flex;align-items:center;gap:5px;height:24px;padding:0 9px;flex:none;
+  border-radius:var(--r-pill);border:1px solid currentColor;background:var(--surface-2);
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;white-space:nowrap;cursor:pointer}
+.strand-pill:hover{background:var(--accent-soft)}
+.strand-pill:disabled{cursor:default;color:var(--text)!important;
+  background:var(--accent-soft);border-color:var(--accent)}
+.strand-id{font-weight:700}
+.strand-ty{color:var(--text-3)}
+.strand-pill:disabled .strand-ty{color:var(--accent)}
+.strand-arrow{color:var(--text-3);flex:none}
+
+@keyframes jumpFlash{from{box-shadow:0 0 0 3px var(--accent-soft)}to{box-shadow:0 0 0 0 transparent}}
+.entry.jump-flash>.card{animation:jumpFlash 1.1s var(--ease)}
+
+/* Baumstruktur: Stamm links, Äste je Turn */
+.branches{position:relative;margin:0;padding:2px 0 0 0;list-style:none}
+.branches::before{content:'';position:absolute;left:9px;top:0;bottom:14px;width:1px;background:var(--line)}
+.branch{position:relative;padding-left:28px;margin-bottom:5px}
+/* Ring sitzt mittig auf dem Stamm (9 px) und auf Höhe des Astes (16 px) */
+.branch::before{content:'';position:absolute;left:9px;top:16px;width:15px;height:1px;background:var(--line)}
+.branch::after{content:'';position:absolute;
+  left:calc(9px - var(--ico-ring)/2 - 1.5px);
+  top:calc(16px - var(--ico-ring)/2 - 1.5px);
+  width:var(--ico-ring);height:var(--ico-ring);border-radius:50%;
+  background:var(--surface);border:1.5px solid var(--line)}
+.branch.user::after{border-color:var(--accent)}
+.branch.assistant::after{border-color:var(--ok)}
+.branch:last-child{margin-bottom:0}
+
+.node{width:100%;display:flex;align-items:center;gap:9px;text-align:left;
+  padding:7px 10px;border-radius:var(--r-md);font-size:12px;color:var(--text-3);
+  border:1px solid transparent}
+.node:hover{background:var(--surface-2);border-color:var(--line-soft);color:var(--text-2)}
+.branch.on>.node{background:var(--surface-2);border-color:var(--line)}
+.node .nr{font-family:var(--mono);font-size:10.5px;color:var(--text-3);flex:none;
+  min-width:20px;font-variant-numeric:tabular-nums}
+.node .role{font-weight:650;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+  padding:2px 7px;border-radius:var(--r-sm);flex:none}
+.branch.user .node .role{color:#9fc0ff;background:#4d7cfe22}
+.branch.assistant .node .role{color:#8fe3bd;background:#3ecf8e1c}
+.node .peek{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.node .when{flex:none;font-family:var(--mono);font-size:10px;letter-spacing:-.02em;white-space:nowrap}
+.tree-bar .stamp{font-family:var(--mono);letter-spacing:-.02em;color:var(--text-2)}
+.node .caret{flex:none;transition:transform .2s var(--ease);
+  width:var(--ico-node);height:var(--ico-node)}
+.branch.on .node .caret{transform:rotate(180deg);color:var(--accent)}
+
+.leaf-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .22s var(--ease)}
+.branch.on .leaf-wrap{grid-template-rows:1fr}
+.leaf-clip{overflow:hidden;min-height:0}
+.leaf{padding:9px 12px 13px;font-size:13.5px;line-height:1.62;color:var(--text-2);
+  white-space:pre-wrap;overflow-wrap:anywhere;border-left:2px solid var(--line);margin:2px 0 0 4px}
+.branch.user .leaf{border-left-color:var(--accent)}
+.branch.assistant .leaf{border-left-color:var(--ok)}
+.leaf strong{color:var(--text);font-weight:600}
+.leaf code{font-family:var(--mono);font-size:12.5px;background:var(--surface-3);
+  border-radius:4px;padding:1px 5px;color:#c9d6f0}
+.leaf .li{padding-left:16px;position:relative;display:block}
+.leaf .li::before{content:'·';position:absolute;left:5px;color:var(--accent)}
+/* Metadaten-Editor */
+.meta-edit{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:9px 0 11px;border-bottom:1px solid var(--line-soft);margin-bottom:4px}
+.edit-label{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text-3)}
+.edit-tags{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.etag{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text-2);
+  background:var(--surface-3);border-radius:var(--r-sm);padding:2px 3px 2px 7px}
+.etag .x{width:15px;height:15px;display:grid;place-items:center;border-radius:3px;color:var(--text-3)}
+.etag .x:hover{background:var(--danger);color:#fff}
+.tag-input{width:82px;height:23px;padding:0 7px;font-size:11px;background:var(--surface);
+  border:1px dashed var(--line);border-radius:var(--r-sm);outline:none;color:var(--text)}
+.tag-input:focus{border-style:solid;border-color:var(--accent);width:150px}
+.tag-input::placeholder{color:var(--text-3)}
+.edit-sel{height:24px;padding:0 6px;font-size:11px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-sm);outline:none;color:var(--text-2);
+  max-width:200px}
+.edit-sel:focus{border-color:var(--accent)}
+
+.has-thought{flex:none;font-size:var(--card-meta);opacity:.85;line-height:1}
+.thought{margin:6px 0 2px 4px;border-left:2px dashed #6b5cf6;background:#8b5cf60d;
+  border-radius:0 var(--r-sm) var(--r-sm) 0}
+.thought summary{cursor:pointer;padding:7px 12px;font-size:11.5px;color:#b9a7f5;list-style:none}
+.thought summary::-webkit-details-marker{display:none}
+.thought summary::before{content:'🧠 ';}
+.thought summary:hover{color:#d3c6ff}
+.thought[open] summary{border-bottom:1px solid #8b5cf622}
+.thought-body{padding:9px 12px 12px;font-size:12.5px;line-height:1.6;color:#9c8fc4;
+  white-space:pre-wrap;overflow-wrap:anywhere;font-style:italic}
+.leaf-foot{display:flex;gap:8px;padding:0 0 4px 14px}
+.leaf-foot button{font-size:11px;color:var(--text-3);padding:3px 7px;border-radius:var(--r-sm)}
+.leaf-foot button:hover{background:var(--surface-3);color:var(--text)}
+
+/* ---------- Drop-Zone ---------- */
+.dropzone{position:fixed;inset:0;z-index:500;display:none;place-items:center;
+  background:rgba(5,7,13,.9);backdrop-filter:blur(6px)}
+.dropzone.on{display:grid}
+.dropzone .inner{border:2px dashed var(--accent);border-radius:20px;padding:52px 70px;text-align:center}
+.dropzone h3{margin:14px 0 6px;font-size:18px;color:var(--text)}
+.dropzone p{margin:0;font-size:13px;color:var(--text-3)}
+
+/* ---------- Geheimnis-Prüfung ---------- */
+.scrim{position:fixed;inset:0;z-index:400;display:grid;place-items:center;
+  background:rgba(2,4,9,.7);backdrop-filter:blur(4px);
+  opacity:0;transition:opacity .18s var(--ease)}
+.scrim.open{opacity:1}
+.scan-dlg{width:min(620px,calc(100vw - 32px));max-height:min(80vh,700px);
+  display:flex;flex-direction:column;background:var(--panel);
+  border-radius:var(--r-lg);box-shadow:var(--shadow-pop);
+  transform:translateY(8px) scale(.99);transition:transform .2s var(--ease)}
+.scrim.open .scan-dlg{transform:none}
+.scan-head{display:flex;align-items:center;gap:11px;padding:18px 22px 14px;
+  border-bottom:1px solid var(--line-soft)}
+.scan-icon{font-size:19px;color:var(--warn);line-height:1}
+.scan-head h2{margin:0;font-size:16px;font-weight:600;flex:1}
+.scan-count{font-size:11.5px;color:var(--text-3);font-variant-numeric:tabular-nums}
+.scan-body{overflow-y:auto;padding:16px 22px}
+.scan-lead{margin:0 0 14px;font-size:13.5px;line-height:1.55;color:var(--text-2)}
+.scan-table{display:flex;flex-direction:column;gap:3px}
+.scan-row{display:grid;grid-template-columns:74px 1fr auto 110px;align-items:center;gap:10px;
+  padding:7px 10px;border-radius:var(--r-sm);background:var(--surface);font-size:12.5px}
+.scan-sev{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  padding:2px 6px;border-radius:var(--r-sm);text-align:center}
+.sev-high   .scan-sev{color:#ffb4b6;background:#f2555a26}
+.sev-medium .scan-sev{color:#f0c384;background:#e6a44e22}
+.sev-low    .scan-sev{color:var(--text-3);background:var(--surface-3)}
+.scan-what{color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scan-n{color:var(--text-3);font-variant-numeric:tabular-nums}
+.scan-ex{font-family:var(--mono);font-size:11px;color:var(--text-3);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:help}
+.scan-note{margin:14px 0 0;font-size:11.5px;color:var(--text-3);line-height:1.5}
+.scan-foot{display:flex;gap:8px;justify-content:flex-end;padding:14px 22px 18px;
+  border-top:1px solid var(--line-soft)}
+.btn.danger{color:var(--danger)}
+.btn.danger:hover{background:#f2555a1a;color:#ffb4b6}
+.secret-tag{font-size:var(--card-meta);color:var(--danger);border:1px solid currentColor;
+  border-radius:var(--r-sm);padding:1px 6px;flex:none;cursor:help}
+
+/* ---------- Toast ---------- */
+.toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:600;
+  display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:10px 16px;font-size:13px;color:var(--text);box-shadow:var(--shadow-pop);
+  display:flex;align-items:center;gap:9px;animation:rise .22s var(--ease)}
+.toast.err{border-color:var(--danger);color:#ffb4b6}
+.toast.ok .ic{color:var(--ok)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+@media (max-width:640px){
+  .app{padding:0 14px 60px}
+  .filterbar{margin:0 -14px;padding:10px 14px}
+  .searchbox{max-width:none;flex-basis:100%}
+  .dayhead{top:58px}
+  .tree{padding:4px 10px 12px}
+  .branch{padding-left:22px}
+  .node .when{display:none}
+}
+@media print{
+  body{background:#fff;color:#000}
+  .filterbar,.masthead,.toolbar,.toasts,.tree-bar{display:none!important}
+  .tree-wrap{grid-template-rows:1fr!important}
+  .leaf-wrap{grid-template-rows:1fr!important}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-search" viewBox="0 0 16 16"><path d="M7.2 1.6a5.6 5.6 0 1 1-3.6 9.9l-2.5 2.5a.8.8 0 1 1-1.1-1.1l2.5-2.5A5.6 5.6 0 0 1 7.2 1.6Zm0 1.6a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z" fill="currentColor"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 16 16"><path d="M4.2 6.2a.8.8 0 0 1 1.1 0L8 8.9l2.7-2.7a.8.8 0 1 1 1.1 1.1L8.6 10.6a.8.8 0 0 1-1.1 0L4.2 7.3a.8.8 0 0 1 0-1.1Z" fill="currentColor"/></symbol>
+  <symbol id="i-x" viewBox="0 0 16 16"><path d="M4.5 4.5a.8.8 0 0 1 1.1 0L8 6.9l2.4-2.4a.8.8 0 1 1 1.1 1.1L9.1 8l2.4 2.4a.8.8 0 1 1-1.1 1.1L8 9.1l-2.4 2.4a.8.8 0 1 1-1.1-1.1L6.9 8 4.5 5.6a.8.8 0 0 1 0-1.1Z" fill="currentColor"/></symbol>
+  <symbol id="i-check" viewBox="0 0 16 16"><path d="M13.3 4.2a.8.8 0 0 1 0 1.2l-6 6a.8.8 0 0 1-1.2 0L2.7 8a.8.8 0 1 1 1.2-1.2l2.8 2.8 5.4-5.4a.8.8 0 0 1 1.2 0Z" fill="currentColor"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 16 16"><path d="M3.5 8a.8.8 0 0 1 .8-.8h7.4a.8.8 0 0 1 0 1.6H4.3A.8.8 0 0 1 3.5 8Z" fill="currentColor"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 16 16"><path d="M8 2.4A5.6 5.6 0 1 0 13.5 9a.8.8 0 1 0-1.57-.3A4 4 0 1 1 8 4a4 4 0 0 1 2.7 1.05L9.4 6.35a.4.4 0 0 0 .28.68h3.4a.4.4 0 0 0 .4-.4V3.2a.4.4 0 0 0-.68-.28l-1.02 1.02A5.58 5.58 0 0 0 8 2.4Z" fill="currentColor"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 16 16"><path d="M8 1.5l1.5 3.9L13.5 7 9.5 8.6 8 12.5 6.5 8.6 2.5 7l4-1.6L8 1.5Z" fill="currentColor"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 16 16"><path d="M3 4.5h10M4.5 8h7M6.5 11.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 16 16"><path d="M5 1.5v1.2M11 1.5v1.2M2.5 6h11M3.7 2.7h8.6c.7 0 1.2.5 1.2 1.2v8.4c0 .7-.5 1.2-1.2 1.2H3.7c-.7 0-1.2-.5-1.2-1.2V3.9c0-.7.5-1.2 1.2-1.2Z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 16 16"><path d="M2.5 7.3V3.2c0-.4.3-.7.7-.7h4.1c.2 0 .4.1.5.2l6 6c.3.3.3.7 0 1l-4.1 4.1c-.3.3-.7.3-1 0l-6-6a.7.7 0 0 1-.2-.5Z" stroke="currentColor" stroke-width="1.3" fill="none"/><circle cx="5.4" cy="5.4" r="1" fill="currentColor"/></symbol>
+  <symbol id="i-model" viewBox="0 0 16 16"><circle cx="8" cy="8" r="2" fill="currentColor"/><circle cx="8" cy="8" r="5.7" stroke="currentColor" stroke-width="1.3" fill="none"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 16 16"><path d="M2.5 4.2c0-.6.5-1 1-1h2.8c.3 0 .6.1.8.4l.7.8h4.7c.6 0 1 .5 1 1v6.4c0 .6-.4 1-1 1h-9c-.5 0-1-.4-1-1V4.2Z" stroke="currentColor" stroke-width="1.3" fill="none"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 16 16"><path d="M8 2v8m0 0 3-3m-3 3L5 7M2.8 12.5h10.4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-up" viewBox="0 0 16 16"><path d="M8 13V5m0 0 3 3M8 5 5 8M2.8 2.5h10.4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-dense" viewBox="0 0 16 16"><path d="M2.5 3h11M2.5 6h11M2.5 9h11M2.5 12h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-cosy" viewBox="0 0 16 16"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-book" viewBox="0 0 16 16"><path d="M2.5 3.2c0-.4.3-.7.7-.7H7c.6 0 1 .4 1 1v9.8c0-.6-.4-1-1-1H3.2a.7.7 0 0 1-.7-.7V3.2Zm11 0c0-.4-.3-.7-.7-.7H9c-.6 0-1 .4-1 1v9.8c0-.6.4-1 1-1h3.8c.4 0 .7-.3.7-.7V3.2Z" stroke="currentColor" stroke-width="1.2" fill="none"/></symbol>
+</defs></svg>
+
+<div class="app">
+  <header class="masthead">
+    <div class="logo"><svg width="17" height="17"><use href="#i-spark"/></svg></div>
+    <div>
+      <h1>PromptEngineer · Journal</h1>
+      <p id="corpus-line">Lade Korpus …</p>
+    </div>
+    <div class="spacer"></div>
+    <div class="langswitch" role="group" id="density" aria-label="Density">
+      <button data-density="compact" type="button">
+        <svg width="13" height="13"><use href="#i-dense"/></svg></button>
+      <button data-density="cosy" type="button">
+        <svg width="13" height="13"><use href="#i-cosy"/></svg></button>
+    </div>
+    <div class="langswitch" role="group" id="langswitch" aria-label="Language">
+      <button data-lang="en" type="button">EN</button>
+      <button data-lang="de" type="button">DE</button>
+    </div>
+    <span class="srv" id="srv">
+      <span class="dot"></span><span id="srv-txt"></span>
+    </span>
+  </header>
+
+  <nav class="filterbar" aria-label="Filter">
+    <div class="filterbar-row">
+      <div class="searchbox">
+        <svg class="ico" width="14" height="14"><use href="#i-search"/></svg>
+        <input id="q" type="search" autocomplete="off" spellcheck="false">
+        <button class="op-tag" id="op-trigger" aria-haspopup="listbox" aria-expanded="false"></button>
+      </div>
+
+      <button class="trigger" id="t-model" aria-haspopup="listbox" aria-expanded="false">
+        <svg width="14" height="14"><use href="#i-model"/></svg><span class="lbl"></span>
+        <svg class="chev" width="14" height="14"><use href="#i-chev"/></svg></button>
+
+      <button class="trigger" id="t-type" aria-haspopup="listbox" aria-expanded="false">
+        <svg width="14" height="14"><use href="#i-folder"/></svg><span class="lbl"></span>
+        <svg class="chev" width="14" height="14"><use href="#i-chev"/></svg></button>
+
+      <button class="trigger" id="t-cat" aria-haspopup="listbox" aria-expanded="false">
+        <svg width="14" height="14"><use href="#i-book"/></svg><span class="lbl"></span>
+        <svg class="chev" width="14" height="14"><use href="#i-chev"/></svg></button>
+
+      <button class="trigger" id="t-ampel" aria-haspopup="listbox" aria-expanded="false">
+        <span class="ampel-ico" aria-hidden="true"></span><span class="lbl"></span>
+        <svg class="chev" width="14" height="14"><use href="#i-chev"/></svg></button>
+
+      <button class="trigger" id="t-tag" aria-haspopup="listbox" aria-expanded="false">
+        <svg width="14" height="14"><use href="#i-tag"/></svg><span class="lbl"></span>
+        <svg class="chev" width="14" height="14"><use href="#i-chev"/></svg></button>
+
+      <button class="trigger" id="t-date" aria-haspopup="listbox" aria-expanded="false">
+        <svg width="14" height="14"><use href="#i-cal"/></svg><span class="lbl"></span>
+        <svg class="chev" width="14" height="14"><use href="#i-chev"/></svg></button>
+
+      <span class="bar-sep"></span>
+
+      <button class="trigger" id="t-sort" aria-haspopup="listbox" aria-expanded="false">
+        <svg width="14" height="14"><use href="#i-sort"/></svg><span class="lbl"></span>
+        <svg class="chev" width="14" height="14"><use href="#i-chev"/></svg></button>
+
+      <button class="trigger primary" id="t-export" aria-haspopup="listbox" aria-expanded="false">
+        <svg width="14" height="14"><use href="#i-dl"/></svg><span class="lbl"></span>
+        <svg class="chev" width="14" height="14"><use href="#i-chev"/></svg></button>
+
+      <button class="link-btn" id="reset" hidden>
+        <svg width="13" height="13"><use href="#i-reset"/></svg> <span></span></button>
+    </div>
+    <div class="chips" id="chips"></div>
+  </nav>
+
+  <div class="toolbar">
+    <span class="result-count" id="count">–</span>
+    <span class="spacer"></span>
+    <button class="link-btn" id="import-btn"><svg width="13" height="13"><use href="#i-up"/></svg> <span></span></button>
+    <span class="timing" id="timing"></span>
+  </div>
+
+  <div id="list" aria-live="polite"></div>
+  <div class="sentinel" id="sentinel"></div>
+  <div class="more" id="more" hidden></div>
+</div>
+
+<div class="dropzone" id="dropzone"><div class="inner">
+  <svg width="42" height="42" style="color:var(--accent)"><use href="#i-up"/></svg>
+  <h3></h3>
+  <p></p>
+</div></div>
+
+<input type="file" id="file-input" multiple accept=".md,.markdown,.txt,.json" hidden>
+<div class="toasts" id="toasts"></div>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL 0 · Sprache
+   Englisch ist Voreinstellung; Deutsch bleibt vollständig
+   verfügbar. Die Wahl steckt in localStorage und setzt zugleich
+   das lang-Attribut, damit die Browser-Übersetzung für andere
+   Sprachen sauber greift.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Anzeigedichte — kompakt ist Voreinstellung */
+const DENSITIES = ['compact', 'cosy'];
+const DENSITY_KEY = 'promptengineer.density';
+let DENSITY = (() => {
+  try { const s = localStorage.getItem(DENSITY_KEY); if (DENSITIES.includes(s)) return s; } catch {}
+  return 'compact';
+})();
+
+const LANGS = ['en', 'de'];
+const LANG_KEY = 'promptengineer.lang';
+let LANG = (() => {
+  try { const s = localStorage.getItem(LANG_KEY); if (LANGS.includes(s)) return s; } catch {}
+  return 'en';                       // Default Englisch, unabhängig von der Browsersprache
+})();
+
+/** Wörterbuch. Schlüssel sind sprechend, damit Lücken auffallen. */
+const T = {
+  appTitle:        { en:'PromptEngineer · Journal',   de:'PromptEngineer · Journal' },
+  corpusLine:      { en:'{n} chats (demo) · {m} models · drop files here to import',
+                     de:'{n} Chats (Demo) · {m} Modelle · Dateien hierher ziehen zum Importieren' },
+  corpusReal:      { en:'{n} chats · {t} turns · {m} models · {g} tags',
+                     de:'{n} Chats · {t} Turns · {m} Modelle · {g} Tags' },
+  srvChecking:     { en:'checking server …',          de:'Server prüfen …' },
+  srvOnline:       { en:'OKF server connected',       de:'OKF-Server verbunden' },
+  srvOffline:      { en:'server offline · local mode',de:'Server offline · lokaler Modus' },
+  srvTitle:        { en:'Connection to the local OKF server (port 31337)',
+                     de:'Verbindung zum lokalen OKF-Server (Port 31337)' },
+  densCompact:     { en:'Compact — more entries at a glance',
+                     de:'Kompakt — mehr Einträge auf einen Blick' },
+  densCosy:        { en:'Roomy — two-line preview',
+                     de:'Weit — zweizeiliger Auszug' },
+
+  searchPlaceholder:{ en:'Search chats & messages …', de:'Chats & Nachrichten durchsuchen …' },
+  searchAria:      { en:'Full-text search',           de:'Volltextsuche' },
+  searchOpTitle:   { en:'Search operator',            de:'Suchoperator' },
+  allModels:       { en:'All models',                 de:'Alle Modelle' },
+  allTypes:        { en:'All types',                  de:'Alle Typen' },
+  allCategories:   { en:'All categories',             de:'Alle Kategorien' },
+  allAmpeln:       { en:'All signals',                de:'Alle Ampeln' },
+  allTags:         { en:'All tags',                   de:'Alle Tags' },
+  allTime:         { en:'All time',                   de:'Gesamter Zeitraum' },
+  export:          { en:'Export',                     de:'Export' },
+  reset:           { en:'Reset',                      de:'Zurücksetzen' },
+  importFiles:     { en:'Import files',               de:'Dateien importieren' },
+
+  searchIn:        { en:'Search …',                   de:'Suchen …' },
+  searchModel:     { en:'Find model …',               de:'Modell suchen …' },
+  searchTag:       { en:'Find tag …',                 de:'Tag suchen …' },
+  noMatches:       { en:'No matches',                 de:'Keine Treffer' },
+  nSelected:       { en:'{n} selected',               de:'{n} ausgewählt' },
+  noRestriction:   { en:'No restriction',             de:'Keine Einschränkung' },
+  cancel:          { en:'Cancel',                     de:'Abbrechen' },
+  applyBtn:        { en:'Apply',                      de:'Übernehmen' },
+  clear:           { en:'Clear',                      de:'Leeren' },
+  customRange:     { en:'Custom range',               de:'Eigener Zeitraum' },
+  from:            { en:'From',                       de:'Von' },
+  to:              { en:'To',                         de:'Bis' },
+  today:           { en:'today',                      de:'heute' },
+
+  general:         { en:'General',                    de:'Allgemein' },
+  okfGroup:        { en:'OKF · Open Knowledge Format',de:'OKF · Open Knowledge Format' },
+  exportHint:      { en:'Exports {n} filtered chats including all turns.',
+                     de:'Exportiert {n} gefilterte Chats mit allen Turns.' },
+  nbDownload:      { en:'Download source markdown',   de:'Quellen-Markdown herunterladen' },
+
+  countLine:       { en:'<b>{n}</b> of {total} chats · <b>{t}</b> turns',
+                     de:'<b>{n}</b> von {total} Chats · <b>{t}</b> Turns' },
+  countNone:       { en:'<b>0</b> matches',           de:'<b>0</b> Treffer' },
+  nMore:           { en:'{n} more …',                 de:'{n} weitere …' },
+  nChats:          { en:'{n} chats',                  de:'{n} Chats' },
+  oneChat:         { en:'1 chat',                     de:'1 Chat' },
+  emptyTitle:      { en:'Nothing found',              de:'Nichts gefunden' },
+  emptyText:       { en:'No entries match this combination.',
+                     de:'Für diese Kombination gibt es keine Einträge.' },
+  emptyBtn:        { en:'Reset filters',              de:'Filter zurücksetzen' },
+
+  openTree:        { en:'{title} – show conversation', de:'{title} – Gesprächsverlauf anzeigen' },
+  turns:           { en:'turns',                      de:'Turns' },
+  thoughtsN:       { en:'{n} reasoning traces',       de:'{n} Denkflüsse' },
+  tokensApprox:    { en:'~{n} tokens',                de:'~{n} Tokens' },
+  expandAll:       { en:'Expand all',                 de:'Alle auf' },
+  collapseAll:     { en:'Collapse all',               de:'Alle zu' },
+  expandAllT:      { en:'Expand all answers',         de:'Alle Antworten aufklappen' },
+  collapseAllT:    { en:'Collapse all answers',       de:'Alle Antworten zuklappen' },
+  openSource:      { en:'Open source',                de:'Quelle öffnen' },
+  roleUser:        { en:'User',                       de:'User' },
+  roleAssistant:   { en:'Assistant',                  de:'Assistant' },
+  chars:           { en:'{n} ch.',                    de:'{n} Z.' },
+  copy:            { en:'Copy',                       de:'Kopieren' },
+  copied:          { en:'Turn copied',                de:'Turn kopiert' },
+  copyBlocked:     { en:'Copying blocked by the browser', de:'Kopieren vom Browser blockiert' },
+  findSimilar:     { en:'Find similar',               de:'Ähnliche finden' },
+  showThought:     { en:'Show reasoning ({n} characters)', de:'Denkfluss anzeigen ({n} Zeichen)' },
+  hasThought:      { en:'Contains a reasoning trace', de:'Enthält einen Denkfluss' },
+  saveAs:          { en:'Save this chat as {f}',      de:'Diesen Chat als {f} speichern' },
+  saved:           { en:'{f} saved',                  de:'{f} gespeichert' },
+
+  editTags:        { en:'Tags',                       de:'Tags' },
+  editAmpel:       { en:'Signal',                     de:'Ampel' },
+  editCat:         { en:'Category',                   de:'Kategorie' },
+  addTag:          { en:'+ tag',                      de:'+ Tag' },
+  removeTag:       { en:'Remove tag {t}',             de:'Tag {t} entfernen' },
+  noAmpel:         { en:'– no signal –',              de:'– keine Ampel –' },
+  revert:          { en:'Revert',                     de:'Zurücksetzen' },
+  revertT:         { en:'Discard manual changes to this entry',
+                     de:'Manuelle Änderungen dieses Eintrags verwerfen' },
+  reverted:        { en:'Changes discarded — a re-import restores the original values.',
+                     de:'Änderungen verworfen — Neuimport stellt die Originalwerte her.' },
+  storeFailed:     { en:'Cannot save in this browser — the change lasts for this session only.',
+                     de:'Speichern im Browser nicht möglich — Änderung gilt nur für diese Sitzung.' },
+  okfIdTitle:      { en:'ID from data.okf.json',      de:'ID aus data.okf.json' },
+  refTitle:        { en:'Reference in data.okf.json', de:'Verweis in data.okf.json' },
+  refByTitle:      { en:'Entries pointing here',      de:'Einträge, die hierher verweisen' },
+  refByN:          { en:'{n} references here',        de:'{n} Verweise hierher' },
+  unstructured:    { en:'unsplit',                    de:'ungetrennt' },
+  strandLabel:     { en:'Strand',                     de:'Strang' },
+  strandCurrent:   { en:'this entry',                 de:'dieser Eintrag' },
+  jumpFilterReset: { en:'Filter cleared to show the linked entry', de:'Filter zurückgesetzt, um den verlinkten Eintrag zu zeigen' },
+
+  scanTitle:       { en:'Credentials found',          de:'Zugangsdaten gefunden' },
+  scanFound:       { en:'{n} findings · {h} critical', de:'{n} Fundstellen · {h} kritisch' },
+  scanLeadExternal:{ en:'These contents are about to leave your device — NotebookLM is a Google service. Anything uploaded there is out of your hands.',
+                     de:'Diese Inhalte verlassen gleich dein Gerät — NotebookLM ist ein Google-Dienst. Was dort landet, ist nicht mehr in deiner Hand.' },
+  scanLeadLocal:   { en:'The export file will contain these values. That is fine as long as it stays on this machine — think twice before passing it on.',
+                     de:'Die Exportdatei enthält diese Werte. Solange sie auf diesem Rechner bleibt, ist das unkritisch — vor dem Weitergeben aber zweimal hinsehen.' },
+  scanNote:        { en:'Masking keeps the first four characters and the structure, so the text stays readable — only the secret is gone.',
+                     de:'Beim Maskieren bleiben die ersten vier Zeichen und die Struktur erhalten, der Text bleibt also lesbar — nur das Geheimnis ist weg.' },
+  scanAsIs:        { en:'Export unchanged',           de:'Unverändert exportieren' },
+  scanMasked:      { en:'Export masked',              de:'Maskiert exportieren' },
+  scanMinor:       { en:'{n} minor findings (email, IP, paths) — exported unchanged.',
+                     de:'{n} nachrangige Fundstellen (E-Mail, IP, Pfade) — unverändert exportiert.' },
+  sev_high:        { en:'critical',                   de:'kritisch' },
+  sev_medium:      { en:'personal',                   de:'persönlich' },
+  sev_low:         { en:'hint',                       de:'Hinweis' },
+  hasSecrets:      { en:'credentials',                de:'Zugangsdaten' },
+  hasSecretsT:     { en:'This entry contains values that look like credentials. Check before exporting.',
+                     de:'Dieser Eintrag enthält Werte, die wie Zugangsdaten aussehen. Vor dem Export prüfen.' },
+  unstructuredT:   { en:'Raw copy-paste transcript — the file contains no speaker markers, so it was kept as one block instead of guessing who said what.',
+                     de:'Roher Copy-Paste-Verlauf — die Datei enthält keine Sprechermarker, deshalb als ein Block belassen statt zu raten, wer was gesagt hat.' },
+  refByOne:        { en:'1 reference here',           de:'1 Verweis hierher' },
+  filterByTag:     { en:'Filter by this tag',         de:'Nach diesem Tag filtern' },
+  ampelTitle:      { en:'Signal {a}: {d}',            de:'Ampel {a}: {d}' },
+
+  dropTitle:       { en:'Drop chat files here',       de:'Chat-Dateien hier ablegen' },
+  dropSub:         { en:'.md (chat export) · .json (OKF / raw.okf.json) · whole folders',
+                     de:'.md (Chat-Export) · .json (OKF / raw.okf.json) · ganze Ordner' },
+  importNothing:   { en:'No .md/.json files found.',  de:'Keine .md/.json-Dateien gefunden.' },
+  importFailed:    { en:'Nothing recognised ({n} files skipped).',
+                     de:'Nichts erkannt ({n} Dateien übersprungen).' },
+  importOk:        { en:'{n} chats imported',         de:'{n} Chats importiert' },
+  importOkOne:     { en:'1 chat imported',            de:'1 Chat importiert' },
+  importSkipped:   { en:' · {n} skipped',             de:' · {n} übersprungen' },
+  exportEmpty:     { en:'Nothing to export — the filtered set is empty.',
+                     de:'Nichts zu exportieren — die Filtermenge ist leer.' },
+  exportDone:      { en:'{f} exported · {n} chats · {ms} ms',
+                     de:'{f} exportiert · {n} Chats · {ms} ms' },
+  nbDownloaded:    { en:'NotebookLM file downloaded — upload it as a source at notebooklm.google.com.',
+                     de:'NotebookLM-Datei heruntergeladen — in notebooklm.google.com als Quelle hochladen.' },
+
+  dayToday:        { en:'Today',                      de:'Heute' },
+  dayYesterday:    { en:'Yesterday',                  de:'Gestern' },
+  chipModel:       { en:'Model',                      de:'Modell' },
+  chipType:        { en:'Type',                       de:'Typ' },
+  chipCat:         { en:'Category',                   de:'Kategorie' },
+  chipAmpel:       { en:'Signal',                     de:'Ampel' },
+  chipTag:         { en:'Tag',                        de:'Tag' },
+  chipRange:       { en:'Range',                      de:'Zeitraum' },
+  chipRemove:      { en:'Remove {l} {v}',             de:'{l} {v} entfernen' },
+
+  /* Texte, die in Exportdateien landen */
+  expHeadline:     { en:'Journal export',             de:'Journal-Export' },
+  expCreated:      { en:'created',                    de:'erzeugt' },
+  expFilter:       { en:'Filter',                     de:'Filter' },
+  expNoFilter:     { en:'no filter (entire corpus)',  de:'kein Filter (gesamter Bestand)' },
+  expModel:        { en:'Model',                      de:'Modell' },
+  expDate:         { en:'Date',                       de:'Datum' },
+  expCategory:     { en:'Category',                   de:'Kategorie' },
+  expType:         { en:'OKF type',                   de:'OKF-Typ' },
+  expTurns:        { en:'Turns',                      de:'Turns' },
+  expTokens:       { en:'Tokens (estimated)',         de:'Tokens (geschätzt)' },
+  expThoughts:     { en:'Reasoning traces',           de:'Denkflüsse' },
+  expTags:         { en:'Tags',                       de:'Tags' },
+  expSource:       { en:'Source',                     de:'Quelle' },
+  expHistory:      { en:'Conversation',               de:'Verlauf' },
+  expReasoning:    { en:'Reasoning',                  de:'Denkfluss' },
+  expChats:        { en:'Chats',                      de:'Chats' },
+  sumModels:       { en:'Models',                     de:'Modelle' },
+  sumTypes:        { en:'Types',                      de:'Typen' },
+  sumCats:         { en:'Categories',                 de:'Kategorien' },
+  sumAmpeln:       { en:'Signals',                    de:'Ampeln' },
+  sumTags:         { en:'Tags',                       de:'Tags' },
+  expPointsTo:     { en:'points to',                  de:'verweist auf' },
+  /* LLM-Wiki-Bündel (Karpathy-Muster): raw/ + wiki/ + CLAUDE.md */
+  vaultTitle:      { en:'LLM wiki — schema and reading guide',
+                     de:'LLM-Wiki — Schema und Lesehilfe' },
+  vaultIntro:      { en:'Three layers. `raw/` holds what was said and never changes. `wiki/` holds what follows from it, compacted. This file is the schema both of them follow.',
+                     de:'Drei Ebenen. `raw/` hält fest, was gesagt wurde, und ändert sich nie. `wiki/` hält fest, was daraus folgt, verdichtet. Diese Datei ist das Schema, dem beide folgen.' },
+  vaultLayout:     { en:'Layout',                     de:'Aufbau' },
+  vaultLaySchema:  { en:'this file — schema and reading guide',
+                     de:'diese Datei — Schema und Lesehilfe' },
+  vaultLayRaw:     { en:'immutable, one file per chat',
+                     de:'unveränderlich, eine Datei je Chat' },
+  vaultLayWiki:    { en:'compacted, one file per entry, links follow ref',
+                     de:'verdichtet, eine Datei je Eintrag, Verweise folgen ref' },
+  vaultLayIndex:   { en:'entry point — open tensions, walls, sessions',
+                     de:'Einstieg — offene Spannungen, Wände, Sitzungen' },
+  vaultLayLog:     { en:'the readable history, age-decayed',
+                     de:'der lesbare Verlauf, altersverdichtet' },
+  vaultTypesHead:  { en:'The six types',              de:'Die sechs Typen' },
+  vaultQuestion:   { en:'Guiding question',           de:'Leitfrage' },
+  vaultTypesNote:  { en:'The identifiers stay German in every interface language — they are data, not display text. `ref` points from the newer entry to the older one; in `wiki/` that becomes a Markdown link to the target file, so the reverse direction is listed as incoming references.',
+                     de:'Die Bezeichner bleiben in jeder Oberflächensprache deutsch — sie sind Daten, kein Anzeigetext. `ref` zeigt vom neueren auf den älteren Eintrag; in `wiki/` wird daraus ein Markdown-Link auf die Zieldatei, die Gegenrichtung steht als Liste eingehender Verweise darunter.' },
+  vaultRulesHead:  { en:'Compaction',                 de:'Verdichtung' },
+  vaultRulesBody:  { en:'`wiki/` holds the age-decayed layer as SKILL.md specifies it: the current session stands verbatim, older sessions lose detail while the frame — MOTIV, SETZUNG, WAND — stays. `raw/` is never compacted.',
+                     de:'`wiki/` enthält die altersverdichtete Ebene, wie SKILL.md sie vorsieht: Die laufende Sitzung steht wörtlich, ältere Sitzungen verlieren Detail, während das Gerüst — MOTIV, SETZUNG, WAND — bleibt. `raw/` wird nie verdichtet.' },
+  vaultContents:   { en:'Contents',                   de:'Inhalt' },
+  vaultIndexTitle: { en:'Index',                      de:'Einstieg' },
+  vaultTensions:   { en:'Open tensions',              de:'Offene Spannungen' },
+  vaultWalls:      { en:'Walls',                      de:'Wände' },
+  vaultSessions:   { en:'Sessions',                   de:'Sitzungen' },
+  vaultNone:       { en:'none',                       de:'keine' },
+  nbTitle:         { en:'Journal sources for NotebookLM', de:'Journal-Quellen für NotebookLM' },
+  nbIntro:         { en:'Created {d} · {n} chats · Filter: {f}',
+                     de:'Erzeugt am {d} · {n} Chats · Filter: {f}' },
+  nbNote:          { en:'Each section is a self-contained source. Roles are marked with **User:** and **Assistant:**.',
+                     de:'Jeder Abschnitt ist eine eigenständige Quelle. Rollen sind mit **User:** und **Assistant:** ausgezeichnet.' },
+  nbSource:        { en:'Source',                     de:'Quelle' },
+  nbTopics:        { en:'Topics',                     de:'Themen' },
+};
+
+/** Übersetzt einen Schlüssel; {platzhalter} werden ersetzt. */
+function t(key, vars){
+  const entry = T[key];
+  let s = entry ? (entry[LANG] ?? entry.en) : key;
+  if (vars) for (const [k, v] of Object.entries(vars)) s = s.replaceAll(`{${k}}`, v);
+  return s;
+}
+/** Übersetzt ein zweisprachiges Feld aus den Stammdaten. */
+const tx = v => (v && typeof v === 'object') ? (v[LANG] ?? v.en) : v;
+
+/** Tooltip für einen OKF-Typ: Beschreibung, Leitfrage und die unveränderte ID. */
+function typeTooltip(id){
+  const x = TYPE_BY_ID.get(id);
+  if (!x) return id;
+  return `${tx(x.name)} — ${tx(x.desc)}\n${tx(x.q)}\n(OKF-ID: ${x.id})`;
+}
+
+const LOCALE = () => (LANG === 'de' ? 'de-DE' : 'en-GB');
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL 1 · Stammdaten
+   Modelle entsprechen den Ordnern unter Chats_LMM/.
+   ═══════════════════════════════════════════════════════════════ */
+
+const MODELS = [
+  { id:'chatgpt',     name:'ChatGPT',     vendor:'OpenAI',      color:'#10a37f', icon:'🤖', w:20,
+    match:/chatgpt|openai|\bgpt-?[45o]?\b/i,  host:/chatgpt\.com|openai\.com/i },
+  { id:'claude',      name:'Claude',      vendor:'Anthropic',   color:'#d97757', icon:'🎭', w:18,
+    match:/claude|anthropic|opus|sonnet|haiku/i, host:/claude\.ai|anthropic\.com/i },
+  { id:'gemini',      name:'Gemini',      vendor:'Google',      color:'#4285f4', icon:'✨', w:14,
+    match:/gemini|bard|google ai/i,           host:/gemini\.google\.com|bard\.google/i },
+  { id:'deepseek',    name:'Deepseek',    vendor:'DeepSeek',    color:'#4d6bfe', icon:'🧠', w:10,
+    match:/deepseek|\br1\b/i,                 host:/deepseek\.com/i },
+  { id:'grok',        name:'Grok',        vendor:'xAI',         color:'#c9d1e0', icon:'🛰️', w:8,
+    match:/grok|\bxai\b/i,                    host:/grok\.com|x\.ai/i },
+  { id:'kimi',        name:'Kimi',        vendor:'Moonshot',    color:'#8b5cf6', icon:'🌙', w:7,
+    match:/kimi|moonshot/i,                   host:/kimi\.(moonshot|com)/i },
+  { id:'glm',         name:'GLM',         vendor:'Zhipu AI',    color:'#4f46e5', icon:'🔷', w:6,
+    match:/\bglm\b|zhipu|chatglm/i,           host:/chatglm\.cn|bigmodel\.cn|z\.ai/i },
+  { id:'minimax',     name:'MiniMax',     vendor:'MiniMax',     color:'#e94b6e', icon:'🔶', w:5,
+    match:/minimax|abab/i,                    host:/minimax|hailuo/i },
+  { id:'manusai',     name:'ManusAI',     vendor:'Manus',       color:'#ff6b35', icon:'🖐️', w:4,
+    match:/manus/i,                           host:/manus\.(im|ai)/i },
+  { id:'huggingface', name:'HuggingFace', vendor:'HF',          color:'#ffcc4d', icon:'🤗', w:4,
+    match:/hugging\s?face|\bhf\b/i,           host:/huggingface\.co/i },
+  { id:'unbekannt',   name:'Unbekannt',   vendor:'–',           color:'#6b7688', icon:'💬', w:0,
+    match:/$^/,                               host:/$^/ },
+];
+const MODEL_BY_ID = new Map(MODELS.map(m => [m.id, m]));
+
+/** Modell aus Ordnername, Titel-Prefix [GEMINI] oder Quell-URL bestimmen. */
+function detectModel({ folder, title, url, hint } = {}){
+  const byFolder = folder && MODELS.find(m => m.id === String(folder).toLowerCase().replace(/[\s_-]/g,''));
+  if (byFolder) return byFolder.id;
+  if (url)   { const m = MODELS.find(x => x.host.test(url));   if (m) return m.id; }
+  const tag = title && title.match(/^\s*\[([^\]]+)\]/);
+  if (tag)   { const m = MODELS.find(x => x.match.test(tag[1])); if (m) return m.id; }
+  for (const src of [hint, title]){
+    if (!src) continue;
+    const m = MODELS.find(x => x.match.test(src));
+    if (m) return m.id;
+  }
+  return 'unbekannt';
+}
+
+/* OKF-Typen — entsprechen VALID_TYPES aus journal-store.js.
+   CHAT kommt hinzu für Roh-Verläufe aus raw.okf.json, die noch
+   nicht in die typisierte Ebene (data.okf.json) überführt sind. */
+/* Die `id` ist Teil des Datenformats und bleibt in jeder Sprache
+   unverändert. Übersetzt werden `short` (das Badge auf der Karte),
+   `name`, die Beschreibung und die Leitfrage. */
+const OKF_TYPES = [
+  { id:'CHAT',    color:'#6b7688',
+    short:{ en:'CHAT',    de:'CHAT' },    name:{ en:'Chat',     de:'Chat' },
+    desc:{ en:'Raw conversation, not yet typed',
+           de:'Roh-Verlauf, noch nicht typisiert' },
+    q:{ en:'What was said?',              de:'Was wurde gesagt?' } },
+
+  { id:'MOTIV',   color:'#8b5cf6',
+    short:{ en:'MOTIVE',  de:'MOTIV' },   name:{ en:'Motive',   de:'Motiv' },
+    desc:{ en:'The dissatisfaction, the trigger, the itch',
+           de:'Die Unzufriedenheit, der Anlass, das Jucken' },
+    q:{ en:'Why are we doing this at all?', de:'Warum tun wir das überhaupt?' } },
+
+  { id:'FUND',    color:'#4d7cfe',
+    short:{ en:'FINDING', de:'FUND' },    name:{ en:'Finding',  de:'Fund' },
+    desc:{ en:'Something learned about the world or the code that now constrains us',
+           de:'Etwas über die Welt/den Code herausgefunden, das nun einschränkt' },
+    q:{ en:'What is the case?',           de:'Was ist der Fall?' } },
+
+  { id:'WEG',     color:'#3ecf8e',
+    short:{ en:'PATH',    de:'WEG' },     name:{ en:'Path',     de:'Weg' },
+    desc:{ en:'An approach taken, a plan, an attempt',
+           de:'Ein eingeschlagener Ansatz, Plan, Versuch' },
+    q:{ en:'What are we trying?',         de:'Was probieren wir?' } },
+
+  { id:'WAND',    color:'#f2555a',
+    short:{ en:'WALL',    de:'WAND' },    name:{ en:'Wall',     de:'Wand' },
+    desc:{ en:'Failed, discarded, blocked',
+           de:'Gescheitert, verworfen, blockiert' },
+    q:{ en:'What did it run into?',       de:'Woran ist es gestoßen?' } },
+
+  { id:'SETZUNG', color:'#e6a44e',
+    short:{ en:'DECISION',de:'SETZUNG' }, name:{ en:'Decision', de:'Setzung' },
+    desc:{ en:'A decision — provisional ones and compromises included',
+           de:'Entscheidung, auch vorläufige, auch Kompromiss' },
+    q:{ en:'What holds now?',             de:'Was gilt jetzt?' } },
+
+  { id:'ZWEIFEL', color:'#d9a3f2',
+    short:{ en:'DOUBT',   de:'ZWEIFEL' }, name:{ en:'Doubt',    de:'Zweifel' },
+    desc:{ en:'Unresolved unease, open tension',
+           de:'Ungelöstes Unbehagen, offene Spannung' },
+    q:{ en:'What is still nagging?',      de:'Was nagt noch?' } },
+];
+const TYPE_BY_ID = new Map(OKF_TYPES.map(t => [t.id, t]));
+
+/* Ampel-System des Auto-Taggers (auto-tagger.js, VALID_KATEGORIES).
+   Schreibweise kanonisch wie dort: Rot / Gelb / Gruen / Blau. */
+const AMPELN = [
+  { id:'Gruen', color:'#3ecf8e', name:{ en:'Green',  de:'Grün' },
+    desc:{ en:'Success, progress, working solution', de:'Erfolg, Fortschritt, funktionierende Lösung' } },
+  { id:'Gelb',  color:'#e6a44e', name:{ en:'Yellow', de:'Gelb' },
+    desc:{ en:'Warning, doubt, risk, open question', de:'Warnung, Zweifel, Risiko, offene Frage' } },
+  { id:'Rot',   color:'#f2555a', name:{ en:'Red',    de:'Rot' },
+    desc:{ en:'Problem, error, blocker, dead end',   de:'Problem, Fehler, Blocker, Sackgasse' } },
+  { id:'Blau',  color:'#4d7cfe', name:{ en:'Blue',   de:'Blau' },
+    desc:{ en:'Neutral information, context',        de:'Neutrale Information, Kontext' } },
+];
+const AMPEL_BY_ID = new Map(AMPELN.map(a => [a.id, a]));
+
+/* Inhaltliche Kategorie — entspricht deiner Ordnerstruktur
+   (md_prompts, md_sklils, md_workflows …) und ist unabhängig
+   von OKF-Typ und Ampel. */
+const CATEGORIES = [
+  { id:'chat',     name:{ en:'Chats',     de:'Chats' },     desc:{ en:'Conversation history',   de:'Gesprächsverlauf' } },
+  { id:'prompt',   name:{ en:'Prompts',   de:'Prompts' },   desc:{ en:'Reusable prompts',       de:'Wiederverwendbare Prompts' } },
+  { id:'skill',    name:{ en:'Skills',    de:'Skills' },    desc:{ en:'Skill definitions',      de:'Skill-Definitionen' } },
+  { id:'workflow', name:{ en:'Workflows', de:'Workflows' }, desc:{ en:'Procedures, pipelines',  de:'Abläufe, Pipelines' } },
+  { id:'note',     name:{ en:'Notes',     de:'Notizen' },   desc:{ en:'Free-form notes',        de:'Freie Notizen' } },
+];
+const CAT_BY_ID = new Map(CATEGORIES.map(c => [c.id, c]));
+
+/** Kategorie aus Ordnername, Titel und Inhalt ableiten. */
+function guessCategory(title, text, folder){
+  const f = String(folder || '').toLowerCase();
+  if (/prompt/.test(f))            return 'prompt';
+  if (/skil/.test(f))              return 'skill';    // md_sklils
+  if (/workflow/.test(f))          return 'workflow';
+  if (/note|notiz/.test(f))        return 'note';
+  const t = (title + ' ' + String(text).slice(0, 1200)).toLowerCase();
+  if (/\bskill\b|skill-erstellung/.test(t))       return 'skill';
+  if (/workflow|pipeline|ablauf/.test(t))         return 'workflow';
+  if (/\bprompt\b|system.?prompt/.test(t))        return 'prompt';
+  if (/\bnotiz\b|memo|gedanke/.test(t))           return 'note';
+  return 'chat';
+}
+/** Normalisiert Ampel-Schreibweisen (grün/GRÜN/gruen → "Gruen"). */
+function normAmpel(v){
+  if (!v) return null;
+  const s = String(v).trim().toLowerCase()
+    .replace(/ü/g,'ue').replace(/ä/g,'ae').replace(/ö/g,'oe');
+  return AMPELN.find(a => a.id.toLowerCase() === s)?.id || null;
+}
+
+const TAGS = ['python','javascript','typescript','rust','sql','regex','api-design','refactoring',
+  'debugging','architektur','testing','docker','kubernetes','ci-cd','performance','security',
+  'prompt-engineering','rag','embeddings','fine-tuning','agents','mcp','datenanalyse','visualisierung',
+  'excel','powershell','automatisierung','scraping','recherche','zusammenfassung','übersetzung',
+  'texten','marketing','recht','finanzen','ui-design','css','tailwind','react','vue','datenbank',
+  'postgres','git','linux','playwright','vanilla-js','notebooklm','okf'];
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL 2 · Import-Parser
+   Erkennt das Markdown-Format deiner Chat-Exporte:
+       # **Titel**
+       [https://…](https://…)
+       *User prompt: …*
+       Response: …
+       ---
+   Zusätzlich: OKF-JSON ({ entries: [...] }).
+   ═══════════════════════════════════════════════════════════════ */
+
+/** Repariert Mojibake (UTF-8 fälschlich als Latin-1 gelesen: "Ã¤" → "ä"). */
+function fixMojibake(s){
+  if (!/Ã[-¿¤¶ÃŸ¼\w]|â€|Ã¼|Ã¶|Ã¤|ÃŸ/.test(s)) return s;
+  try {
+    const bytes = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++){
+      const c = s.charCodeAt(i);
+      if (c > 255) return s;              // enthält echtes Unicode → nicht anfassen
+      bytes[i] = c;
+    }
+    return new TextDecoder('utf-8', { fatal:true }).decode(bytes);
+  } catch { return s; }
+}
+
+/** Entfernt Backslash-Escapes, die Export-Tools ins Markdown schreiben ("Absolut\!" → "Absolut!"). */
+const unescapeMd = s => String(s).replace(/\\([\\`*_{}\[\]()#+\-.!>|~])/g, '$1');
+
+const stripMd = s => unescapeMd(String(s)
+  .replace(/^#{1,6}\s+/, '')
+  .replace(/\*\*(.*?)\*\*/g, '$1')
+  .replace(/^\*+|\*+$/g, '')).trim();
+
+/**
+ * Trennt den Denkfluss (Chain of Thought) vom eigentlichen Antworttext.
+ * Erkennt <think>/<thinking>-Tags sowie einen ausgewiesenen Denkprozess-Block.
+ * Ergebnis: { text, thought } — thought ist null, wenn keiner vorhanden ist.
+ */
+function splitThought(raw){
+  let text = String(raw), thought = null;
+  const tag = text.match(/<think(?:ing)?>([\s\S]*?)<\/think(?:ing)?>/i);
+  if (tag){
+    thought = tag[1].trim();
+    text = text.replace(tag[0], '').trim();
+  } else {
+    const block = text.match(/^\s*(?:\*\*)?(?:Denkprozess|Denkfluss|Gedankengang|Chain of Thought|Reasoning)(?:\*\*)?\s*:\s*([\s\S]*?)(?=\n\s*\n|$)/i);
+    if (block){
+      thought = block[1].trim();
+      text = text.replace(block[0], '').trim();
+    }
+  }
+  return { text, thought: thought || null };
+}
+
+/**
+ * Zerlegt einen Markdown-Chatexport in Chat + Turns.
+ * @returns {object|null}
+ */
+function parseChatMarkdown(raw, meta = {}){
+  const text = fixMojibake(raw).replace(/\r\n?/g, '\n');
+  const lines = text.split('\n');
+
+  // --- Kopf: Titel + Quell-URL ---
+  let title = '', url = '', bodyStart = 0;
+  for (let i = 0; i < Math.min(lines.length, 12); i++){
+    const l = lines[i].trim();
+    if (!title && /^#{1,3}\s/.test(l)){ title = stripMd(l); bodyStart = i + 1; continue; }
+    const link = l.match(/^\[?(https?:\/\/[^\]\s)]+)\]?(?:\(([^)]+)\))?$/);
+    if (title && !url && link){ url = link[1]; bodyStart = i + 1; break; }
+    if (title && l && !link && i > bodyStart) break;
+  }
+  if (!title) title = stripMd(meta.filename || 'Ohne Titel').replace(/\.(md|markdown|txt)$/i, '');
+
+  // --- Turns: an Trennlinien splitten, dann User/Response herauslösen ---
+  const body = lines.slice(bodyStart).join('\n');
+  const blocks = body.split(/\n\s*(?:---|\*\*\*|___)\s*\n/);
+  const turns = [];
+  let markers = 0;              // wie oft ein echter Sprecherwechsel erkannt wurde
+
+  for (const block of blocks){
+    if (!block.trim()) continue;
+    // "*User prompt: …*"  (auch mehrzeilig, auch ohne schließendes *)
+    const uMatch = block.match(/^[\s\S]*?\*User prompt:\s*([\s\S]*?)\*?\s*(?=\n\s*\n|\n#{1,6}\s|\nResponse:|$)/i);
+    // "Response:" – optional mit Heading und Fettung davor
+    const rIdx = block.search(/(?:^|\n)\s*(?:#{1,6}\s*)?(?:\*\*)?Response(?:\*\*)?\s*:/i);
+
+    const addTurn = (role, body) => {
+      const { text, thought } = splitThought(unescapeMd(body.trim()));
+      if (text || thought) turns.push({ role, text, thought });
+    };
+
+    if (uMatch && uMatch[1] != null && uMatch[1].trim()){ addTurn('user', uMatch[1]); markers++; }
+    if (rIdx >= 0){
+      const after = block.slice(rIdx).replace(/^[\s\S]*?Response(?:\*\*)?\s*:/i, '').trim();
+      if (after){ addTurn('assistant', after); markers++; }
+    }
+    // Fallback: Block ohne Marker → als Assistant-Text übernehmen
+    if (!uMatch && rIdx < 0 && block.trim().length > 20) addTurn('assistant', block);
+  }
+
+  if (!turns.length) return null;
+
+  /* Wurde kein einziger Sprecherwechsel erkannt, liegt ein roher
+     Copy-Paste-Verlauf vor: die Zuordnung „wer sagt was" steht nicht in
+     der Datei. Sie zu raten wäre schlimmer als sie wegzulassen — ein
+     Journal, dessen Rollen erfunden sind, ist wertlos. Der Text kommt
+     deshalb als ein einziger, ausdrücklich als unstrukturiert
+     gekennzeichneter Eintrag herein: durchsuchbar, aber ohne
+     vorgetäuschte Struktur. */
+  const unstructured = markers === 0 && turns.length > 1;
+  if (unstructured){
+    const all = turns.map(t => t.text).join('\n\n');
+    turns.length = 0;
+    turns.push({ role:'assistant', text: all, thought: null });
+  }
+
+  const modelId = detectModel({ folder:meta.folder, title, url, hint:meta.path });
+  const ts = meta.ts || Date.now();
+
+  return normalizeChat({
+    title: title.replace(/^\s*\[[^\]]+\]\s*/, ''),   // "[GEMINI] Titel" → "Titel"
+    url, modelId, ts, turns, unstructured,
+    typeId: 'CHAT',
+    catId: meta.catId || guessCategory(title, turns.map(t => t.text).join(' '), meta.folder || meta.path),
+    tags: meta.tags || autoTags(title + ' ' + turns.map(t => t.text).join(' ')),
+    source: meta.filename || null,
+  });
+}
+
+/**
+ * Ampel eines OKF-Eintrags lesen — akzeptiert beide Feldformen:
+ * `kategorie` (Richards Server, OKF_MD_LOG) und `tags: ["ampel/…"]`
+ * (Googles Schema, seit 25.08.2026 die Schreibrichtung des Journals).
+ * Reine Lesefunktion, damit ältere Dateien weiter importierbar bleiben.
+ */
+function ampelFromEntry(e){
+  if (e.kategorie) return e.kategorie;
+  const hit = (e.tags || []).find(t => /^ampel\//.test(t));
+  return hit ? hit.slice(6) : e.ampel;
+}
+
+/**
+ * Liest die JSON-Formate des OKF-Projekts:
+ *   · data.okf.json  → [{ id, type, text, timestamp, ref?, llm? }]  (typisiert, mit Referenzgraph)
+ *   · raw.okf.json   → [{ role?, text, url?, timestamp, llm?, tags? }]  (Roh-Verlauf)
+ *   · eigener Export → { chats:[{ …, turns:[…] }] }
+ */
+function parseOkfJson(raw, meta = {}){
+  let data; try { data = JSON.parse(raw); } catch { return []; }
+  const entries = Array.isArray(data) ? data : (data.entries || data.chats || []);
+  if (!entries.length) return [];
+
+  // --- data.okf.json: typisierte Einträge mit ref-Graph ---
+  const typed = entries.filter(e => e && TYPE_BY_ID.has(String(e.type || '').toUpperCase()));
+  if (typed.length && typed.length >= entries.length * 0.6){
+    return parseOkfTyped(entries, meta);
+  }
+
+  // Bereits gruppierte Chats (mit turns/messages)?
+  if (entries[0] && (entries[0].turns || entries[0].messages)){
+    return entries.map(e => normalizeChat({
+      title: e.title || e.name || 'Ohne Titel',
+      url: e.url || '',
+      modelId: detectModel({ title:e.title, url:e.url, hint:e.llm || e.model }),
+      ts: toTs(e.timestamp || e.ts || e.created_at) || meta.ts || Date.now(),
+      typeId: TYPE_BY_ID.has(String(e.type || '').toUpperCase()) ? String(e.type).toUpperCase() : 'CHAT',
+      ampel: normAmpel(ampelFromEntry(e)),
+      tags: e.tags || autoTags(e.title || ''),
+      turns: (e.turns || e.messages).map(t => {
+        const sp = splitThought(fixMojibake(String(t.text ?? t.content ?? '')));
+        return {
+          role: /assistant|model|ai|bot/i.test(t.role || '') ? 'assistant' : 'user',
+          text: sp.text,
+          thought: t.thought_process || t.thought || t.reasoning || sp.thought || null,
+          ts: toTs(t.timestamp || t.ts),
+        };
+      }).filter(t => t.text || t.thought),
+      source: meta.filename,
+    })).filter(c => c.turns.length);
+  }
+
+  // Flache raw.okf.json → nach url/ref/Tag gruppieren, sonst nach Tag+Modell
+  const groups = new Map();
+  for (const e of entries){
+    const text = fixMojibake(String(e.text ?? e.content ?? ''));
+    if (!text) continue;
+    const ts = toTs(e.timestamp || e.ts) || meta.ts || Date.now();
+    const url = e.url || e.ref || '';
+    const llm = e.llm || e.model || '';
+    const key = url || `${llm}|${new Date(ts).toISOString().slice(0,10)}`;
+    if (!groups.has(key)) groups.set(key, { url, llm, ts, kategorie:normAmpel(ampelFromEntry(e)), turns:[] });
+    const g = groups.get(key);
+    g.ts = Math.min(g.ts, ts);
+    if (!g.kategorie) g.kategorie = normAmpel(ampelFromEntry(e));
+    const sp = splitThought(text);
+    g.turns.push({
+      role: /assistant|model|ai|bot|response/i.test(e.role || e.type || '') ? 'assistant' : 'user',
+      text: sp.text,
+      thought: e.thought_process || e.thought || e.reasoning || sp.thought || null,
+      ts,
+    });
+  }
+
+  return [...groups.values()].map(g => {
+    const first = g.turns[0]?.text || '';
+    return normalizeChat({
+      title: firstLine(first, 90),
+      url: g.url,
+      modelId: detectModel({ url:g.url, hint:g.llm }),
+      ts: g.ts,
+      typeId: 'CHAT',
+      ampel: g.kategorie,
+      tags: autoTags(g.turns.map(t => t.text).join(' ')),
+      turns: g.turns.sort((a,b) => (a.ts||0) - (b.ts||0)),
+      source: meta.filename,
+    });
+  });
+}
+
+/**
+ * data.okf.json → ein Journaleintrag je typisiertem OKF-Eintrag.
+ * Vorgänger (`ref`) und Nachfolger (`refBy`) werden nicht mehr als
+ * Turns simuliert — TEIL 8 zeigt den Strang stattdessen als eigenes
+ * Element im Baum (buildStrand()), verlinkt statt eingebettet.
+ */
+function parseOkfTyped(entries, meta = {}){
+  // eingehende Verweise sammeln → wer verweist auf wen
+  const incoming = new Map();
+  for (const e of entries){
+    if (!e?.ref) continue;
+    if (!incoming.has(e.ref)) incoming.set(e.ref, []);
+    incoming.get(e.ref).push(e.id);
+  }
+
+  const byId = new Map(entries.map(e => [e.id, e]));
+
+  const out = [];
+  for (const e of entries){
+    if (!e || !e.text) continue;
+    const type = String(e.type || 'CHAT').toUpperCase();
+    const ts = toTs(e.timestamp) || meta.ts || Date.now();
+    const text = fixMojibake(String(e.text));
+
+    // "Text — weil Begründung" auftrennen (addEntry setzt das so zusammen)
+    const weil = text.match(/^([\s\S]*?)\s+—\s+weil\s+([\s\S]+)$/);
+    const turns = [{
+      role:'user', ts,
+      text: weil ? weil[1].trim() : text,
+      thought: e.thought_process || e.thought || null,
+    }];
+    if (weil) turns.push({ role:'assistant', ts, text:'weil ' + weil[2].trim(), thought:null });
+
+    // Kette der Vorgänger über ref anhängen (max. 12 Glieder gegen Zyklen).
+    // Das ist reine Anzeige — folgt bewusst der eigenen ref-Richtung
+    // (rückwärts), damit der Baum den Gedankenstrang so zeigt, wie er
+    // entstanden ist. Mit der Verdichtung (compactOkf, incoming-Richtung)
+    // hat das nichts zu tun.
+    let cur = e.ref, guard = 0;
+    while (cur && byId.has(cur) && guard++ < 12){
+      const p = byId.get(cur);
+      turns.push({
+        role:'assistant', ts: toTs(p.timestamp) || ts,
+        text: `↳ [${p.id}] ${String(p.type || '').toUpperCase()}: ${fixMojibake(String(p.text || ''))}`,
+        thought: null,
+      });
+      cur = p.ref;
+    }
+
+    out.push(normalizeChat({
+      title: `[${e.id}] ${firstLine(weil ? weil[1] : text, 90)}`,
+      url: e.url || '',
+      modelId: detectModel({ folder:meta.folder, hint:e.llm, url:e.url }),
+      typeId: TYPE_BY_ID.has(type) ? type : 'CHAT',
+      ampel: normAmpel(ampelFromEntry(e)),
+      tags: autoTags(text),
+      ts, turns,
+      okfId: e.id,
+      ref: e.ref || null,
+      refBy: incoming.get(e.id) || [],
+      source: meta.filename,
+    }));
+  }
+  return out;
+}
+
+/**
+ * Faltet eingerückte Fortsetzungszeilen in ihren Listeneintrag.
+ * In einer echten VERLAUF.md laufen Einträge über mehrere Zeilen:
+ *     - `21:41` [e01] **MOTIV** Richard will einen Logging-Skill, weil
+ *       Zusammenfassungen die Motivationslage überdecken. ↳e00
+ * Ohne dieses Falten liest der Parser nur den ersten Zeilenteil.
+ */
+function foldContinuations(text){
+  const out = [];
+  for (const line of text.split('\n')){
+    const isCont = /^\s{2,}\S/.test(line);
+    const prevIsItem = out.length && /^\s*-\s/.test(out[out.length - 1]);
+    if (isCont && prevIsItem) out[out.length - 1] += ' ' + line.trim();
+    else out.push(line);
+  }
+  return out;
+}
+
+/**
+ * VERLAUF.md → Einträge. Gelesen werden der Abschnitt *Sitzungen*
+ * und zusätzlich *Wände*, weil eine Wand nach der Verdichtung dort
+ * stehen bleibt, auch wenn ihre Sitzung längst weggefallen ist
+ * (SKILL.md, Regel 2). Dubletten werden über die ID ausgeschlossen.
+ *
+ * Eintragsformat:  - `HH:MM` [e01] **TYP** Ein Satz — mit dem Weil. ↳e00
+ * Sitzungskopf:    ### YYYY-MM-DD (Tue)
+ */
+function parseVerlaufMd(raw, meta = {}){
+  // Code-Blöcke zuerst entfernen: Dokumentation wie SKILL.md zeigt das
+  // VERLAUF-Format als Beispiel und wäre sonst selbst ein Treffer.
+  const text = fixMojibake(raw).replace(/\r\n?/g, '\n')
+    .replace(/^```[\s\S]*?^```\s*$/gm, '');
+  if (!/^#\s*Verlauf/m.test(text) || !/^##\s*Sitzungen\s*$/m.test(text)) return null;
+
+  const project = (text.match(/^#\s*Verlauf\s*[—–-]\s*(.+)$/m) || [, ''])[1].trim();
+  const section = name => {
+    const re = new RegExp(`^##\\s*${name}\\s*$`, 'm');
+    const i = text.search(re);
+    if (i < 0) return '';
+    const rest = text.slice(i).replace(re, '');
+    const next = rest.search(/^##\s+\S/m);
+    return next < 0 ? rest : rest.slice(0, next);
+  };
+
+  const entries = [];
+  const seen = new Set();
+  const ENTRY = /^-\s*(?:`(\d{2}:\d{2})`\s*)?\[([^\]]+)\]\s*(?:\*\*([A-ZÄÖÜ]+)\*\*\s*)?([\s\S]*?)(?:\s*↳\s*(\S+))?\s*$/;
+
+  // --- Sitzungen: Tagesköpfe liefern das Datum ---
+  let day = null;
+  for (const line of foldContinuations(section('Sitzungen'))){
+    const head = line.match(/^###\s*(\d{4}-\d{2}-\d{2})/);
+    if (head){ day = head[1]; continue; }
+    const m = line.match(ENTRY);
+    if (!m || !day) continue;
+    const [, time, id, type, body, ref] = m;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    entries.push({
+      id, type: (type || 'FUND').toUpperCase(), text: body.trim(),
+      timestamp: `${day}T${time || '00:00'}:00`, ref: ref || undefined,
+    });
+  }
+
+  // --- Wände: ohne Zeitstempel, Typ ergibt sich aus dem Abschnitt ---
+  for (const line of foldContinuations(section('Wände'))){
+    const m = line.match(ENTRY);
+    if (!m) continue;
+    const [, , id, type, body, ref] = m;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    entries.push({
+      id, type: (type || 'WAND').toUpperCase(), text: body.trim(),
+      timestamp: day ? `${day}T00:00:00` : undefined, ref: ref || undefined,
+    });
+  }
+
+  if (!entries.length) return null;
+  return parseOkfTyped(entries, { ...meta, folder: meta.folder || project });
+}
+
+const toTs = v => {
+  if (v == null) return null;
+  if (typeof v === 'number') return v < 1e12 ? v * 1000 : v;
+  const t = Date.parse(v);
+  return Number.isNaN(t) ? null : t;
+};
+const firstLine = (s, max = 120) => {
+  const l = String(s).split('\n').find(p => p.trim()) || '';
+  const c = l.trim().replace(/^[#*>\-\s]+/, '');
+  return c.length > max ? c.slice(0, max - 1) + '…' : (c || 'Ohne Titel');
+};
+
+function autoTags(text){
+  const t = text.toLowerCase();
+  const hits = TAGS.filter(tag => t.includes(tag.replace('-', ' ')) || t.includes(tag));
+  return hits.slice(0, 4);
+}
+/**
+ * Heuristische Ampel für Roh-Chats ohne Auto-Tagger-Ergebnis.
+ * Der echte Tagger (auto-tagger.js, Gemini) gewinnt immer — diese
+ * Funktion greift nur, wenn keine Ampel importiert wurde.
+ */
+function guessAmpel(text){
+  const t = text.toLowerCase();
+  if (/\bfehler\b|error|exception|scheitert|blocker|sackgasse|funktioniert nicht|stack ?trace/.test(t)) return 'Rot';
+  if (/\bzweifel\b|unsicher|risiko|offene frage|vielleicht|problem/.test(t))                            return 'Gelb';
+  if (/funktioniert|gelöst|erfolgreich|fertig|läuft|bestanden|entschieden/.test(t))                     return 'Gruen';
+  return null;
+}
+
+let _uid = 0;
+/** Vereinheitlicht ein Chat-Objekt und leitet Kennzahlen ab. */
+function normalizeChat(c){
+  const turns = (c.turns || []).filter(t => t && (t.text || t.thought));
+  const chars = turns.reduce((a,t) => a + t.text.length + (t.thought?.length || 0), 0);
+  return {
+    id: _uid++,
+    title: c.title || 'Ohne Titel',
+    url: c.url || '',
+    modelId: MODEL_BY_ID.has(c.modelId) ? c.modelId : 'unbekannt',
+    typeId: TYPE_BY_ID.has(c.typeId) ? c.typeId : 'CHAT',
+    catId: CAT_BY_ID.has(c.catId) ? c.catId : 'chat',
+    ampel: normAmpel(c.ampel) || guessAmpel(turns.map(t => t.text).join(' ').slice(0, 4000)),
+    tags: [...new Set(c.tags || [])],
+    ts: c.ts || Date.now(),
+    turns,
+    source: c.source || null,
+    unstructured: !!c.unstructured,  // roher Verlauf ohne erkennbare Sprecherwechsel
+    okfId: c.okfId || null,          // Original-ID aus data.okf.json (e01, e02 …)
+    ref: c.ref || null,              // Verweis auf einen anderen Eintrag
+    refBy: c.refBy || [],            // Einträge, die hierher verweisen
+    msgs: turns.length,
+    thoughts: turns.filter(t => t.thought).length,
+    tokens: Math.round(chars / 3.6),     // grobe Schätzung: ~3,6 Zeichen je Token
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL 3 · Mock-Korpus (bis der echte Import läuft)
+   ═══════════════════════════════════════════════════════════════ */
+
+const TOPIC_VERBS = ['Refactoring von','Debugging bei','Konzept für','Review von','Migration von',
+  'Optimierung der','Analyse von','Setup für','Vergleich von','Fehlersuche in','Entwurf einer',
+  'Automatisierung von','Dokumentation für','Benchmark von','Rewrite des'];
+const TOPIC_NOUNS = ['Auth-Flow','Datenpipeline','Filter-Komponente','Build-Setup','REST-Schnittstelle',
+  'Datenbankschema','Deployment','Suchindex','State-Management','Caching-Layer','Testsuite','CSV-Import',
+  'Webhook-Handler','Rate-Limiter','Retry-Logik','Log-Aggregation','Backup-Strategie','Onboarding-Strecke',
+  'Preisrechner','Report-Generator','Chat-Verlauf','Embedding-Store'];
+const USER_SNIPPETS = [
+  'Kannst du dir das nochmal ansehen? Der Ansatz funktioniert, fühlt sich aber umständlich an.',
+  'Ich brauche das ohne zusätzliche Abhängigkeit — geht das auch in reinem Vanilla-JS?',
+  'Warum bricht das bei größeren Datenmengen ein? Bei 200 Einträgen läuft es noch flüssig.',
+  'Gib mir bitte die kürzeste Variante, die trotzdem lesbar bleibt.',
+  'Das Ergebnis stimmt nicht ganz. Kannst du die Randfälle durchgehen?',
+  'Bau das bitte so um, dass die Reihenfolge stabil bleibt.',
+];
+const AI_SNIPPETS = [
+  'Der entscheidende Punkt ist die Reihenfolge: erst normalisieren, dann indexieren, erst danach filtern. Wenn du das umdrehst, musst du bei jedem Tastendruck neu aufbauen.',
+  'Ich habe drei Varianten gegenübergestellt. Die einfachste kommt ohne zusätzliche Abhängigkeit aus und ist bei deiner Datenmenge schnell genug.',
+  'Die Messung zeigt: rund 80 % der Laufzeit gehen für die Serialisierung drauf, nicht für die eigentliche Abfrage. Dort lohnt die Optimierung.',
+  'Statt eines vollständigen Rewrites reicht ein dünner Adapter, der die alte Signatur auf die neue mappt. Das hält die Änderung lokal.',
+  'Der Fehler liegt nicht im Code, sondern in der Annahme über das Zeitzonenverhalten der Eingabedaten. Sobald du lokal formatierst, verschwindet er.',
+  'Als Faustregel: alles was pro Tastendruck läuft, sollte unter einer Millisekunde bleiben. Dein aktueller Scan liegt gut darunter.',
+];
+
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function buildMockCorpus(n){
+  const rnd = mulberry32(20260823);
+  const pick = a => a[(rnd() * a.length) | 0];
+  const pool = [];
+  MODELS.forEach(m => { for (let i = 0; i < m.w; i++) pool.push(m.id); });
+  const DAY = 86400000, now = Date.now();
+  const out = [];
+
+  for (let i = 0; i < n; i++){
+    const r = rnd();
+    const ts = now - Math.floor(r * r * 400) * DAY - Math.floor(rnd() * DAY);
+    const turnCount = 2 + ((rnd() * 9) | 0) * 2;
+    const turns = [];
+    for (let t = 0; t < turnCount; t++){
+      if (t % 2 === 0){
+        turns.push({ role:'user', text: pick(USER_SNIPPETS), ts: ts + t * 90000, thought:null });
+      } else {
+        // in etwa jedem vierten Assistant-Turn ein Denkfluss, wie bei R1/o1-Modellen
+        const withThought = rnd() < 0.25;
+        turns.push({ role:'assistant', ts: ts + t * 90000,
+          text: pick(AI_SNIPPETS) + '\n\n' + pick(AI_SNIPPETS),
+          thought: withThought
+            ? `Zuerst prüfen, ob das Problem überhaupt am Code liegt. ${pick(AI_SNIPPETS)} Also die einfachere Variante wählen.`
+            : null });
+      }
+    }
+    const tags = [];
+    for (let t = 0, c = 1 + ((rnd()*3)|0); t < c; t++){ const g = pick(TAGS); if (!tags.includes(g)) tags.push(g); }
+
+    out.push(normalizeChat({
+      title: `${pick(TOPIC_VERBS)} ${pick(TOPIC_NOUNS)}`,
+      url: '',
+      modelId: pool[(rnd() * pool.length) | 0],
+      catId: pick(CATEGORIES).id,
+      typeId: pick(['CHAT','CHAT','CHAT','FUND','WEG','WAND','SETZUNG','ZWEIFEL','MOTIV']),
+      ampel: pick(['Gruen','Gruen','Gelb','Rot','Blau',null]),
+      tags, ts, turns,
+    }));
+  }
+  return out;
+}
+
+/* ---------------------------------------------------------------
+   Manuelle Metadaten: Tags, Ampel und Kategorie lassen sich pro
+   Eintrag ändern. Der Chatinhalt bleibt unangetastet (read-only) —
+   geändert wird nur die Verschlagwortung, genau wie es der
+   Auto-Tagger mit `kategorie` tut. Gespeichert wird unter einem
+   inhaltsbasierten Schlüssel, damit die Änderung einen Reimport
+   derselben Datei übersteht.
+   --------------------------------------------------------------- */
+const OVERRIDE_KEY = 'promptengineer.overrides.v1';
+let OVERRIDES = new Map();
+
+function loadOverrides(){
+  try { OVERRIDES = new Map(Object.entries(JSON.parse(localStorage.getItem(OVERRIDE_KEY) || '{}'))); }
+  catch { OVERRIDES = new Map(); }
+}
+function saveOverrides(){
+  try { localStorage.setItem(OVERRIDE_KEY, JSON.stringify(Object.fromEntries(OVERRIDES))); }
+  catch { toast(t('storeFailed'), 'err'); }
+}
+/** Inhaltsbasierter, stabiler Schlüssel (Modell + Zeit + Titel), FNV-1a. */
+function chatKey(c){
+  const base = `${c.modelId}|${c.ts}|${c.title}`;
+  let hash = 2166136261;
+  for (let i = 0; i < base.length; i++){ hash ^= base.charCodeAt(i); hash = Math.imul(hash, 16777619); }
+  return (hash >>> 0).toString(36);
+}
+function applyOverride(c){
+  const o = OVERRIDES.get(chatKey(c));
+  if (!o) return c;
+  if (o.tags)  c.tags  = o.tags;
+  if (o.ampel !== undefined) c.ampel = o.ampel;
+  if (o.catId) c.catId = o.catId;
+  return c;
+}
+/** Übernimmt eine Änderung, speichert sie und baut den Index neu auf. */
+function setOverride(c, patch){
+  const key = chatKey(c);
+  OVERRIDES.set(key, { ...(OVERRIDES.get(key) || {}), ...patch });
+  saveOverrides();
+  Object.assign(c, patch);
+  reindex(CHATS);          // Tag-Universum und Facetten neu berechnen
+  apply();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL 4 · Index & Filter-Engine
+   Vorberechnete Spalten → ein Filterlauf ist ein linearer Scan.
+   ═══════════════════════════════════════════════════════════════ */
+
+let CHATS = [];
+let N = 0, HAY = [], TITLE_LC = [], TS = null;
+let MODEL_IDX = null, TYPE_IDX = null, AMPEL_IDX = null, CAT_IDX = null, TAG_SETS = [];
+let ALL_TAGS = [];
+/* okfId → Index in CHATS, für den Strang im Baum (TEIL 8) — Nachschlagen
+   von Vorgänger (ref) und Nachfolgern (refBy), unabhängig vom Filter. */
+let OKFID_TO_IDX = new Map();
+
+const MODEL_ORDER = MODELS.map(m => m.id);
+const TYPE_ORDER  = OKF_TYPES.map(t => t.id);
+const AMPEL_ORDER = AMPELN.map(a => a.id);
+const CAT_ORDER   = CATEGORIES.map(c => c.id);
+
+/* Einträge mit kritischen Funden werden in der Liste markiert. Geprüft
+   wird nur einmal je Eintrag — die Kennzeichnung hängt am Inhalt, nicht
+   an den Metadaten, und der Inhalt ist unveränderlich. */
+let SECRET_CHATS = new Set();
+const SECRET_CHECKED = new Set();
+
+function markSecrets(chats){
+  const high = SECRET_PATTERNS.filter(p => p.sev === 'high');
+  for (const c of chats){
+    if (SECRET_CHECKED.has(c.id)) continue;
+    SECRET_CHECKED.add(c.id);
+    const hay = c.title + '\n' +
+      c.turns.map(t => t.text + (t.thought ? '\n' + t.thought : '')).join('\n');
+    for (const p of high){
+      p.re.lastIndex = 0;
+      const m = p.re.exec(hay);
+      if (m && !PLACEHOLDER.test(m[1] || m[0])){ SECRET_CHATS.add(c.id); break; }
+    }
+  }
+}
+
+function reindex(chats){
+  CHATS = chats;
+  N = chats.length;
+  for (const c of chats) applyOverride(c);      // manuelle Tags/Ampel/Kategorie zuerst anwenden
+  markSecrets(chats);
+  HAY = new Array(N); TITLE_LC = new Array(N); TAG_SETS = new Array(N);
+  TS = new Float64Array(N);
+  MODEL_IDX = new Uint8Array(N); TYPE_IDX = new Uint8Array(N);
+  AMPEL_IDX = new Uint8Array(N); CAT_IDX = new Uint8Array(N);
+
+  const freq = new Map();
+  for (let i = 0; i < N; i++){
+    const c = chats[i];
+    TITLE_LC[i] = c.title.toLowerCase();
+    // Suchtext umfasst Titel, ALLE Turns inkl. Denkflüsse und Tags
+    HAY[i] = (c.title + ' ' +
+              c.turns.map(t => t.text + (t.thought ? ' ' + t.thought : '')).join(' ') + ' ' +
+              c.tags.join(' ')).toLowerCase();
+    TS[i] = c.ts;
+    MODEL_IDX[i] = Math.max(0, MODEL_ORDER.indexOf(c.modelId));
+    TYPE_IDX[i]  = Math.max(0, TYPE_ORDER.indexOf(c.typeId));
+    AMPEL_IDX[i] = c.ampel ? AMPEL_ORDER.indexOf(c.ampel) + 1 : 0;   // 0 = ungetaggt
+    CAT_IDX[i]   = Math.max(0, CAT_ORDER.indexOf(c.catId));
+    TAG_SETS[i]  = new Set(c.tags);
+    for (const t of c.tags) freq.set(t, (freq.get(t) || 0) + 1);
+  }
+  ALL_TAGS = [...freq.keys()].sort((a,b) => freq.get(b) - freq.get(a) || a.localeCompare(b));
+
+  OKFID_TO_IDX = new Map();
+  for (let i = 0; i < N; i++) if (chats[i].okfId) OKFID_TO_IDX.set(chats[i].okfId, i);
+}
+
+const TEXT_OPS = [
+  { id:'contains',  label:{ en:'Contains',        de:'Enthält' } },
+  { id:'ncontains', label:{ en:'Does not contain',de:'Enthält nicht' } },
+  { id:'equals',    label:{ en:'Equals',          de:'Ist gleich' } },
+  { id:'nequals',   label:{ en:'Does not equal',  de:'Ist ungleich' } },
+  { id:'starts',    label:{ en:'Begins with',     de:'Beginnt mit' } },
+  { id:'ends',      label:{ en:'Ends with',       de:'Endet mit' } },
+  { id:'words',     label:{ en:'All words',       de:'Alle Wörter' } },
+  { id:'regex',     label:{ en:'Regex',           de:'Regex' } },
+];
+const OP_BY_ID = new Map(TEXT_OPS.map(o => [o.id, o]));
+
+const DATE_PRESETS = [
+  { id:'all',   days:null, label:{ en:'All time',   de:'Gesamter Zeitraum' } },
+  { id:'today', days:0,    label:{ en:'Today',      de:'Heute' } },
+  { id:'24h',   days:1,    label:{ en:'24 hours',   de:'24 Stunden' } },
+  { id:'7d',    days:7,    label:{ en:'7 days',     de:'7 Tage' } },
+  { id:'30d',   days:30,   label:{ en:'30 days',    de:'30 Tage' } },
+  { id:'90d',   days:90,   label:{ en:'90 days',    de:'90 Tage' } },
+  { id:'365d',  days:365,  label:{ en:'12 months',  de:'12 Monate' } },
+];
+
+const SORTS = [
+  { id:'new',    group:true,  label:{ en:'Newest first',  de:'Neueste zuerst' }, cmp:(a,b) => TS[b] - TS[a] },
+  { id:'old',    group:true,  label:{ en:'Oldest first',  de:'Älteste zuerst' }, cmp:(a,b) => TS[a] - TS[b] },
+  { id:'title',  group:false, label:{ en:'Title A–Z',     de:'Titel A–Z' },
+    cmp:(a,b) => TITLE_LC[a] < TITLE_LC[b] ? -1 : TITLE_LC[a] > TITLE_LC[b] ? 1 : 0 },
+  { id:'msgs',   group:false, label:{ en:'Most turns',    de:'Meiste Turns' },   cmp:(a,b) => CHATS[b].msgs - CHATS[a].msgs },
+  { id:'tokens', group:false, label:{ en:'Largest chats', de:'Größte Chats' },   cmp:(a,b) => CHATS[b].tokens - CHATS[a].tokens },
+];
+const SORT_BY_ID = new Map(SORTS.map(s => [s.id, s]));
+
+const state = {
+  q:'', op:'contains',
+  models:new Set(), types:new Set(), ampeln:new Set(), cats:new Set(), tags:new Set(),
+  datePreset:'all', from:null, to:null,
+  sort:'new',
+};
+
+let qError = false;
+function buildMatcher(){
+  qError = false;
+  const raw = state.q.trim();
+  if (!raw) return null;
+  const q = raw.toLowerCase();
+  switch (state.op){
+    case 'contains':  return i => HAY[i].includes(q);
+    case 'ncontains': return i => !HAY[i].includes(q);
+    case 'equals':    return i => TITLE_LC[i] === q;
+    case 'nequals':   return i => TITLE_LC[i] !== q;
+    case 'starts':    return i => TITLE_LC[i].startsWith(q);
+    case 'ends':      return i => TITLE_LC[i].endsWith(q);
+    case 'words': {
+      const w = q.split(/\s+/).filter(Boolean);
+      return i => { const h = HAY[i]; for (const x of w) if (!h.includes(x)) return false; return true; };
+    }
+    case 'regex': {
+      let re; try { re = new RegExp(raw, 'i'); } catch { qError = true; return null; }
+      return i => re.test(HAY[i]);
+    }
+    default: return null;
+  }
+}
+
+function dateBounds(){
+  if (state.from != null || state.to != null)
+    return { lo: state.from ?? -Infinity, hi: state.to ?? Infinity };
+  const p = DATE_PRESETS.find(p => p.id === state.datePreset);
+  if (!p || p.days == null) return { lo:-Infinity, hi:Infinity };
+  if (p.days === 0){ const d = new Date(); d.setHours(0,0,0,0); return { lo:d.getTime(), hi:Infinity }; }
+  return { lo: Date.now() - p.days * 86400000, hi: Infinity };
+}
+
+function maskOf(set, order){
+  if (!set.size) return -1;
+  let m = 0;
+  for (const id of set){ const i = order.indexOf(id); if (i >= 0) m |= (1 << i); }
+  return m;
+}
+
+function runFilter(skip){
+  const match = buildMatcher();
+  const { lo, hi } = dateBounds();
+  const mMask = skip === 'models' ? -1 : maskOf(state.models, MODEL_ORDER);
+  const tMask = skip === 'types'  ? -1 : maskOf(state.types,  TYPE_ORDER);
+  const aMask = skip === 'ampeln' ? -1 : (state.ampeln.size
+    ? [...state.ampeln].reduce((m,id) => m | (1 << (AMPEL_ORDER.indexOf(id) + 1)), 0) : -1);
+  const cMask = skip === 'cats'   ? -1 : maskOf(state.cats, CAT_ORDER);
+  const wantTags = skip === 'tags' ? null : (state.tags.size ? [...state.tags] : null);
+
+  const out = [];
+  for (let i = 0; i < N; i++){
+    const t = TS[i];
+    if (t < lo || t > hi) continue;
+    if (mMask !== -1 && !(mMask & (1 << MODEL_IDX[i]))) continue;
+    if (tMask !== -1 && !(tMask & (1 << TYPE_IDX[i]))) continue;
+    if (aMask !== -1 && !(aMask & (1 << AMPEL_IDX[i]))) continue;
+    if (cMask !== -1 && !(cMask & (1 << CAT_IDX[i]))) continue;
+    if (wantTags){
+      const bag = TAG_SETS[i];
+      let ok = false;
+      for (const t2 of wantTags) if (bag.has(t2)){ ok = true; break; }   // ODER
+      if (!ok) continue;
+    }
+    if (match && !match(i)) continue;
+    out.push(i);
+  }
+  return out;
+}
+
+function facetCounts(){
+  const models = new Map(), types = new Map(), ampeln = new Map(), cats = new Map(), tags = new Map();
+  for (const i of runFilter('models')){ const k = MODEL_ORDER[MODEL_IDX[i]]; models.set(k,(models.get(k)||0)+1); }
+  for (const i of runFilter('types')) { const k = TYPE_ORDER[TYPE_IDX[i]];   types.set(k,(types.get(k)||0)+1); }
+  for (const i of runFilter('cats'))  { const k = CAT_ORDER[CAT_IDX[i]];     cats.set(k,(cats.get(k)||0)+1); }
+  for (const i of runFilter('ampeln')){ const k = AMPEL_IDX[i] ? AMPEL_ORDER[AMPEL_IDX[i]-1] : '_none';
+                                        ampeln.set(k,(ampeln.get(k)||0)+1); }
+  for (const i of runFilter('tags'))  { for (const t of TAG_SETS[i]) tags.set(t,(tags.get(t)||0)+1); }
+  return { models, types, ampeln, cats, tags };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL 5 · Export
+   Alle Formate arbeiten auf der AKTUELL GEFILTERTEN Menge.
+   ═══════════════════════════════════════════════════════════════ */
+
+const pad = n => String(n).padStart(2,'0');
+const fmt = n => n.toLocaleString(LOCALE());
+const stamp = ts => { const d = new Date(ts);
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}`; };
+const isoLocal = ts => { const d = new Date(ts);
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; };
+
+/** Technischer Zeitstempel je Eintrag: DD/MM/YYYY-hh/mm/ss.
+    Bewusst in beiden Sprachen gleich — ein Format zum Ablesen und
+    Vergleichen, kein Fließtext. */
+const stampFull = ts => { const d = new Date(ts);
+  return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}-` +
+         `${pad(d.getHours())}/${pad(d.getMinutes())}/${pad(d.getSeconds())}`; };
+const dateTime = ts => { const d = new Date(ts);
+  const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return LANG === 'de'
+    ? `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}, ${time} Uhr`
+    : `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}, ${time}`; };
+
+function filterSummary(){
+  const p = [];
+  const list = (key, set, nameOf) => { if (set.size) p.push(t(key) + ': ' + [...set].map(nameOf).join(', ')); };
+  if (state.q) p.push(`${tx(OP_BY_ID.get(state.op).label)}: "${state.q}"`);
+  list('sumModels', state.models, m => MODEL_BY_ID.get(m).name);
+  list('sumTypes',  state.types,  x => tx(TYPE_BY_ID.get(x).short));
+  list('sumCats',   state.cats,   c => tx(CAT_BY_ID.get(c).name));
+  list('sumAmpeln', state.ampeln, a => tx(AMPEL_BY_ID.get(a).name));
+  list('sumTags',   state.tags,   x => x);
+  if (state.datePreset !== 'all' || state.from || state.to) p.push(t('chipRange') + ': ' + dateLabel());
+  return p.length ? p.join(' · ') : t('expNoFilter');
+}
+
+/* --- Markdown ------------------------------------------------ */
+function toMarkdown(chats){
+  const head = [
+    '---',
+    'export: PromptEngineer Journal',
+    `${t('expCreated')}: ${isoLocal(Date.now())}`,
+    `chats: ${chats.length}`,
+    `filter: ${filterSummary().replace(/"/g,"'")}`,
+    '---', '', `# ${t('expHeadline')}`, '',
+  ];
+  for (const c of chats){
+    const m = MODEL_BY_ID.get(c.modelId);
+    head.push(
+      `## ${m.icon} ${c.title}`, '',
+      `- **${t('expModel')}:** ${m.name} (${m.vendor})`,
+      `- **${t('expDate')}:** ${dateTime(c.ts)}`,
+      `- **Timestamp (ISO):** ${isoLocal(c.ts)}`,
+      `- **${t('expCategory')}:** ${tx(CAT_BY_ID.get(c.catId).name)}` +
+        (c.ampel ? ` · ${t('editAmpel')}: ${c.ampel}` : ''),
+      c.typeId !== 'CHAT'
+        ? `- **${t('expType')}:** \`${c.typeId}\` ${tx(TYPE_BY_ID.get(c.typeId).short)} — ` +
+          `${tx(TYPE_BY_ID.get(c.typeId).desc)} (${tx(TYPE_BY_ID.get(c.typeId).q)})`
+        : null,
+      c.okfId ? `- **OKF-ID:** ${c.okfId}${c.ref ? ` → ${t('expPointsTo')} ${c.ref}` : ''}` : null,
+      `- **${t('expTurns')}:** ${c.msgs} · **${t('expTokens')}:** ${fmt(c.tokens)}` +
+        (c.thoughts ? ` · **${t('expThoughts')}:** ${c.thoughts}` : ''),
+      c.tags.length ? `- **${t('expTags')}:** ${c.tags.map(x => '#'+x).join(' ')}` : null,
+      c.url ? `- **${t('expSource')}:** ${c.url}` : null,
+      '', `### ${t('expHistory')}`, '',
+    );
+    for (const turn of c.turns){
+      head.push(`**${turn.role === 'user' ? t('roleUser') : t('roleAssistant')}**` +
+                (turn.ts ? ` · ${dateTime(turn.ts)}` : ''), '');
+      if (turn.thought)
+        head.push(`<details><summary>${t('expReasoning')}</summary>`, '', turn.thought, '', '</details>', '');
+      head.push(turn.text, '');
+    }
+    head.push('---', '');
+  }
+  return head.filter(l => l !== null).join('\n');
+}
+
+/* --- Klartext ------------------------------------------------ */
+function toText(chats){
+  const out = [`${t('expHeadline').toUpperCase()} — ${dateTime(Date.now())}`,
+               `${t('expFilter')}: ${filterSummary()}`,
+               `${t('expChats')}: ${chats.length}`, '='.repeat(72), ''];
+  for (const c of chats){
+    const m = MODEL_BY_ID.get(c.modelId);
+    out.push(c.title, `${m.name} (${m.vendor})  |  ${dateTime(c.ts)}  |  ${tx(CAT_BY_ID.get(c.catId).name)}`,
+             c.url ? `${t('expSource')}: ${c.url}` : null,
+             c.tags.length ? `${t('expTags')}: ${c.tags.join(', ')}` : null,
+             '-'.repeat(72));
+    for (const turn of c.turns){
+      out.push(`[${turn.role === 'user' ? 'USER' : 'ASSISTANT'}]${turn.ts ? ' ' + dateTime(turn.ts) : ''}`);
+      if (turn.thought) out.push(`  <${t('expReasoning').toUpperCase()}> ${turn.thought}`);
+      out.push(turn.text, '');
+    }
+    out.push('='.repeat(72), '');
+  }
+  return out.filter(l => l !== null).join('\n');
+}
+
+/* --- CSV (eine Zeile je Turn, Semikolon für Excel-DE) --------- */
+function toCsv(chats){
+  const q = v => { const s = String(v ?? '');
+    return /[";\n\r]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
+  const cols = LANG === 'de'
+    ? ['chat_id','chat_titel','modell','anbieter','okf_typ','kategorie','ampel','tags','datum',
+       'uhrzeit','timestamp_iso','quelle','turn_nr','rolle','zeichen','denkfluss','text']
+    : ['chat_id','chat_title','model','vendor','okf_type','category','signal','tags','date',
+       'time','timestamp_iso','source','turn_no','role','characters','reasoning','text'];
+  const rows = [cols.join(';')];
+  for (const c of chats){
+    const m = MODEL_BY_ID.get(c.modelId), d = new Date(c.ts);
+    c.turns.forEach((turn, i) => rows.push([
+      c.id, q(c.title), m.name, m.vendor, c.typeId, tx(CAT_BY_ID.get(c.catId).name), c.ampel || '',
+      q(c.tags.join(', ')), `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`,
+      `${pad(d.getHours())}:${pad(d.getMinutes())}`, isoLocal(c.ts), q(c.url),
+      i + 1, turn.role, turn.text.length, q(turn.thought || ''), q(turn.text),
+    ].join(';')));
+  }
+  return '﻿' + rows.join('\r\n');    // BOM, damit Excel UTF-8 erkennt
+}
+
+/* --- JSON (volle Struktur) -----------------------------------
+   Die Schlüssel sind bewusst englisch und sprachunabhängig — es
+   ist ein Datenformat, das von Skripten gelesen wird, kein Text
+   für die Anzeige.                                              */
+function toJson(chats){
+  return JSON.stringify({
+    export:'PromptEngineer Journal', version:'1.0',
+    created: isoLocal(Date.now()), filter: filterSummary(), count: chats.length,
+    chats: chats.map(c => ({
+      id:c.id, title:c.title, url:c.url,
+      model:{ id:c.modelId, name:MODEL_BY_ID.get(c.modelId).name, vendor:MODEL_BY_ID.get(c.modelId).vendor },
+      okf_type:c.typeId, category:c.catId, signal:c.ampel, tags:c.tags,
+      okf_id:c.okfId, ref:c.ref,
+      timestamp: isoLocal(c.ts), date: dateTime(c.ts),
+      turns: c.turns.length, tokens_estimated: c.tokens,
+      conversation: c.turns.map((turn,i) => ({
+        no:i+1, role:turn.role, timestamp: turn.ts ? isoLocal(turn.ts) : null,
+        thought_process: turn.thought || null, text:turn.text,
+      })),
+    })),
+  }, null, 2);
+}
+
+/* --- OKF: raw.okf.json ---------------------------------------
+   Flaches Array, Schema nach Googles OKF-Standard:
+   { role, text, url, timestamp, llm, tags }
+   Die Ampel des Auto-Taggers (Rot/Gelb/Gruen/Blau) steht als
+   `ampel/<Wert>` in `tags`. Bis 24.08.2026 hieß das Feld `kategorie`
+   (Richards Server, OKF_MD_LOG) — der Import liest beide Formen
+   (ampelFromEntry()), geschrieben wird nur noch `tags`.            */
+function toOkfRaw(chats){
+  const entries = [];
+  for (const c of chats){
+    const m = MODEL_BY_ID.get(c.modelId);
+    for (const t of c.turns){
+      const e = {
+        role: t.role,
+        text: t.text,
+        url: c.url || undefined,
+        timestamp: isoLocal(t.ts || c.ts),
+        llm: m.name,
+      };
+      if (c.ampel) e.tags = ['ampel/' + c.ampel];
+      if (t.thought) e.thought_process = t.thought;   // Denkfluss, wie geplant
+      entries.push(e);
+    }
+  }
+  return JSON.stringify(entries, null, 2);
+}
+
+/* --- OKF: data.okf.json --------------------------------------
+   Typisierte Ebene mit fortlaufenden IDs (e01, e02 …) und
+   ref-Verkettung — Schema aus journal-store.js/addEntry().
+   Turns eines Chats werden zu einem Strang verkettet:
+   der erste Turn trägt den Chat-Typ, die folgenden verweisen
+   per ref auf ihren Vorgänger.                                 */
+function toOkfData(chats){
+  const entries = [];
+  let n = 0;
+  const nextId = () => 'e' + String(++n).padStart(2, '0');
+
+  for (const c of chats){
+    const m = MODEL_BY_ID.get(c.modelId);
+
+    // Stammt der Eintrag bereits aus OKF (data.okf.json oder VERLAUF.md),
+    // wird er unverändert zurückgeschrieben: eigene ID, eigener ref.
+    if (c.okfId){
+      const e = {
+        id: c.okfId,
+        type: c.typeId === 'CHAT' ? 'FUND' : c.typeId,
+        text: c.turns.map(t => t.text).join(' — '),   // "X" + "weil Y" → "X — weil Y"
+        timestamp: isoLocal(c.ts),
+      };
+      if (c.ref) e.ref = c.ref;
+      if (m.id !== 'unbekannt') e.llm = m.name;
+      if (c.ampel) e.tags = ['ampel/' + c.ampel];
+      const th = c.turns.find(t => t.thought);
+      if (th) e.thought_process = th.thought;
+      entries.push(e);
+      continue;
+    }
+
+    // Sonst: die Turns eines Chats werden zu einem Strang verkettet
+    let prev = null;
+    c.turns.forEach((t, i) => {
+      const id = nextId();
+      const e = {
+        id,
+        // Erster Turn erbt den Chat-Typ, weitere sind FUND (Erkenntnis aus dem Verlauf)
+        type: i === 0 ? (c.typeId === 'CHAT' ? 'FUND' : c.typeId) : 'FUND',
+        text: t.text,
+        timestamp: isoLocal(t.ts || c.ts),
+      };
+      if (prev) e.ref = prev;
+      if (m.id !== 'unbekannt') e.llm = m.name;
+      if (c.ampel) e.tags = ['ampel/' + c.ampel];
+      if (t.thought) e.thought_process = t.thought;
+      entries.push(e);
+      prev = id;
+    });
+  }
+  return JSON.stringify(entries, null, 2);
+}
+
+/* --- Verdichtung -------------------------------------------------
+   Nach den Regeln aus md_files/SKILL.md, Abschnitt „Schicht 2":
+
+     1. MOTIV ist unantastbar — nie verdichtet, nie umformuliert.
+     2. Strang WEG → WAND: auf die WAND zusammengezogen, die WAND
+        erbt das Weil des WEG.
+     3. Strang WEG → SETZUNG: auf die SETZUNG zusammengezogen, die
+        SETZUNG saugt die ursprüngliche Motivation auf.
+     5. Offener ZWEIFEL verdichtet nie — bleibt wörtlich stehen.
+     6. FUND überlebt nur, solange er trägt; durch eine spätere
+        SETZUNG gegenstandslos gewordene FUNDe fallen weg.
+     7. Folgenlose Einträge fallen weg — aber eine Sackgasse, die
+        gegen etwas gestoßen ist, ist eine WAND und bleibt.
+        „Nicht der Gang durch die Sackgasse bleibt, sondern die
+        Wand an ihrem Ende."
+
+   Regel 4 (aufgelöster ZWEIFEL wandert in die auflösende SETZUNG)
+   braucht die Information, welche SETZUNG welchen ZWEIFEL auflöst.
+   Die steht nur im Fließtext, nicht in den Daten — deshalb hier
+   bewusst nicht automatisiert.
+
+   Abweichung von compactor.js: dessen `isFolgenlos()` schützt nur
+   MOTIV und kann damit WAND- und ZWEIFEL-Einträge entfernen, die
+   nach SKILL.md stehenbleiben müssten. Maßgeblich ist SKILL.md.  */
+
+/** Typen, die die Folgenlos-Regel niemals entfernen darf. */
+const KEEP_ALWAYS = new Set(['MOTIV', 'WAND', 'ZWEIFEL']);
+
+/* --- Altersstufen (SKILL.md, „Der Detailgrad verfällt mit dem Alter,
+   das motivationale Gerüst nie") ------------------------------------
+
+     laufende Sitzung  → alles, wörtlich
+     letzte 2 Sitzungen→ Stränge zusammengezogen, Zeitstempel bleiben
+     älter             → nur MOTIV, SETZUNG, WAND, offene ZWEIFEL,
+                         Datum statt Uhrzeit
+     viel älter        → dasselbe, Sitzungen eines Monats zu einem Block
+
+   „Sitzung" ist ein Tag mit Einträgen, nicht ein Kalendertag: der
+   jüngste vorhandene Tag gilt als der laufende. Damit funktioniert die
+   Einstufung auch bei einem Datensatz, an dem seit Wochen niemand
+   gearbeitet hat.                                                     */
+
+const AGE_STAGES = [
+  { id:'current', label:{ en:'current session',  de:'laufende Sitzung' } },
+  { id:'recent',  label:{ en:'last 2 sessions',  de:'letzte 2 Sitzungen' } },
+  { id:'older',   label:{ en:'older',            de:'älter' } },
+  { id:'ancient', label:{ en:'much older',       de:'viel älter' } },
+];
+/** Das motivationale Gerüst, das auch in alten Stufen bleibt. */
+const FRAME_TYPES = new Set(['MOTIV', 'SETZUNG', 'WAND']);
+const ANCIENT_DAYS = 90;
+
+const dayOfEntry = e => String(e.timestamp || '').slice(0, 10);
+
+/** Ordnet jedem vorkommenden Tag seine Altersstufe zu. */
+function stagesByDay(entries){
+  const days = [...new Set(entries.map(dayOfEntry).filter(Boolean))].sort().reverse();
+  const map = new Map();
+  const newest = days[0] ? Date.parse(days[0] + 'T12:00:00') : Date.now();
+  days.forEach((day, i) => {
+    const ageDays = (newest - Date.parse(day + 'T12:00:00')) / 86400000;
+    map.set(day, i === 0 ? 'current'
+                : i <= 2 ? 'recent'
+                : ageDays > ANCIENT_DAYS ? 'ancient' : 'older');
+  });
+  return map;
+}
+
+/**
+ * Verdichtung mit Altersstufen. Die laufende Sitzung ist vor jeder
+ * Regel geschützt — sie steht wörtlich, wie sie geschrieben wurde.
+ * Zurück kommen die Einträge mit einem zusätzlichen `_stage`, das die
+ * VERLAUF-Ausgabe für die Monatsblöcke braucht.
+ */
+function compactByAge(entries){
+  const stages = stagesByDay(entries);
+  const stageOf = e => stages.get(dayOfEntry(e)) || 'older';
+
+  // Regeln laufen über den ganzen Graphen — Stränge kreuzen Tagesgrenzen.
+  const protect = new Set(entries.filter(e => stageOf(e) === 'current').map(e => e.id));
+  const compacted = compactOkf(entries, protect);
+
+  const kept = compacted
+    .filter(e => {
+      const st = stageOf(e);
+      if (st === 'current' || st === 'recent') return true;
+      if (e.type === 'ZWEIFEL') return true;     // Regel 5: offener Zweifel bleibt immer
+      return FRAME_TYPES.has(e.type);
+    })
+    .map(e => {
+      const st = stageOf(e);
+      // ältere Stufen führen nur noch das Datum
+      const ts = (st === 'older' || st === 'ancient') ? dayOfEntry(e) : e.timestamp;
+      return { ...e, timestamp: ts, _stage: st };
+    });
+
+  // Der Altersfilter entfernt weitere Einträge — Verweise erneut nachziehen,
+  // diesmal gegen den bereits verdichteten Stand.
+  return relinkRefs(kept, new Map(compacted.map(e => [e.id, e])));
+}
+function extractWeil(text){
+  const m = String(text).match(/weil\s+(.+?)(?:\.|$)/i);
+  return m ? m[1].trim() : text;
+}
+/**
+ * @param {Array}  entries  OKF-Einträge
+ * @param {Set}    protect  IDs, die unverändert bleiben müssen
+ *                          (die laufende Sitzung — sie steht wörtlich)
+ */
+function compactOkf(entries, protect = new Set()){
+  const byId = new Map(entries.map(e => [e.id, e]));
+  const incoming = new Map(), outgoing = new Map();
+  for (const e of entries){ incoming.set(e.id, []); outgoing.set(e.id, []); }
+  for (const e of entries){
+    if (!e.ref) continue;
+    outgoing.get(e.id).push(e.ref);
+    if (!incoming.has(e.ref)) incoming.set(e.ref, []);
+    incoming.get(e.ref).push(e.id);
+  }
+
+  /**
+   * Folgt vom Strang-Anfang (z.B. einer WEG) den EINGEHENDEN Verweisen —
+   * also dem, was Neueres auf sie aufbaut —, solange das eindeutig ist,
+   * bis ein Eintrag vom Typ endType erreicht ist.
+   *
+   * `ref` zeigt immer vom neueren auf den älteren Eintrag. Eine WAND, die
+   * aus einer WEG entsteht, verweist deshalb AUF die WEG (WAND.ref = WEG.id),
+   * nicht umgekehrt. Wer von der WEG aus einen geschlossenen Strang zu ihrer
+   * WAND finden will, muss also fragen "wer zeigt auf mich" (incoming), nicht
+   * "worauf zeige ich" (outgoing) — sonst läuft die Suche in die eigene
+   * Vergangenheit und kann die neuere WAND nie erreichen.
+   *
+   * Bestätigt an echten Projektdaten (23.08.2026): Mit der alten,
+   * ausgehenden Richtung fand die Funktion auf `TestProjekt` selbst den
+   * lehrbuchhaften Strang `WEG(e03) → WAND(e04)` nicht (4 Einträge blieben
+   * 4). Mit `incoming` findet sie ihn im ersten Schritt.
+   */
+  const findStrand = (startId, endType) => {
+    const seen = new Set(); const chain = []; let cur = startId;
+    while (cur && byId.has(cur) && !seen.has(cur)){
+      seen.add(cur); chain.push(cur);
+      const ins = incoming.get(cur) || [];
+      if (ins.length !== 1) return null;      // verzweigt oder toter Strang → nicht eindeutig
+      const next = byId.get(ins[0]);
+      if (!next) return null;
+      if (next.type === endType) return { chain, endId: ins[0] };
+      cur = ins[0];
+    }
+    return null;
+  };
+
+  const remove = new Set(), update = new Map();
+  const drop = id => { if (!protect.has(id)) remove.add(id); };
+
+  for (const e of entries){
+    if (e.type !== 'WEG' || protect.has(e.id)) continue;
+    const wand = findStrand(e.id, 'WAND');
+    if (wand){
+      const target = byId.get(wand.endId);
+      if (!protect.has(wand.endId))
+        update.set(wand.endId, `${target.text} (${e.text.split(',')[0]}, weil ${extractWeil(e.text)})`);
+      for (const id of wand.chain) if (id !== wand.endId) drop(id);
+      continue;
+    }
+    const setz = findStrand(e.id, 'SETZUNG');
+    if (setz){
+      const target = byId.get(setz.endId);
+      if (!protect.has(setz.endId))
+        update.set(setz.endId, `${target.text} (ursprünglich: ${e.text})`);
+      for (const id of setz.chain) if (id !== setz.endId) drop(id);
+    }
+  }
+
+  // Regel 6: FUND überlebt nur, solange er trägt
+  let survivors = new Set(entries.filter(e => !remove.has(e.id)).map(e => e.id));
+  for (const e of entries){
+    if (remove.has(e.id) || protect.has(e.id) || e.type !== 'FUND') continue;
+    const toSetzung = (outgoing.get(e.id) || []).some(r => byId.get(r)?.type === 'SETZUNG' && survivors.has(r));
+    const referenced = (incoming.get(e.id) || []).some(id => survivors.has(id));
+    if (!toSetzung && !referenced && (outgoing.get(e.id) || []).length === 0) drop(e.id);
+  }
+
+  // Regel 7: Folgenloses fällt weg — außer MOTIV, WAND und ZWEIFEL
+  survivors = new Set(entries.filter(e => !remove.has(e.id)).map(e => e.id));
+  for (const e of entries){
+    if (remove.has(e.id) || protect.has(e.id) || KEEP_ALWAYS.has(e.type)) continue;
+    const hasIn  = (incoming.get(e.id) || []).some(id => survivors.has(id));
+    const hasOut = (outgoing.get(e.id) || []).length > 0;
+    if (!hasIn && !hasOut) drop(e.id);
+  }
+
+  const kept = entries.filter(e => !remove.has(e.id))
+                      .map(e => update.has(e.id) ? { ...e, text: update.get(e.id) } : { ...e });
+  return relinkRefs(kept, byId);
+}
+
+/**
+ * Hängt Verweise um, die auf verdichtete Einträge zeigen: gefolgt wird
+ * der ref-Kette, bis ein überlebender Eintrag erreicht ist. Ein Verweis
+ * ins Leere ist wertlos — er behauptet einen Eintrag, den es nicht mehr
+ * gibt, und bricht die Argumentationsstränge, wegen derer die IDs
+ * überhaupt existieren.
+ * @param {Array} kept    die überlebenden Einträge (werden verändert)
+ * @param {Map}   byIdAll alle Einträge vor der Verdichtung
+ */
+function relinkRefs(kept, byIdAll){
+  const alive = new Set(kept.map(e => e.id));
+  for (const e of kept){
+    if (!e.ref) continue;
+    let cur = e.ref, guard = 0;
+    while (cur && !alive.has(cur) && guard++ < 32) cur = byIdAll.get(cur)?.ref;
+    if (cur && alive.has(cur) && cur !== e.id) e.ref = cur;
+    else delete e.ref;
+  }
+  return kept;
+}
+
+/** Verdichtung ohne Altersbezug — nur die Regeln 1–3, 5–7. */
+function toOkfCompact(chats){
+  return JSON.stringify(compactOkf(JSON.parse(toOkfData(chats))), null, 2);
+}
+
+/** Verdichtung samt Altersstufen, wie SKILL.md sie vorsieht. */
+function toOkfAged(chats){
+  const aged = compactByAge(JSON.parse(toOkfData(chats)))
+    .map(({ _stage, ...e }) => e);        // Hilfsfeld gehört nicht in die Datei
+  return JSON.stringify(aged, null, 2);
+}
+
+/* --- VERLAUF.md ----------------------------------------------
+   Format aus compactor.js/buildVerlaufMd(): Kopf, offene
+   Spannungen, Wände, dann Sitzungen nach Tagen gruppiert.       */
+const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = { en:['January','February','March','April','May','June','July',
+                     'August','September','October','November','December'],
+                 de:['Januar','Februar','März','April','Mai','Juni','Juli',
+                     'August','September','Oktober','November','Dezember'] };
+
+function toVerlaufMd(chats){
+  const entries = compactByAge(JSON.parse(toOkfData(chats)));
+  const of = t => entries.filter(e => e.type === t);
+  const motiv = of('MOTIV')[0], setzungen = of('SETZUNG'), zweifel = of('ZWEIFEL'), waende = of('WAND');
+  const last = setzungen[setzungen.length-1] || waende[waende.length-1] || entries[entries.length-1];
+
+  const L = ['# Verlauf — Journal-Export', '', '## Kopf',
+    '**Worum es geht:** ' + (motiv ? motiv.text : (chats[0]?.title || '—')),
+    '**Warum überhaupt:** ' + (motiv ? extractWeil(motiv.text) : '—'),
+    '**Wo wir stehen:** ' + (setzungen.length ? setzungen[setzungen.length-1].text : '—'),
+    '**Woran zuletzt gearbeitet:** ' + (last ? last.text : '—')];
+  if (zweifel.length) L.push('**Offen:** ' + zweifel.map(z => z.text).join('; '));
+
+  L.push('', '## Offene Spannungen', '| # | Spannung | seit | Stand |', '|---|----------|------|-------|');
+  zweifel.forEach((z, i) => L.push(`| S${i+1} | ${z.text} | ${(z.timestamp||'').slice(0,10) || '—'} | ungelöst |`));
+
+  L.push('', '## Wände');
+  for (const w of waende) L.push(`- [${w.id}] ${w.text}`);
+
+  L.push('', '## Sitzungen', '');
+
+  // Sitzungen der ältesten Stufe werden monatsweise zu einem Block
+  // zusammengefasst; jüngere behalten ihren Tageskopf.
+  const groups = new Map();
+  for (const e of entries){
+    const day = (e.timestamp || '').slice(0, 10) || 'unknown';
+    const key = e._stage === 'ancient' ? day.slice(0, 7) : day;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(e);
+  }
+
+  for (const key of [...groups.keys()].sort()){
+    if (/^\d{4}-\d{2}$/.test(key)){                       // Monatsblock
+      const [y, m] = key.split('-');
+      L.push(`### ${key} — ${MONTHS[LANG][+m - 1]} ${y}`);
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(key)){
+      L.push(`### ${key} (${WEEKDAYS[new Date(key + 'T00:00:00').getDay()]})`);
+    } else {
+      L.push(`### ${key}`);
+    }
+    for (const e of groups.get(key)){
+      // Ältere Stufen führen nur noch das Datum, keine Uhrzeit mehr
+      const time = (e.timestamp || '').slice(11, 16);
+      const mark = time ? `\`${time}\`` : `\`${(e.timestamp || '').slice(0, 10) || '—'}\``;
+      let line = `- ${mark} [${e.id}] **${e.type}** ${e.text}`;
+      if (e.ref) line += ` ↳${e.ref}`;
+      L.push(line);
+    }
+    L.push('');
+  }
+  return L.join('\n');
+}
+
+/* --- NotebookLM ---------------------------------------------
+   NotebookLM hat keine öffentliche Upload-API. Erzeugt wird eine
+   quellenoptimierte Markdown-Datei (klare Überschriften, keine
+   Deko), die immer als Download übergeben wird — nie automatisch
+   an einen Server; hochgeladen wird nur von Hand.               */
+function toNotebookLM(chats){
+  const out = [
+    `# ${t('nbTitle')}`, '',
+    t('nbIntro', { d:dateTime(Date.now()), n:chats.length, f:filterSummary() }), '',
+    t('nbNote'), '',
+  ];
+  chats.forEach((c, n) => {
+    const m = MODEL_BY_ID.get(c.modelId);
+    out.push(
+      `---`, '', `## ${t('nbSource')} ${n+1}: ${c.title}`, '',
+      `${t('expModel')}: ${m.name} · ${t('expDate')}: ${dateTime(c.ts)} · ` +
+      `${t('expCategory')}: ${tx(CAT_BY_ID.get(c.catId).name)}` +
+      (c.tags.length ? ` · ${t('nbTopics')}: ${c.tags.join(', ')}` : ''), '',
+    );
+    for (const turn of c.turns)
+      out.push(`**${turn.role === 'user' ? t('roleUser') : t('roleAssistant')}:** ${turn.text}`, '');
+  });
+  return out.join('\n');
+}
+
+/* --- PDF: minimaler Writer, keine Bibliothek ------------------
+   Helvetica + WinAnsi. Zeichen außerhalb von CP1252 (Emoji) sind
+   im PDF nicht darstellbar und werden ersetzt.                  */
+const HELV_W = (() => {
+  const w = new Uint16Array(256).fill(556);
+  const set = (s, v) => { for (const ch of s) w[ch.charCodeAt(0)] = v; };
+  set(' !', 278); set('"', 355); set('#$', 556); set('%', 889); set('&', 667); set("'", 191);
+  set('()', 333); set('*', 389); set('+', 584); set(',.', 278); set('-', 333); set('/', 278);
+  set(':;', 278); set('<=>', 584); set('?', 556); set('@', 1015);
+  set('ABDEHKNOPQRUX', 722); set('A', 667); set('B', 667); set('CG', 722); set('E', 667); set('F', 611);
+  set('G', 778); set('I', 278); set('J', 500); set('K', 667); set('L', 556); set('M', 833);
+  set('O', 778); set('Q', 778); set('S', 667); set('T', 611); set('V', 667); set('W', 944);
+  set('X', 667); set('Y', 667); set('Z', 611);
+  set('[]', 278); set('\\', 278); set('^', 469); set('_', 556); set('`', 333);
+  set('abdeghnopqu', 556); set('c', 500); set('f', 278); set('ij', 222); set('k', 500); set('l', 222);
+  set('m', 833); set('r', 333); set('s', 500); set('t', 278); set('v', 500); set('w', 722);
+  set('x', 500); set('y', 500); set('z', 500);
+  set('{}', 334); set('|', 260); set('~', 584);
+  for (let i = 192; i < 256; i++) w[i] = i < 223 ? 700 : 556;   // Akzente ~ Grundbuchstaben
+  return w;
+})();
+
+const CP1252 = { '€':128,'‚':130,'ƒ':131,'„':132,'…':133,'†':134,'‡':135,'‰':137,'Š':138,'‹':139,
+  'Œ':140,'‘':145,'’':146,'“':147,'”':148,'•':149,'–':150,'—':151,'™':153,'š':154,'›':155,'œ':156,'Ÿ':159 };
+
+function toWinAnsi(str){
+  const out = [];
+  for (const ch of str){
+    const c = ch.codePointAt(0);
+    if (c === 9) { out.push(32,32); continue; }
+    if (c < 32) continue;
+    if (c < 256) { out.push(c); continue; }
+    if (CP1252[ch] != null) { out.push(CP1252[ch]); continue; }
+    if (c >= 0x1F000 || (c >= 0x2190 && c <= 0x2BFF)) continue;   // Emoji/Symbole verwerfen
+    out.push(63);                                                  // '?'
+  }
+  return out;
+}
+const textWidth = (bytes, size) => {
+  let w = 0; for (const b of bytes) w += HELV_W[b]; return w * size / 1000;
+};
+
+function wrapLine(str, size, maxW){
+  const words = str.split(/(\s+)/);
+  const lines = []; let cur = [];
+  const widthOf = arr => textWidth(toWinAnsi(arr.join('')), size);
+  for (const word of words){
+    if (word === '') continue;
+    cur.push(word);
+    if (widthOf(cur) > maxW){
+      cur.pop();
+      if (cur.length) lines.push(cur.join('').trimEnd());
+      // sehr langes Einzelwort hart brechen
+      if (textWidth(toWinAnsi(word), size) > maxW){
+        let buf = '';
+        for (const ch of word){
+          if (textWidth(toWinAnsi(buf + ch), size) > maxW){ lines.push(buf); buf = ch; }
+          else buf += ch;
+        }
+        cur = buf ? [buf] : [];
+      } else cur = [word.trimStart()];
+    }
+  }
+  if (cur.join('').trim()) lines.push(cur.join('').trimEnd());
+  return lines.length ? lines : [''];
+}
+
+function toPdf(chats){
+  const PW = 595.28, PH = 841.89, M = 56;          // A4 in pt
+  const MAXW = PW - 2 * M;
+  const pages = [];
+  let ops = [], y = PH - M;
+
+  const newPage = () => { if (ops.length) pages.push(ops); ops = []; y = PH - M; };
+  const esc = bytes => { const o = [];
+    for (const b of bytes){ if (b === 40 || b === 41 || b === 92) o.push(92); o.push(b); } return o; };
+
+  function line(str, { size = 10, lead = 14, bold = false, gap = 0, color = null } = {}){
+    for (const raw of String(str).split('\n')){
+      for (const l of wrapLine(raw, size, MAXW)){
+        if (y - lead < M) newPage();
+        y -= lead;
+        const bytes = esc(toWinAnsi(l));
+        const str8 = bytes.map(b => String.fromCharCode(b)).join('');
+        ops.push(`BT /F${bold ? 2 : 1} ${size} Tf ${color || '0 0 0'} rg ${M} ${y.toFixed(2)} Td (${str8}) Tj ET`);
+      }
+    }
+    y -= gap;
+  }
+  function rule(){ if (y - 10 < M) newPage(); y -= 8;
+    ops.push(`0.78 0.80 0.85 RG 0.6 w ${M} ${y.toFixed(2)} m ${(PW-M).toFixed(2)} ${y.toFixed(2)} l S`); y -= 8; }
+
+  line(t('expHeadline'), { size:19, lead:24, bold:true });
+  line(`${dateTime(Date.now())}  ·  ${chats.length} ${t('expChats')}`, { size:9.5, lead:14, color:'0.42 0.45 0.5' });
+  line(`${t('expFilter')}: ${filterSummary()}`, { size:9.5, lead:13, color:'0.42 0.45 0.5', gap:6 });
+  rule();
+
+  for (const c of chats){
+    if (y < M + 90) newPage();
+    const m = MODEL_BY_ID.get(c.modelId);
+    line(c.title, { size:13, lead:18, bold:true, gap:1 });
+    line(`${m.name} (${m.vendor})  ·  ${dateTime(c.ts)}  ·  ${tx(CAT_BY_ID.get(c.catId).name)}` +
+         (c.typeId !== 'CHAT' ? `  ·  ${c.typeId}` : '') +
+         (c.ampel ? `  ·  ${t('editAmpel')}: ${c.ampel}` : '') +
+         (c.tags.length ? `  ·  ${c.tags.map(x => '#'+x).join(' ')}` : ''),
+         { size:8.5, lead:12, color:'0.42 0.45 0.5' });
+    if (c.url) line(c.url, { size:8.5, lead:12, color:'0.30 0.45 0.85', gap:4 });
+    for (const turn of c.turns){
+      line(turn.role === 'user' ? 'USER' : 'ASSISTANT',
+           { size:8, lead:13, bold:true, color: turn.role === 'user' ? '0.20 0.36 0.80' : '0.10 0.55 0.38' });
+      if (turn.thought)
+        line(`[${t('expReasoning')}] ${turn.thought}`, { size:8.5, lead:11.5, color:'0.48 0.42 0.66', gap:3 });
+      line(turn.text, { size:9.5, lead:13.2, gap:6 });
+    }
+    rule();
+  }
+  newPage();
+
+  /* --- PDF-Objekte zusammensetzen (Byte-genaue xref) --- */
+  const enc = new TextEncoder();
+  const chunks = []; let len = 0;
+  const push = s => { const b = typeof s === 'string' ? enc.encode(s) : s; chunks.push(b); len += b.length; };
+
+  const objCount = 3 + pages.length * 2;    // Catalog, Pages, Font + je Seite Page+Content
+  const offsets = new Array(objCount + 1).fill(0);
+  const startObj = n => { offsets[n] = len; push(`${n} 0 obj\n`); };
+  const endObj = () => push('endobj\n');
+
+  push('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+
+  startObj(1); push('<< /Type /Catalog /Pages 2 0 R >>\n'); endObj();
+
+  const kids = pages.map((_, i) => `${4 + i * 2} 0 R`).join(' ');
+  startObj(2);
+  push(`<< /Type /Pages /Count ${pages.length} /Kids [${kids}] >>\n`); endObj();
+
+  startObj(3);
+  push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\n'); endObj();
+
+  pages.forEach((pageOps, i) => {
+    const pageNo = 4 + i * 2, contentNo = pageNo + 1;
+    startObj(pageNo);
+    push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW.toFixed(2)} ${PH.toFixed(2)}] ` +
+         `/Resources << /Font << /F1 3 0 R /F2 3 0 R >> >> /Contents ${contentNo} 0 R >>\n`);
+    endObj();
+
+    const body = pageOps.join('\n') + '\n';
+    const bytes = new Uint8Array(body.length);
+    for (let k = 0; k < body.length; k++) bytes[k] = body.charCodeAt(k) & 0xff;
+    startObj(contentNo);
+    push(`<< /Length ${bytes.length} >>\nstream\n`);
+    push(bytes);
+    push('\nendstream\n'); endObj();
+  });
+
+  const xref = len;
+  let table = `xref\n0 ${objCount + 1}\n0000000000 65535 f \n`;
+  for (let n = 1; n <= objCount; n++) table += String(offsets[n]).padStart(10,'0') + ' 00000 n \n';
+  push(table);
+  push(`trailer\n<< /Size ${objCount + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
+
+  const all = new Uint8Array(len);
+  let p = 0; for (const b of chunks){ all.set(b, p); p += b.length; }
+  return all;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Geheimnis-Prüfung vor dem Export
+   Chatverläufe enthalten regelmäßig Zugangsdaten — im Journal
+   selbst ist das unkritisch, weil alles lokal bleibt. Kritisch
+   wird es in dem Moment, in dem etwas das Gerät verlässt: beim
+   Hochladen zu NotebookLM oder beim Weitergeben einer Exportdatei.
+   Deshalb wird vor jedem Export geprüft, vor dem NotebookLM-Weg
+   ohne Ausnahme.
+   ═══════════════════════════════════════════════════════════════ */
+
+const SECRET_PATTERNS = [
+  // --- Zugangsdaten: eindeutig, hohe Dringlichkeit ---
+  // sk-proj-… enthält Bindestriche, deshalb _- im Zeichensatz
+  { id:'openai',   sev:'high', re:/\bsk-(?!ant-)[A-Za-z0-9_-]{20,}/g,
+    label:{ en:'OpenAI API key',        de:'OpenAI-API-Schlüssel' } },
+  { id:'anthropic',sev:'high', re:/\bsk-ant-[A-Za-z0-9_-]{20,}/g,
+    label:{ en:'Anthropic API key',     de:'Anthropic-API-Schlüssel' } },
+  // kein \b am Ende: - und _ sind keine Wortgrenzen
+  { id:'google',   sev:'high', re:/\bAIza[0-9A-Za-z_-]{30,45}/g,
+    label:{ en:'Google API key',        de:'Google-API-Schlüssel' } },
+  { id:'github',   sev:'high', re:/\bgh[pousr]_[A-Za-z0-9]{30,}\b/g,
+    label:{ en:'GitHub token',          de:'GitHub-Token' } },
+  { id:'slack',    sev:'high', re:/\bxox[baprs]-[A-Za-z0-9-]{10,}\b/g,
+    label:{ en:'Slack token',           de:'Slack-Token' } },
+  { id:'aws',      sev:'high', re:/\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/g,
+    label:{ en:'AWS access key',        de:'AWS-Zugangsschlüssel' } },
+  { id:'jwt',      sev:'high', re:/\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b/g,
+    label:{ en:'JWT',                   de:'JWT' } },
+  { id:'privkey',  sev:'high', re:/-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY-----/g,
+    label:{ en:'Private key',           de:'Privater Schlüssel' } },
+  { id:'conn',     sev:'high', re:/\b(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis|amqp):\/\/[^\s:@/]+:[^\s@/]{3,}@/gi,
+    label:{ en:'Connection string with password', de:'Verbindungszeichenfolge mit Passwort' } },
+  { id:'bearer',   sev:'high', re:/\bBearer\s+[A-Za-z0-9._~+/-]{20,}={0,2}/g,
+    label:{ en:'Bearer token',          de:'Bearer-Token' } },
+  { id:'assign',   sev:'high',
+    re:/\b(?:api[_-]?key|apikey|access[_-]?token|auth[_-]?token|client[_-]?secret|password|passwort|passwd)\b\s*[:=]\s*["']?([A-Za-z0-9_\-./+]{12,})["']?/gi,
+    label:{ en:'Assigned credential',   de:'Zugewiesene Zugangsdaten' } },
+
+  // --- Personenbezogenes: mittlere Dringlichkeit ---
+  { id:'email',    sev:'medium', re:/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g,
+    label:{ en:'Email address',         de:'E-Mail-Adresse' } },
+  { id:'iban',     sev:'medium', re:/\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){3,7}\b/g,
+    label:{ en:'IBAN',                  de:'IBAN' } },
+  // Nach der Vorwahl muss ein Trenner stehen — sonst gilt jede lange
+  // Ziffernfolge in einem Token als Telefonnummer
+  { id:'phone',    sev:'medium', re:/(?:\+49[\s/-]?|\b0)\d{2,5}[\s)/-]\s?\d{3,}(?:[\s-]?\d{2,})?/g,
+    label:{ en:'Phone number',          de:'Telefonnummer' } },
+
+  // --- Hinweise: niedrige Dringlichkeit ---
+  { id:'winpath',  sev:'low', re:/\b[A-Za-z]:\\Users\\[^\\\s"']{2,}/g,
+    label:{ en:'Local path with user name', de:'Lokaler Pfad mit Benutzername' } },
+  { id:'ip',       sev:'low', re:/\b(?:\d{1,3}\.){3}\d{1,3}\b/g,
+    label:{ en:'IP address',            de:'IP-Adresse' } },
+];
+
+const SEV_ORDER = { high:0, medium:1, low:2 };
+/** Offensichtlich harmlose Treffer aussortieren. */
+const FALSE_POSITIVE = /^(?:0\.0\.0\.0|127\.0\.0\.1|255\.255\.255\.255|1\.2\.3\.4|192\.168\.\d+\.\d+|localhost)$/;
+const PLACEHOLDER = /^(?:sk-xxx+|dein[_-]?\w+|your[_-]?\w+|<[^>]+>|\.{3,}|x{6,}|placeholder|beispiel\S*|example\S*)$/i;
+
+/**
+ * Durchsucht Chats nach Zugangsdaten und personenbezogenen Angaben.
+ * @returns {{findings:Array, byChat:Map, high:number}}
+ */
+function scanSecrets(chats){
+  const findings = [];
+  const byChat = new Map();
+
+  for (const c of chats){
+    const haystacks = [['Titel', c.title]];
+    c.turns.forEach((t, i) => {
+      haystacks.push([`Turn ${i + 1}`, t.text]);
+      if (t.thought) haystacks.push([`Turn ${i + 1} · Denkfluss`, t.thought]);
+    });
+
+    for (const [where, text] of haystacks){
+      if (!text) continue;
+      for (const p of SECRET_PATTERNS){
+        p.re.lastIndex = 0;
+        let m;
+        while ((m = p.re.exec(text)) !== null){
+          const hit = m[1] || m[0];
+          if (FALSE_POSITIVE.test(hit) || PLACEHOLDER.test(hit)) continue;
+          if (p.id === 'ip' && !/^\d/.test(hit)) continue;
+          findings.push({
+            chat: c, chatId: c.id, where, pattern: p, sev: p.sev,
+            raw: m[0], value: hit,
+            context: text.slice(Math.max(0, m.index - 30), m.index + m[0].length + 30).replace(/\s+/g, ' '),
+          });
+          if (!byChat.has(c.id)) byChat.set(c.id, []);
+          byChat.get(c.id).push(p.id);
+        }
+      }
+    }
+  }
+
+  findings.sort((a, b) => SEV_ORDER[a.sev] - SEV_ORDER[b.sev]);
+  return { findings, byChat, high: findings.filter(f => f.sev === 'high').length };
+}
+
+/** Ersetzt gefundene Werte durch Platzhalter — Struktur bleibt lesbar. */
+function maskSecrets(text, minSev = 'medium'){
+  let out = String(text);
+  for (const p of SECRET_PATTERNS){
+    if (SEV_ORDER[p.sev] > SEV_ORDER[minSev]) continue;
+    out = out.replace(p.re, m => {
+      const keep = m.slice(0, Math.min(4, m.length));
+      return `${keep}${'•'.repeat(Math.min(12, Math.max(4, m.length - 4)))}[${p.id}]`;
+    });
+  }
+  return out;
+}
+
+/** Liefert eine Kopie der Chats mit maskierten Inhalten. */
+function maskChats(chats, minSev = 'medium'){
+  return chats.map(c => ({
+    ...c,
+    title: maskSecrets(c.title, minSev),
+    turns: c.turns.map(t => ({
+      ...t,
+      text: maskSecrets(t.text, minSev),
+      thought: t.thought ? maskSecrets(t.thought, minSev) : null,
+    })),
+  }));
+}
+
+/* --- ZIP: minimaler Writer, keine Bibliothek ------------------
+   Nur Methode 0 („gespeichert"), keine Kompression — der Code
+   bleibt kurz und der Inhalt im Archiv lesbar. Dateinamen als
+   UTF-8, angezeigt über Bit 11 der allgemeinen Flags.           */
+const CRC32_TABLE = (() => {
+  const tab = new Uint32Array(256);
+  for (let i = 0; i < 256; i++){
+    let c = i;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    tab[i] = c >>> 0;
+  }
+  return tab;
+})();
+
+function crc32(bytes){
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) c = CRC32_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+/** @param {Array<{path:string, text:string}>} files  @returns {Uint8Array} */
+function zipBundle(files, ts){
+  const enc = new TextEncoder();
+  const d = new Date(ts);
+  const dosTime = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+  const dosDate = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+
+  const parts = [], central = [];
+  let offset = 0;
+
+  for (const f of files){
+    const name = enc.encode(f.path);
+    const data = enc.encode(f.text);
+    const crc = crc32(data);
+
+    const local = new Uint8Array(30 + name.length);
+    const lv = new DataView(local.buffer);
+    lv.setUint32(0, 0x04034b50, true);
+    lv.setUint16(4, 20, true);            // benötigte Version
+    lv.setUint16(6, 0x0800, true);        // Bit 11: Name ist UTF-8
+    lv.setUint16(8, 0, true);             // Methode 0 = gespeichert
+    lv.setUint16(10, dosTime, true);
+    lv.setUint16(12, dosDate, true);
+    lv.setUint32(14, crc, true);
+    lv.setUint32(18, data.length, true);
+    lv.setUint32(22, data.length, true);
+    lv.setUint16(26, name.length, true);
+    local.set(name, 30);
+    parts.push(local, data);
+
+    const cen = new Uint8Array(46 + name.length);
+    const cv = new DataView(cen.buffer);
+    cv.setUint32(0, 0x02014b50, true);
+    cv.setUint16(4, 20, true);            // erzeugt von
+    cv.setUint16(6, 20, true);            // benötigte Version
+    cv.setUint16(8, 0x0800, true);
+    cv.setUint16(10, 0, true);
+    cv.setUint16(12, dosTime, true);
+    cv.setUint16(14, dosDate, true);
+    cv.setUint32(16, crc, true);
+    cv.setUint32(20, data.length, true);
+    cv.setUint32(24, data.length, true);
+    cv.setUint16(28, name.length, true);
+    cv.setUint32(42, offset, true);       // Versatz des lokalen Kopfes
+    cen.set(name, 46);
+    central.push(cen);
+
+    offset += local.length + data.length;
+  }
+
+  const cenSize = central.reduce((n, c) => n + c.length, 0);
+  const end = new Uint8Array(22);
+  const ev = new DataView(end.buffer);
+  ev.setUint32(0, 0x06054b50, true);
+  ev.setUint16(8, files.length, true);
+  ev.setUint16(10, files.length, true);
+  ev.setUint32(12, cenSize, true);
+  ev.setUint32(16, offset, true);
+
+  const all = [...parts, ...central, end];
+  const out = new Uint8Array(all.reduce((n, x) => n + x.length, 0));
+  let at = 0;
+  for (const x of all){ out.set(x, at); at += x.length; }
+  return out;
+}
+
+/* --- LLM-Wiki-Bündel (Karpathy-Muster) ------------------------
+   Dreiteilung: `raw/` unveränderlich, `wiki/` verdichtet,
+   `CLAUDE.md` als Schema. Verlässt die Seite als ZIP, weil ein
+   file://-Dokument kein Verzeichnis schreiben kann. Entpackt ist
+   derselbe Baum zugleich ein OKF-Bündel nach Googles Spezifikation:
+   YAML-Frontmatter je Datei, `index.md` als Einstieg, `log.md` als
+   Verlauf, `ref` als Markdown-Link auf die Zieldatei.            */
+
+const UMLAUT = { 'ä':'ae','ö':'oe','ü':'ue','ß':'ss','Ä':'ae','Ö':'oe','Ü':'ue' };
+
+/** Dateinamen-tauglicher Kurzname: ASCII, klein, Bindestriche. */
+function slugify(s, max = 48){
+  const out = String(s)
+    .replace(/[äöüßÄÖÜ]/g, ch => UMLAUT[ch])
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, max)
+    .replace(/-+$/, '');
+  return out || 'ohne-titel';
+}
+
+/** Eine Rohdatei je Chat. */
+function vaultRawDoc(c){
+  const m = MODEL_BY_ID.get(c.modelId);
+  const turns = c.turns;
+  const L = ['---',
+    `title: ${JSON.stringify(c.title)}`,
+    `llm: ${m.name}`,
+    `timestamp: ${isoLocal(c.ts)}`];
+  // Ampel und Schlagworte laufen nach OKF gemeinsam in `tags`;
+  // der Präfix hält auseinander, aus welcher Dimension ein Tag stammt.
+  const tags = [...(c.ampel ? [`ampel/${c.ampel}`] : []), ...c.tags];
+  if (tags.length) L.push(`tags: [${tags.join(', ')}]`);
+  if (c.url) L.push(`url: ${c.url}`);
+  if (c.okfId) L.push(`okf: ${c.okfId}`);
+  L.push('---', '', `# ${c.title}`, '');
+
+  for (const turn of turns){
+    L.push(`**${turn.role === 'user' ? t('roleUser') : t('roleAssistant')}**` +
+           (turn.ts ? ` · ${dateTime(turn.ts)}` : ''), '');
+    if (turn.thought)
+      L.push(`<details><summary>${t('expReasoning')}</summary>`, '', turn.thought, '', '</details>', '');
+    L.push(turn.text, '');
+  }
+  return L.join('\n');
+}
+
+/** Eine Wiki-Datei je verdichtetem Eintrag, ref und Gegenrichtung als [[…]]. */
+function vaultEntryDoc(e, incoming){
+  const ty = TYPE_BY_ID.get(e.type) || TYPE_BY_ID.get('CHAT');
+  const L = ['---', `id: ${e.id}`, `type: ${e.type}`, `timestamp: ${e.timestamp}`];
+  if (e.llm) L.push(`llm: ${e.llm}`);
+  if (e.tags?.length) L.push(`tags: [${e.tags.join(', ')}]`);
+  if (e.ref) L.push(`ref: ${e.ref}`);
+  L.push('---', '', `# ${e.id} · ${tx(ty.short)}`, '', `*${tx(ty.q)}*`, '', e.text, '');
+  if (e.thought_process)
+    L.push(`<details><summary>${t('expReasoning')}</summary>`, '', e.thought_process, '', '</details>', '');
+  if (e.ref) L.push(`${t('expPointsTo')}: [${e.ref}](${e.ref}.md)`, '');
+  if (incoming.length)
+    L.push(`${t('refByTitle')}: ${incoming.map(id => `[${id}](${id}.md)`).join(' · ')}`, '');
+  return L.join('\n');
+}
+
+/** Einstieg ins Wiki: offene Spannungen, Wände, dann Sitzungen nach Tag. */
+function vaultIndexDoc(entries){
+  const link = e => `- [${e.id}](${e.id}.md) **${e.type}** ${firstLine(e.text, 90)}`;
+  const pick = ty => entries.filter(e => e.type === ty);
+  const doubts = pick('ZWEIFEL'), walls = pick('WAND');
+
+  const L = [`# ${t('vaultIndexTitle')}`, '', `## ${t('vaultTensions')}`, ''];
+  L.push(...(doubts.length ? doubts.map(link) : [`*${t('vaultNone')}*`]), '',
+         `## ${t('vaultWalls')}`, '',
+         ...(walls.length ? walls.map(link) : [`*${t('vaultNone')}*`]), '',
+         `## ${t('vaultSessions')}`, '');
+
+  const byDay = new Map();
+  for (const e of entries){
+    const day = String(e.timestamp).slice(0, 10);
+    if (!byDay.has(day)) byDay.set(day, []);
+    byDay.get(day).push(e);
+  }
+  for (const day of [...byDay.keys()].sort().reverse()){
+    L.push('', `### ${day}`, '');
+    for (const e of byDay.get(day)) L.push(link(e));
+  }
+  return L.join('\n');
+}
+
+/** Das Schema, dem beide Ebenen folgen — `CLAUDE.md` im Wurzelverzeichnis. */
+function vaultSchemaDoc(entries, chats){
+  const L = [`# ${t('vaultTitle')}`, '', t('vaultIntro'), '',
+             `## ${t('vaultLayout')}`, '', '```',
+             `CLAUDE.md      ${t('vaultLaySchema')}`,
+             `raw/           ${t('vaultLayRaw')}`,
+             `wiki/          ${t('vaultLayWiki')}`,
+             `wiki/index.md  ${t('vaultLayIndex')}`,
+             `wiki/log.md    ${t('vaultLayLog')}`,
+             '```', '',
+             `## ${t('vaultTypesHead')}`, '',
+             `| \`type\` | ${t('expType')} | ${t('vaultQuestion')} |`, '|---|---|---|'];
+  for (const ty of OKF_TYPES){
+    if (ty.id === 'CHAT') continue;
+    L.push(`| \`${ty.id}\` | ${tx(ty.desc)} | ${tx(ty.q)} |`);
+  }
+  L.push('', t('vaultTypesNote'), '',
+         `## ${t('vaultRulesHead')}`, '', t('vaultRulesBody'), '',
+         `## ${t('vaultContents')}`, '',
+         `- \`raw/\` — ${chats.length}`,
+         `- \`wiki/\` — ${entries.length}`,
+         `- ${t('expFilter')}: ${filterSummary()}`,
+         `- ${t('expCreated')}: ${isoLocal(Date.now())}`);
+  return L.join('\n');
+}
+
+function toKarpathyVault(chats){
+  // wiki/ trägt die altersverdichtete Ebene, wie SKILL.md sie vorsieht
+  const aged = compactByAge(JSON.parse(toOkfData(chats))).map(({ _stage, ...e }) => e);
+
+  const incoming = new Map();
+  for (const e of aged){
+    if (!e.ref) continue;
+    if (!incoming.has(e.ref)) incoming.set(e.ref, []);
+    incoming.get(e.ref).push(e.id);
+  }
+
+  const files = [{ path:'CLAUDE.md', text: vaultSchemaDoc(aged, chats) }];
+
+  const used = new Set();
+  for (const c of chats){
+    const base = `${isoLocal(c.ts).slice(0,10)}_${MODEL_BY_ID.get(c.modelId).id}_${slugify(c.title)}`;
+    let name = base, n = 1;
+    while (used.has(name)) name = `${base}-${++n}`;
+    used.add(name);
+    files.push({ path:`raw/${name}.md`, text: vaultRawDoc(c) });
+  }
+
+  for (const e of aged)
+    files.push({ path:`wiki/${e.id}.md`, text: vaultEntryDoc(e, incoming.get(e.id) || []) });
+  files.push({ path:'wiki/index.md', text: vaultIndexDoc(aged) });
+  files.push({ path:'wiki/log.md',   text: toVerlaufMd(chats) });
+
+  return zipBundle(files, Date.now());
+}
+
+/* --- Download-Helfer ----------------------------------------- */
+function download(filename, data, mime){
+  const blob = data instanceof Uint8Array
+    ? new Blob([data], { type: mime })
+    : new Blob([data], { type: mime + ';charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+const EXPORTS = [
+  { id:'md',   fmt:'MD',   ext:'md',   mime:'text/markdown',    build:toMarkdown,
+    label:{ en:'Markdown',    de:'Markdown' },
+    sub:{ en:'One document, chats as sections',  de:'Ein Dokument, Chats als Abschnitte' } },
+  { id:'txt',  fmt:'TXT',  ext:'txt',  mime:'text/plain',       build:toText,
+    label:{ en:'Plain text',  de:'Klartext' },
+    sub:{ en:'No formatting',                    de:'Ohne Formatierung' } },
+  { id:'csv',  fmt:'CSV',  ext:'csv',  mime:'text/csv',         build:toCsv,
+    label:{ en:'CSV / Excel', de:'CSV / Excel' },
+    sub:{ en:'One row per turn, semicolon',      de:'Eine Zeile je Turn, Semikolon' } },
+  { id:'json', fmt:'JSON', ext:'json', mime:'application/json', build:toJson,
+    label:{ en:'JSON',        de:'JSON' },
+    sub:{ en:'Full nested structure',            de:'Volle verschachtelte Struktur' } },
+  { id:'pdf',  fmt:'PDF',  ext:'pdf',  mime:'application/pdf',  build:toPdf,
+    label:{ en:'PDF',         de:'PDF' },
+    sub:{ en:'A4, print-ready, no emoji',        de:'A4, druckfertig, ohne Emoji' } },
+];
+
+/* OKF-Formate deines Projekts, bewusst getrennt gruppiert.
+   Die Dateinamen und Schemata bleiben in beiden Sprachen gleich. */
+const OKF_EXPORTS = [
+  { id:'raw',     fmt:'RAW',  ext:'raw.okf.json',     mime:'application/json', build:toOkfRaw,
+    label:{ en:'raw.okf.json', de:'raw.okf.json' },
+    sub:{ en:'Raw history, signal per entry',      de:'Roh-Verlauf, Ampel je Eintrag' } },
+  { id:'data',    fmt:'DATA', ext:'data.okf.json',    mime:'application/json', build:toOkfData,
+    label:{ en:'data.okf.json', de:'data.okf.json' },
+    sub:{ en:'Typed, e01/e02 with ref chain',      de:'Typisiert, e01/e02 mit ref-Kette' } },
+  { id:'compact', fmt:'⤓',    ext:'compact.okf.json', mime:'application/json', build:toOkfCompact,
+    label:{ en:'data.okf.json compacted', de:'data.okf.json verdichtet' },
+    sub:{ en:'Rules 1–3, 5–7, no age decay',       de:'Regeln 1–3, 5–7, ohne Altersbezug' } },
+  { id:'aged',    fmt:'⤓⤓',   ext:'aged.okf.json',    mime:'application/json', build:toOkfAged,
+    label:{ en:'data.okf.json age-decayed', de:'data.okf.json altersverdichtet' },
+    sub:{ en:'Detail decays with age, frame stays', de:'Detailgrad verfällt, Gerüst bleibt' } },
+  { id:'verlauf', fmt:'MD',   ext:'VERLAUF.md',       mime:'text/markdown',    build:toVerlaufMd,
+    label:{ en:'VERLAUF.md', de:'VERLAUF.md' },
+    sub:{ en:'Head, tensions, walls, sessions',    de:'Kopf, Spannungen, Wände, Sitzungen' } },
+  { id:'vault',   fmt:'WIKI', ext:'zip',              mime:'application/zip',  build:toKarpathyVault,
+    label:{ en:'LLM wiki bundle', de:'LLM-Wiki-Bündel' },
+    sub:{ en:'ZIP: raw/ + wiki/ + CLAUDE.md, opens as a vault',
+          de:'ZIP: raw/ + wiki/ + CLAUDE.md, öffnet als Vault' } },
+];
+const ALL_EXPORTS = [...EXPORTS, ...OKF_EXPORTS];
+
+/** Führt den Export tatsächlich aus. */
+function doExport(def, chats){
+  const name = `Journal_${stamp(Date.now())}_${chats.length}-${t('expChats')}.${def.ext}`;
+  const t0 = performance.now();
+  download(name, def.build(chats), def.mime);
+  toast(t('exportDone', { f:tx(def.label), n:chats.length, ms:(performance.now()-t0).toFixed(0) }), 'ok');
+}
+
+function runExport(def, chats){
+  if (!chats.length){ toast(t('exportEmpty'), 'err'); return; }
+  guardExport(chats, { leavesDevice:false }, use => doExport(def, use));
+}
+
+/**
+ * Prüft auf Zugangsdaten und lässt entscheiden, bevor etwas das
+ * Gerät verlässt. `leavesDevice` verschärft die Darstellung: beim
+ * NotebookLM-Weg gehen die Inhalte zu einem fremden Dienst.
+ * @param {Function} proceed  bekommt die (ggf. maskierten) Chats
+ */
+function guardExport(chats, { leavesDevice }, proceed){
+  const scan = scanSecrets(chats);
+  if (!scan.findings.length){ proceed(chats); return; }
+  // Ohne kritische Funde und ohne Gerätewechsel genügt ein Hinweis
+  if (!scan.high && !leavesDevice){
+    proceed(chats);
+    toast(t('scanMinor', { n:scan.findings.length }), 'err');
+    return;
+  }
+  openScanDialog(scan, chats, leavesDevice, proceed);
+}
+
+let scanDlg = null;
+function closeScanDialog(){
+  if (!scanDlg) return;
+  const el = scanDlg; scanDlg = null;
+  document.removeEventListener('keydown', scanKey, true);
+  el.classList.remove('open');
+  setTimeout(() => el.remove(), 200);
+}
+function scanKey(e){ if (e.key === 'Escape'){ e.stopPropagation(); closeScanDialog(); } }
+
+function openScanDialog(scan, chats, leavesDevice, proceed){
+  closeScanDialog();
+
+  const grouped = new Map();
+  for (const f of scan.findings){
+    const k = f.pattern.id;
+    if (!grouped.has(k)) grouped.set(k, { p:f.pattern, items:[] });
+    grouped.get(k).items.push(f);
+  }
+
+  const rows = [...grouped.values()]
+    .sort((a, b) => SEV_ORDER[a.p.sev] - SEV_ORDER[b.p.sev])
+    .map(g => h('div', { class:`scan-row sev-${g.p.sev}` },
+      h('span', { class:'scan-sev' }, t('sev_' + g.p.sev)),
+      h('span', { class:'scan-what' }, tx(g.p.label)),
+      h('span', { class:'scan-n' }, String(g.items.length)),
+      h('span', { class:'scan-ex', title:g.items[0].context },
+        g.items[0].value.slice(0, 10) + (g.items[0].value.length > 10 ? '…' : ''))));
+
+  const body = h('div', { class:'scan-body' },
+    h('p', { class:'scan-lead' },
+      leavesDevice ? t('scanLeadExternal') : t('scanLeadLocal')),
+    h('div', { class:'scan-table' }, ...rows),
+    h('p', { class:'scan-note' }, t('scanNote')));
+
+  scanDlg = h('div', { class:'scrim', onClick: e => { if (e.target === scanDlg) closeScanDialog(); } },
+    h('div', { class:'scan-dlg', role:'dialog', 'aria-modal':'true', 'aria-label':t('scanTitle') },
+      h('div', { class:'scan-head' },
+        h('span', { class:'scan-icon' }, leavesDevice ? '⚠' : 'ⓘ'),
+        h('h2', {}, t('scanTitle')),
+        h('span', { class:'scan-count' },
+          t('scanFound', { n:scan.findings.length, h:scan.high }))),
+      body,
+      h('div', { class:'scan-foot' },
+        h('button', { class:'btn btn-ghost', onClick: closeScanDialog }, t('cancel')),
+        h('button', { class:'btn btn-ghost danger',
+          onClick: () => { closeScanDialog(); proceed(chats); } }, t('scanAsIs')),
+        h('button', { class:'btn btn-primary',
+          onClick: () => { closeScanDialog(); proceed(maskChats(chats)); } }, t('scanMasked')))));
+
+  document.body.append(scanDlg);
+  requestAnimationFrame(() => scanDlg.classList.add('open'));
+  scanDlg.querySelector('.btn-primary').focus();
+  document.addEventListener('keydown', scanKey, true);
+}
+
+/**
+ * NotebookLM ist der einzige Weg, auf dem Inhalte das Gerät verlassen —
+ * als Datei, die anschließend von Hand zu Google hochgeladen wird.
+ * Deshalb wird hier immer geprüft, auch wenn nur nachrangige Funde
+ * vorliegen.
+ */
+function exportNotebookLM(chats){
+  if (!chats.length){ toast(t('exportEmpty'), 'err'); return; }
+  guardExport(chats, { leavesDevice:true }, use => sendNotebookLM(use));
+}
+
+function sendNotebookLM(chats){
+  const content = toNotebookLM(chats);
+  const name = `NotebookLM_${stamp(Date.now())}_${chats.length}-${t('nbSource')}.md`;
+  download(name, content, 'text/markdown');
+  toast(t('nbDownloaded'), 'ok');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL 6 · Popover-Engine
+   ═══════════════════════════════════════════════════════════════ */
+
+let openPop = null;
+
+class Popover {
+  constructor(trigger, render, opts = {}){
+    this.trigger = trigger; this.render = render; this.opts = opts;
+    this.el = null; this.cursor = -1;
+    trigger.addEventListener('click', e => { e.stopPropagation(); this.toggle(); });
+    trigger.addEventListener('keydown', e => { if (e.key === 'ArrowDown' && !this.el){ e.preventDefault(); this.open(); } });
+  }
+  toggle(){ this.el ? this.close() : this.open(); }
+  open(){
+    if (openPop && openPop !== this) openPop.close();
+    openPop = this;
+    const el = document.createElement('div');
+    el.className = 'pop'; el.setAttribute('role','dialog');
+    if (this.opts.width) el.style.minWidth = this.opts.width + 'px';
+    document.body.append(el); this.el = el;
+    this.trigger.setAttribute('aria-expanded','true');
+    this.paint(); this.position();
+    requestAnimationFrame(() => el.classList.add('open'));
+
+    this._onDoc = e => { if (!el.contains(e.target) && !this.trigger.contains(e.target)) this.close(); };
+    this._onKey = e => { if (e.key === 'Escape'){ e.stopPropagation(); this.close(true); return; } this.navigate(e); };
+    this._onScroll = () => this.position();
+    document.addEventListener('pointerdown', this._onDoc, true);
+    document.addEventListener('keydown', this._onKey, true);
+    window.addEventListener('resize', this._onScroll);
+    window.addEventListener('scroll', this._onScroll, true);
+    const f = el.querySelector('input'); if (f) f.focus();
+  }
+  paint(){
+    if (!this.el) return;
+    const sc = this.el.querySelector('.pop-list'); const top = sc ? sc.scrollTop : 0;
+    const act = document.activeElement;
+    const keep = act && act.tagName === 'INPUT' && this.el.contains(act)
+      ? { val:act.value, sel:act.selectionStart } : null;
+    this.el.innerHTML = '';
+    this.render(this.el, this);
+    const s2 = this.el.querySelector('.pop-list'); if (s2 && top) s2.scrollTop = top;
+    if (keep){ const i = this.el.querySelector('input');
+      if (i){ i.value = keep.val; i.focus(); i.setSelectionRange(keep.sel, keep.sel); } }
+    this.position();
+  }
+  position(){
+    if (!this.el) return;
+    const r = this.trigger.getBoundingClientRect(), el = this.el;
+    el.style.maxHeight = '';
+    const h = el.offsetHeight, w = el.offsetWidth, gap = 8;
+    const below = window.innerHeight - r.bottom - gap, above = r.top - gap;
+    let top;
+    if (h <= below || below >= above){ top = r.bottom + gap; el.style.maxHeight = Math.max(160, below) + 'px'; }
+    else { top = Math.max(gap, r.top - gap - h); el.style.maxHeight = Math.max(160, above) + 'px'; }
+    let left = this.opts.alignRight ? r.right - w : r.left;
+    left = Math.min(Math.max(8, left), window.innerWidth - w - 8);
+    el.style.top = top + 'px'; el.style.left = left + 'px';
+  }
+  navigate(e){
+    if (!['ArrowDown','ArrowUp','Enter','Home','End'].includes(e.key)) return;
+    const opts = [...this.el.querySelectorAll('.opt')];
+    if (!opts.length) return;
+    if (e.key === 'Enter'){ if (this.cursor >= 0 && opts[this.cursor]){ e.preventDefault(); opts[this.cursor].click(); } return; }
+    e.preventDefault();
+    if (e.key === 'Home') this.cursor = 0;
+    else if (e.key === 'End') this.cursor = opts.length - 1;
+    else this.cursor = e.key === 'ArrowDown' ? (this.cursor + 1) % opts.length
+                                             : (this.cursor - 1 + opts.length) % opts.length;
+    opts.forEach((o,i) => o.classList.toggle('cursor', i === this.cursor));
+    opts[this.cursor].scrollIntoView({ block:'nearest' });
+  }
+  close(refocus){
+    if (!this.el) return;
+    const el = this.el; this.el = null; this.cursor = -1;
+    if (openPop === this) openPop = null;
+    this.trigger.setAttribute('aria-expanded','false');
+    document.removeEventListener('pointerdown', this._onDoc, true);
+    document.removeEventListener('keydown', this._onKey, true);
+    window.removeEventListener('resize', this._onScroll);
+    window.removeEventListener('scroll', this._onScroll, true);
+    el.classList.remove('open');
+    setTimeout(() => el.remove(), 160);
+    if (refocus) this.trigger.focus();
+  }
+}
+
+function h(tag, props = {}, ...kids){
+  const el = document.createElement(tag);
+  for (const [k,v] of Object.entries(props)){
+    if (v === false || v == null) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2).toLowerCase(), v);
+    else el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const kid of kids.flat()){
+    if (kid == null || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(kid));
+  }
+  return el;
+}
+const icon = (id, size = 14) => h('svg', { width:size, height:size, 'aria-hidden':'true', html:`<use href="#${id}"/>` });
+function searchField(placeholder, onInput){
+  return h('div', { class:'pop-search' },
+    h('svg', { width:14, height:14, class:'ico', html:'<use href="#i-search"/>' }),
+    h('input', { type:'text', placeholder, autocomplete:'off', spellcheck:'false',
+                 onInput: e => onInput(e.target.value) }));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL 7 · Filter-Popovers
+   ═══════════════════════════════════════════════════════════════ */
+
+function multiSelectPop(trigger, cfg){
+  let draft = null, query = '';
+  const pop = new Popover(trigger, (el, api) => {
+    if (!draft) draft = new Set(cfg.get());
+    const counts = FACETS[cfg.facet] || new Map();
+    const all = cfg.options();
+    const q = query.trim().toLowerCase();
+    const visible = q ? all.filter(o => o.label.toLowerCase().includes(q)) : all;
+
+    if (cfg.searchable) el.append(searchField(t(cfg.searchKey || 'searchIn'), v => { query = v; api.paint(); }));
+
+    const list = h('ul', { class:'pop-list', role:'listbox', 'aria-multiselectable':'true' });
+    if (!q){
+      const total = [...counts.values()].reduce((a,b) => a+b, 0);
+      const allOn = draft.size === 0;
+      list.append(h('li', {}, h('button', {
+        class:'opt', role:'option', 'aria-checked': allOn ? 'true' : 'mixed',
+        onClick: () => { draft = new Set(); api.paint(); },
+      },
+        h('span', { class:'cb', html: allOn ? '<svg width="11" height="11"><use href="#i-check"/></svg>'
+                                            : '<svg width="11" height="11"><use href="#i-minus"/></svg>' }),
+        h('span', { class:'label' }, t(cfg.allKey)),
+        h('span', { class:'n' }, fmt(total)))));
+      list.append(h('li', { class:'pop-sep' }));
+    }
+    if (!visible.length){
+      list.append(h('li', { class:'pop-empty' }, t('noMatches')));
+    } else for (const o of visible){
+      const on = draft.has(o.id);
+      list.append(h('li', {}, h('button', {
+        class: o.q ? 'opt rich' : 'opt', role:'option',
+        'aria-checked': String(on), title:o.title || null,
+        onClick: () => { on ? draft.delete(o.id) : draft.add(o.id); api.paint(); },
+      },
+        h('span', { class:'cb', html:'<svg width="11" height="11"><use href="#i-check"/></svg>' }),
+        o.color ? h('span', { class:'dot', style:`background:${o.color}` }) : null,
+        h('span', { class:'label' }, o.label,
+          o.desc ? h('span', { class:'desc' }, o.desc) : null,
+          o.q    ? h('span', { class:'lead-q' }, o.q) : null),
+        h('span', { class:'n' }, fmt(counts.get(o.id) || 0)))));
+    }
+    el.append(list);
+    el.append(h('div', { class:'pop-sep' }));
+    el.append(h('div', { class:'pop-foot' },
+      h('span', { class:'fill' }, draft.size ? t('nSelected', { n:draft.size }) : t('noRestriction')),
+      h('button', { class:'btn btn-ghost', onClick: () => { draft = null; pop.close(true); } }, t('cancel')),
+      h('button', { class:'btn btn-primary', onClick: () => {
+        cfg.set(new Set(draft)); draft = null; pop.close(true); apply();
+      } }, t('applyBtn'))));
+  }, { width: cfg.width || 250 });
+
+  const orig = pop.close.bind(pop);
+  pop.close = r => { draft = null; query = ''; orig(r); };
+  return pop;
+}
+
+multiSelectPop(document.getElementById('t-model'), {
+  facet:'models', allKey:'allModels', searchable:true, searchKey:'searchModel', width:270,
+  options: () => MODELS.map(m => ({ id:m.id, label:`${m.name} · ${m.vendor}`, color:m.color })),
+  get: () => state.models, set: s => state.models = s,
+});
+multiSelectPop(document.getElementById('t-type'), {
+  facet:'types', allKey:'allTypes', searchable:false, width:330,
+  options: () => OKF_TYPES.map(x => ({
+    id:x.id, label:tx(x.short), color:x.color,
+    desc:tx(x.desc), q:tx(x.q), title:typeTooltip(x.id),
+  })),
+  get: () => state.types, set: s => state.types = s,
+});
+multiSelectPop(document.getElementById('t-cat'), {
+  facet:'cats', allKey:'allCategories', searchable:false, width:270,
+  options: () => CATEGORIES.map(c => ({ id:c.id, label:tx(c.name), desc:tx(c.desc) })),
+  get: () => state.cats, set: s => state.cats = s,
+});
+multiSelectPop(document.getElementById('t-ampel'), {
+  facet:'ampeln', allKey:'allAmpeln', searchable:false, width:290,
+  options: () => AMPELN.map(a => ({ id:a.id, label:tx(a.name), desc:tx(a.desc), color:a.color })),
+  get: () => state.ampeln, set: s => state.ampeln = s,
+});
+multiSelectPop(document.getElementById('t-tag'), {
+  facet:'tags', allKey:'allTags', searchable:true, searchKey:'searchTag', width:260,
+  options: () => ALL_TAGS.map(x => ({ id:x, label:x })),
+  get: () => state.tags, set: s => state.tags = s,
+});
+
+const dateTrigger = document.getElementById('t-date');
+const datePop = new Popover(dateTrigger, (el) => {
+  const list = h('ul', { class:'pop-list', role:'listbox' });
+  for (const p of DATE_PRESETS){
+    const on = state.datePreset === p.id && state.from == null && state.to == null;
+    list.append(h('li', {}, h('button', {
+      class:'opt', role:'option', 'aria-selected':String(on),
+      onClick: () => { state.datePreset = p.id; state.from = state.to = null; datePop.close(true); apply(); },
+    }, h('span', { class:'label' }, tx(p.label)),
+       h('span', { class:'tick', html:'<svg width="13" height="13"><use href="#i-check"/></svg>' }))));
+  }
+  el.append(list, h('div', { class:'pop-sep' }), h('div', { class:'pop-hint' }, t('customRange')));
+  const toInput = v => { if (!v) return '';
+    const d = new Date(v); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+  const from = h('input', { type:'date', value:toInput(state.from), 'aria-label':t('from') });
+  const to   = h('input', { type:'date', value:toInput(state.to),   'aria-label':t('to') });
+  el.append(h('div', { class:'range' }, from, to));
+  el.append(h('div', { class:'pop-foot' },
+    h('button', { class:'btn btn-ghost', onClick: () => {
+      state.from = state.to = null; state.datePreset = 'all'; datePop.close(true); apply(); } }, t('clear')),
+    h('button', { class:'btn btn-primary', onClick: () => {
+      state.from = from.value ? new Date(from.value + 'T00:00:00').getTime() : null;
+      state.to   = to.value   ? new Date(to.value   + 'T23:59:59').getTime() : null;
+      if (state.from != null || state.to != null) state.datePreset = 'custom';
+      datePop.close(true); apply(); } }, t('applyBtn'))));
+}, { width:230 });
+
+const sortTrigger = document.getElementById('t-sort');
+const sortPop = new Popover(sortTrigger, el => {
+  const list = h('ul', { class:'pop-list', role:'listbox' });
+  for (const s of SORTS) list.append(h('li', {}, h('button', {
+    class:'opt', role:'option', 'aria-selected':String(state.sort === s.id),
+    onClick: () => { state.sort = s.id; sortPop.close(true); apply(); },
+  }, h('span', { class:'label' }, tx(s.label)),
+     h('span', { class:'tick', html:'<svg width="13" height="13"><use href="#i-check"/></svg>' }))));
+  el.append(list);
+}, { width:210 });
+
+const opTrigger = document.getElementById('op-trigger');
+const opPop = new Popover(opTrigger, el => {
+  const list = h('ul', { class:'pop-list', role:'listbox' });
+  for (const o of TEXT_OPS) list.append(h('li', {}, h('button', {
+    class:'opt', role:'option', 'aria-selected':String(state.op === o.id),
+    onClick: () => { state.op = o.id; opPop.close(); qInput.focus(); apply(); },
+  }, h('span', { class:'label' }, tx(o.label)),
+     h('span', { class:'tick', html:'<svg width="13" height="13"><use href="#i-check"/></svg>' }))));
+  el.append(list);
+}, { width:200 });
+
+/* --- Export-Popover ------------------------------------------ */
+const exportTrigger = document.getElementById('t-export');
+const exportPop = new Popover(exportTrigger, el => {
+  const chats = () => results.map(i => CHATS[i]);
+  const row = def => h('li', {}, h('button', {
+    class:'opt', role:'option',
+    onClick: () => { exportPop.close(true); runExport(def, chats()); },
+  },
+    h('span', { class:'fmt' }, def.fmt),
+    h('span', { class:'label' }, tx(def.label), h('span', { class:'sub' }, tx(def.sub)))));
+
+  const list = h('ul', { class:'pop-list', role:'listbox' });
+  list.append(h('li', { class:'pop-group' }, t('general')));
+  for (const def of EXPORTS) list.append(row(def));
+  list.append(h('li', { class:'pop-sep' }));
+  list.append(h('li', { class:'pop-group' }, t('okfGroup')));
+  for (const def of OKF_EXPORTS) list.append(row(def));
+  list.append(h('li', { class:'pop-sep' }));
+  list.append(h('li', {}, h('button', {
+    class:'opt', role:'option',
+    onClick: () => { exportPop.close(true); exportNotebookLM(chats()); },
+  },
+    h('span', { class:'fmt' }, '⌁'),
+    h('span', { class:'label' }, 'NotebookLM',
+      h('span', { class:'sub' }, t('nbDownload'))))));
+  el.append(list);
+  el.append(h('div', { class:'pop-hint' }, t('exportHint', { n:fmt(results.length) })));
+}, { width:320, alignRight:true });
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL 8 · Inline-Baum: Gesprächsverlauf im selben Frame
+   Klick auf einen Journaleintrag klappt darunter einen Baum auf:
+       Chat
+        ├─ 1 USER      Frage …        (klickbar → Volltext)
+        ├─ 2 ASSISTANT Antwort …
+        └─ …
+   Der Baum wird erst beim ersten Öffnen gebaut (lazy) und danach
+   im DOM behalten, damit erneutes Auf-/Zuklappen sofort geht.
+   ═══════════════════════════════════════════════════════════════ */
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+/** Sehr leichte Markdown-Darstellung im Turn-Text (bewusst minimal). */
+function renderTurnText(s){
+  return escapeHtml(s)
+    .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+    .split('\n')
+    .map(l => /^\s*[*\-•]\s+/.test(l) ? `<span class="li">${l.replace(/^\s*[*\-•]\s+/, '')}</span>` : l)
+    .join('\n');
+}
+
+/** Zeile zum Bearbeiten von Tags, Ampel und Kategorie. */
+function metaEditor(c, rerenderBar){
+  const tagRow = h('div', { class:'edit-tags' });
+
+  const refresh = () => {
+    tagRow.innerHTML = '';
+    for (const tag of c.tags){
+      tagRow.append(h('span', { class:'etag' }, '#' + tag,
+        h('button', { class:'x', 'aria-label':t('removeTag', { t:tag }), title:t('removeTag', { t:tag }),
+          onClick: () => { setOverride(c, { tags: c.tags.filter(x => x !== tag) }); refresh(); } },
+          icon('i-x', 10))));
+    }
+    tagRow.append(input, list);
+  };
+
+  const list = h('datalist', { id:`tags-${c.id}` },
+    ...ALL_TAGS.map(x => h('option', { value:x })));
+
+  const commit = () => {
+    const raw = input.value.trim().replace(/^#/, '').toLowerCase();
+    if (!raw) return;
+    // mehrere Tags auf einmal: "a, b, c"
+    const neu = raw.split(/[,;]/).map(s => s.trim()).filter(Boolean);
+    const merged = [...new Set([...c.tags, ...neu])];
+    input.value = '';
+    if (merged.length !== c.tags.length){ setOverride(c, { tags: merged }); refresh(); }
+  };
+  const input = h('input', { class:'tag-input', type:'text', list:`tags-${c.id}`,
+    placeholder:t('addTag'), autocomplete:'off', spellcheck:'false',
+    onKeydown: e => {
+      if (e.key === 'Enter'){ e.preventDefault(); commit(); }
+      else if (e.key === 'Backspace' && !e.currentTarget.value && c.tags.length){
+        setOverride(c, { tags: c.tags.slice(0, -1) }); refresh();
+      }
+    },
+    onBlur: commit });
+
+  const ampelSel = h('select', { class:'edit-sel', 'aria-label':t('editAmpel'),
+    onChange: e => { setOverride(c, { ampel: e.target.value || null }); rerenderBar?.(); } },
+    h('option', { value:'' }, t('noAmpel')),
+    ...AMPELN.map(a => h('option', { value:a.id, ...(c.ampel === a.id ? { selected:true } : {}) },
+      `${tx(a.name)} — ${tx(a.desc)}`)));
+
+  const catSel = h('select', { class:'edit-sel', 'aria-label':t('editCat'),
+    onChange: e => { setOverride(c, { catId: e.target.value }); rerenderBar?.(); } },
+    ...CATEGORIES.map(k => h('option', { value:k.id, ...(c.catId === k.id ? { selected:true } : {}) }, tx(k.name))));
+
+  refresh();
+  return h('div', { class:'meta-edit' },
+    h('span', { class:'edit-label' }, t('editTags')), tagRow,
+    h('span', { class:'edit-label' }, t('editAmpel')), ampelSel,
+    h('span', { class:'edit-label' }, t('editCat')), catSel,
+    OVERRIDES.has(chatKey(c))
+      ? h('button', { class:'mini', title:t('revertT'),
+          onClick: () => {
+            OVERRIDES.delete(chatKey(c)); saveOverrides();
+            toast(t('reverted'), 'ok');
+            apply();
+          } }, t('revert'))
+      : null);
+}
+
+/** Baut den Baum für einen Chat (Kopfzeile + Äste). */
+/**
+ * Strang um einen OKF-Eintrag: Vorgänger über `ref` (links, älter),
+ * dieser Eintrag hervorgehoben, Nachfolger über `refBy` (rechts, neuer —
+ * mehrere, falls verschiedene Einträge auf denselben Vorgänger zeigen).
+ * Zeitachse waagerecht, damit Verdichtungsstränge (WEG→WAND, WEG→SETZUNG)
+ * als das lesbar werden, was sie sind: eine Spur, kein Netz.
+ */
+function buildStrand(c){
+  if (!c.okfId) return null;
+
+  const ancestors = [];
+  let cur = c.ref, guard = 0;
+  while (cur && OKFID_TO_IDX.has(cur) && guard++ < 8){
+    const p = CHATS[OKFID_TO_IDX.get(cur)];
+    ancestors.unshift(p);
+    cur = p.ref;
+  }
+  const children = (c.refBy || [])
+    .map(id => OKFID_TO_IDX.has(id) ? CHATS[OKFID_TO_IDX.get(id)] : null)
+    .filter(Boolean);
+  if (!ancestors.length && !children.length) return null;
+
+  const pill = (chat, current) => {
+    const ty = TYPE_BY_ID.get(chat.typeId) || TYPE_BY_ID.get('CHAT');
+    return h('button', {
+      class:'strand-pill', type:'button', style:`color:${ty.color}`,
+      disabled: current || undefined,
+      title: current ? t('strandCurrent')
+                     : `${chat.okfId} · ${tx(ty.short)} — ${firstLine(chat.turns[0]?.text || '', 140)}`,
+      onClick: current ? null : () => jumpToChat(chat),
+    },
+      h('span', { class:'strand-id' }, chat.okfId),
+      h('span', { class:'strand-ty' }, tx(ty.short)));
+  };
+  const arrow = () => h('span', { class:'strand-arrow', 'aria-hidden':'true' }, '→');
+
+  const row = h('div', { class:'strand-row' });
+  ancestors.forEach(p => { row.append(pill(p, false)); row.append(arrow()); });
+  row.append(pill(c, true));
+  if (children.length){
+    row.append(arrow());
+    row.append(children.length === 1
+      ? pill(children[0], false)
+      : h('div', { class:'strand-fan' }, ...children.map(ch => pill(ch, false))));
+  }
+
+  return h('div', { class:'strand' }, h('span', { class:'strand-caption' }, t('strandLabel')), row);
+}
+
+/** Springt zu einem anderen Eintrag: aufklappen, ins Bild scrollen; liegt
+    er außerhalb des aktuellen Filters, wird der Filter dafür zurückgesetzt. */
+function jumpToChat(chat){
+  const i = CHATS.indexOf(chat);
+  if (i < 0) return;
+
+  const settle = () => {
+    const k = results.indexOf(i);
+    if (k < 0) return false;
+    while (shown <= k) renderPage();
+    const entry = listEl.querySelector(`.entry[data-ci="${i}"]`);
+    if (!entry) return false;
+    if (!entry.classList.contains('open')) toggleEntry(entry, i);
+    entry.scrollIntoView({ behavior:'smooth', block:'center' });
+    entry.classList.add('jump-flash');
+    setTimeout(() => entry.classList.remove('jump-flash'), 1100);
+    return true;
+  };
+
+  if (settle()) return;
+  resetFilters();
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    if (settle()) toast(t('jumpFilterReset'), 'ok');
+  }));
+}
+
+function buildTree(c){
+  const m = MODEL_BY_ID.get(c.modelId);
+
+  const dot = () => h('span', {}, '·');
+  const bar = h('div', { class:'tree-bar' },
+    h('span', { class:'meta' },
+      h('span', { class:'stamp', title:dateTime(c.ts) }, stampFull(c.ts)),
+      dot(), h('span', {}, `${c.msgs} ${t('turns')}`),
+      dot(), h('span', {}, t('tokensApprox', { n:fmt(c.tokens) })),
+      dot(), h('span', {}, `${m.name} (${m.vendor})`),
+      dot(), h('span', {}, tx(CAT_BY_ID.get(c.catId).name)),
+      c.typeId !== 'CHAT' ? dot() : null,
+      c.typeId !== 'CHAT' ? h('span', { title:typeTooltip(c.typeId) },
+        `${tx(TYPE_BY_ID.get(c.typeId).short)} — ${tx(TYPE_BY_ID.get(c.typeId).desc)}`) : null,
+      c.ampel ? dot() : null,
+      c.ampel ? h('span', {}, `${t('editAmpel')} ${tx(AMPEL_BY_ID.get(c.ampel).name)}`) : null,
+      c.ref ? dot() : null,
+      c.ref ? h('span', { title:t('refTitle') }, `↳ ${c.ref}`) : null,
+      c.refBy?.length ? dot() : null,
+      c.refBy?.length ? h('span', { title:t('refByTitle') },
+        c.refBy.length === 1 ? t('refByOne') : t('refByN', { n:c.refBy.length })) : null,
+      c.source ? dot() : null,
+      c.source ? h('span', {}, c.source) : null,
+      c.url ? h('a', { href:c.url, target:'_blank', rel:'noopener' }, t('openSource')) : null),
+    h('button', { class:'mini', title:t('expandAllT'),
+      onClick: e => toggleAll(e.currentTarget.closest('.tree'), true) }, t('expandAll')),
+    h('button', { class:'mini', title:t('collapseAllT'),
+      onClick: e => toggleAll(e.currentTarget.closest('.tree'), false) }, t('collapseAll')),
+    ...ALL_EXPORTS.map(def => h('button', { class:'mini', title:t('saveAs', { f:tx(def.label) }),
+      onClick: () => {
+        const name = `${m.name}_${stamp(c.ts)}.${def.ext}`;
+        download(name, def.build([c]), def.mime);
+        toast(t('saved', { f:name }), 'ok');
+      } }, def.fmt)),
+    h('button', { class:'mini nb', onClick: () => exportNotebookLM([c]) }, 'NotebookLM'));
+
+  const branches = h('ul', { class:'branches' });
+  c.turns.forEach((turn, i) => {
+    const leaf = h('div', { class:'leaf', html: renderTurnText(turn.text) });
+    const node = h('button', { class:'node', 'aria-expanded':'false' },
+      h('span', { class:'nr' }, String(i + 1)),
+      h('span', { class:'role' }, turn.role === 'user' ? t('roleUser') : t('roleAssistant')),
+      turn.thought ? h('span', { class:'has-thought', title:t('hasThought') }, '🧠') : null,
+      h('span', { class:'peek' }, firstLine(turn.text || turn.thought, 150)),
+      h('span', { class:'when', title:turn.ts ? dateTime(turn.ts) : null },
+        turn.ts ? stampFull(turn.ts) : t('chars', { n:fmt(turn.text.length) })),
+      icon('i-chev', 13));
+    node.lastElementChild.classList.add('caret');
+
+    // Denkfluss (Chain of Thought) als eigener, standardmäßig zugeklappter Block
+    const thought = turn.thought ? h('details', { class:'thought' },
+      h('summary', {}, t('showThought', { n:fmt(turn.thought.length) })),
+      h('div', { class:'thought-body', html: renderTurnText(turn.thought) })) : null;
+
+    const li = h('li', { class:`branch ${turn.role}` }, node,
+      h('div', { class:'leaf-wrap' }, h('div', { class:'leaf-clip' },
+        thought,
+        leaf,
+        h('div', { class:'leaf-foot' },
+          h('button', { onClick: async () => {
+            try { await navigator.clipboard.writeText(turn.text); toast(t('copied'), 'ok'); }
+            catch { toast(t('copyBlocked'), 'err'); }
+          } }, t('copy')),
+          h('button', { onClick: () => {
+            state.q = firstLine(turn.text, 40); state.op = 'contains';
+            qInput.value = state.q; apply(); window.scrollTo({ top:0, behavior:'smooth' });
+          } }, t('findSimilar'))))));
+
+    node.addEventListener('click', () => {
+      const on = li.classList.toggle('on');
+      node.setAttribute('aria-expanded', String(on));
+    });
+    branches.append(li);
+  });
+
+  return h('div', { class:'tree' }, bar, buildStrand(c), metaEditor(c), branches);
+}
+
+function toggleAll(tree, open){
+  for (const li of tree.querySelectorAll('.branch')){
+    li.classList.toggle('on', open);
+    li.querySelector('.node').setAttribute('aria-expanded', String(open));
+  }
+}
+
+/** Klappt einen Journaleintrag auf/zu. */
+function toggleEntry(entry, chatIdx){
+  const open = !entry.classList.contains('open');
+  entry.classList.toggle('open', open);
+  entry.querySelector('.card').setAttribute('aria-expanded', String(open));
+
+  if (open && !entry.dataset.built){
+    entry.querySelector('.tree-clip').append(buildTree(CHATS[chatIdx]));
+    entry.dataset.built = '1';
+  }
+  if (open){
+    // aufgeklappten Eintrag in den Blick holen, ohne zu springen
+    requestAnimationFrame(() => {
+      const r = entry.getBoundingClientRect();
+      if (r.top < 70) window.scrollBy({ top: r.top - 78, behavior:'smooth' });
+    });
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL 9 · Import (Drag & Drop + Dateiauswahl)
+   ═══════════════════════════════════════════════════════════════ */
+
+const dropzone = document.getElementById('dropzone');
+let dragDepth = 0;
+
+window.addEventListener('dragenter', e => {
+  if (![...(e.dataTransfer?.types || [])].includes('Files')) return;
+  e.preventDefault(); dragDepth++; dropzone.classList.add('on');
+});
+window.addEventListener('dragover', e => { if (dropzone.classList.contains('on')) e.preventDefault(); });
+window.addEventListener('dragleave', () => { if (--dragDepth <= 0){ dragDepth = 0; dropzone.classList.remove('on'); } });
+window.addEventListener('drop', async e => {
+  if (!e.dataTransfer?.files?.length && !e.dataTransfer?.items?.length) return;
+  e.preventDefault(); dragDepth = 0; dropzone.classList.remove('on');
+  await importFiles(await collectFiles(e.dataTransfer));
+});
+
+document.getElementById('import-btn').addEventListener('click', () => document.getElementById('file-input').click());
+document.getElementById('file-input').addEventListener('change', async e => {
+  await importFiles([...e.target.files]); e.target.value = '';
+});
+
+/** Sammelt Dateien inkl. ganzer Ordner (webkitGetAsEntry). */
+async function collectFiles(dt){
+  const items = [...(dt.items || [])];
+  const entries = items.map(i => i.webkitGetAsEntry?.()).filter(Boolean);
+  if (!entries.length) return [...dt.files];
+
+  const files = [];
+  const walk = entry => new Promise(res => {
+    if (entry.isFile) entry.file(f => { f._path = entry.fullPath; files.push(f); res(); }, res);
+    else if (entry.isDirectory){
+      const reader = entry.createReader();
+      const readAll = () => reader.readEntries(async batch => {
+        if (!batch.length) return res();
+        await Promise.all(batch.map(walk));
+        readAll();
+      }, res);
+      readAll();
+    } else res();
+  });
+  await Promise.all(entries.map(walk));
+  return files;
+}
+
+async function importFiles(files){
+  const usable = files.filter(f => /\.(md|markdown|txt|json)$/i.test(f.name));
+  if (!usable.length){ toast(t('importNothing'), 'err'); return; }
+
+  const imported = [];
+  let failed = 0;
+  for (const file of usable){
+    try {
+      const raw = await file.text();
+      const path = file._path || file.webkitRelativePath || '';
+      const folder = path.split('/').filter(Boolean).slice(-2, -1)[0] || '';
+      const meta = { filename:file.name, path, folder, ts:file.lastModified || Date.now() };
+
+      if (/\.json$/i.test(file.name)){
+        imported.push(...parseOkfJson(raw, meta));
+      } else {
+        // VERLAUF.md hat ein eigenes Format und wird zuerst geprüft
+        const verlauf = parseVerlaufMd(raw, meta);
+        if (verlauf){ imported.push(...verlauf); }
+        else { const c = parseChatMarkdown(raw, meta); if (c) imported.push(c); else failed++; }
+      }
+    } catch { failed++; }
+  }
+
+  if (!imported.length){
+    toast(t('importFailed', { n:failed }), 'err');
+    return;
+  }
+  if (mockMode){ CHATS = []; mockMode = false; }        // Mock beim ersten echten Import ersetzen
+  reindex([...CHATS, ...imported].sort((a,b) => b.ts - a.ts));
+  resetFilters(false);
+  apply();
+  updateCorpusLine();
+  toast((imported.length === 1 ? t('importOkOne') : t('importOk', { n:imported.length })) +
+        (failed ? t('importSkipped', { n:failed }) : ''), 'ok');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL 10 · Server-Erkennung (optional)
+   ═══════════════════════════════════════════════════════════════ */
+
+const SERVER = 'http://localhost:31337';
+let serverOnline = false;
+
+async function pingServer(){
+  const el = document.getElementById('srv'), txt = document.getElementById('srv-txt');
+  try {
+    const ctl = new AbortController();
+    const to = setTimeout(() => ctl.abort(), 1500);
+    const r = await fetch(`${SERVER}/api/mcp/status`, { signal:ctl.signal });
+    clearTimeout(to);
+    serverOnline = r.ok;
+  } catch { serverOnline = false; }
+  el.classList.toggle('on', serverOnline);
+  el.classList.toggle('off', !serverOnline);
+  txt.textContent = t(serverOnline ? 'srvOnline' : 'srvOffline');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL 11 · Rendering
+   ═══════════════════════════════════════════════════════════════ */
+
+const listEl = document.getElementById('list');
+const countEl = document.getElementById('count');
+const timingEl = document.getElementById('timing');
+const chipsEl = document.getElementById('chips');
+const moreEl = document.getElementById('more');
+const sentinel = document.getElementById('sentinel');
+const qInput = document.getElementById('q');
+const toastsEl = document.getElementById('toasts');
+
+const PAGE = 40;
+let results = [], shown = 0, mockMode = true;
+let FACETS = { models:new Map(), cats:new Map(), tags:new Map() };
+
+function toast(msg, kind = ''){
+  const t = h('div', { class:`toast ${kind}` },
+    kind === 'ok' ? h('span', { class:'ic' }, icon('i-check', 13)) : null, msg);
+  toastsEl.append(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 320); }, 3600);
+}
+
+function highlight(text, q){
+  const safe = escapeHtml(text);
+  if (!q || state.op === 'regex' || state.op.startsWith('n')) return safe;
+  const needle = q.trim(); if (!needle) return safe;
+  const re = new RegExp('(' + needle.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+  return safe.replace(re, '<mark>$1</mark>');
+}
+
+/* Datumsformate hängen an der gewählten Sprache und werden beim
+   Sprachwechsel neu gebaut. */
+let REL, DAY_FMT, DATE_FMT;
+function buildFormatters(){
+  REL      = new Intl.RelativeTimeFormat(LOCALE(), { numeric:'auto' });
+  DAY_FMT  = new Intl.DateTimeFormat(LOCALE(), { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+  DATE_FMT = new Intl.DateTimeFormat(LOCALE(), { day:'2-digit', month:'short', year:'numeric' });
+}
+buildFormatters();
+
+function dayKey(ts){ const d = new Date(ts); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function dayLabel(ts){
+  const d = new Date(ts); d.setHours(0,0,0,0);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((d - today) / 86400000);
+  if (diff === 0)  return t('dayToday');
+  if (diff === -1) return t('dayYesterday');
+  if (diff > -7)   return REL.format(diff, 'day');
+  return DAY_FMT.format(ts);
+}
+
+function cardOf(i){
+  const c = CHATS[i], m = MODEL_BY_ID.get(c.modelId), q = state.q;
+  const firstUser = c.turns.find(t => t.role === 'user') || c.turns[0];
+  const d = new Date(c.ts);
+
+  const chev = icon('i-chev', 15);
+  chev.classList.add('expand');
+
+  // Flache Struktur: alle Teile sind direkte Kinder des Rasters, damit
+  // die Dichte allein über grid-template-areas umgeordnet werden kann.
+  const card = h('article', { class:'card', tabindex:'0', role:'button',
+    'aria-expanded':'false', 'aria-label':t('openTree', { title:c.title }) },
+    h('span', { class:'model', style:`color:${m.color}`, title:m.vendor }, h('span', { class:'dot' }), m.name),
+    h('span', { class:'card-title', html: highlight(c.title, q) }),
+    h('span', { class:'card-date', title:dateTime(c.ts) }, stampFull(c.ts)),
+    chev,
+    h('p', { class:'card-snippet', html: highlight(firstLine(firstUser?.text || '', 260), q) }),
+    h('div', { class:'card-meta' },
+      c.ampel ? h('span', { class:'ampel', style:`background:${AMPEL_BY_ID.get(c.ampel).color}`,
+                            title:t('ampelTitle', { a:tx(AMPEL_BY_ID.get(c.ampel).name),
+                                                    d:tx(AMPEL_BY_ID.get(c.ampel).desc) }) }) : null,
+      c.typeId !== 'CHAT'
+        ? h('span', { class:'okf-type', style:`color:${TYPE_BY_ID.get(c.typeId).color}`,
+                      title:typeTooltip(c.typeId) }, tx(TYPE_BY_ID.get(c.typeId).short))
+        : null,
+      h('span', { class:'cat', title:tx(CAT_BY_ID.get(c.catId).desc) }, tx(CAT_BY_ID.get(c.catId).name)),
+      c.okfId ? h('span', { class:'tag', title:t('okfIdTitle') }, c.okfId) : null,
+      c.unstructured ? h('span', { class:'warn-tag', title:t('unstructuredT') }, t('unstructured')) : null,
+      SECRET_CHATS.has(c.id) ? h('span', { class:'secret-tag', title:t('hasSecretsT') }, t('hasSecrets')) : null,
+      ...c.tags.map(tag => h('span', { class:'tag', style:'cursor:pointer', title:t('filterByTag'),
+        onClick: e => { e.stopPropagation(); state.tags = new Set([tag]); apply();
+                        window.scrollTo({ top:0, behavior:'smooth' }); } },
+        '#' + tag)),
+      h('span', { class:'stat' },
+        `${c.msgs} ${t('turns')}` +
+        (c.thoughts ? ` · ${t('thoughtsN', { n:c.thoughts })}` : '') +
+        ` · ${t('tokensApprox', { n:fmt(c.tokens) })}`)));
+
+  const entry = h('div', { class:'entry', 'data-ci':String(i) }, card,
+    h('div', { class:'tree-wrap' }, h('div', { class:'tree-clip' })));
+
+  card.addEventListener('click', () => toggleEntry(entry, i));
+  card.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleEntry(entry, i); }
+  });
+  return entry;
+}
+
+/** Rendert die nächste Seite; bei Sortierung nach Datum mit Tages-Gruppen. */
+function renderPage(){
+  const grouped = SORT_BY_ID.get(state.sort).group;
+  const end = Math.min(shown + PAGE, results.length);
+  const frag = document.createDocumentFragment();
+
+  let group = null, groupKey = listEl.lastElementChild?.dataset?.day || null;
+  if (grouped && groupKey) group = listEl.lastElementChild.querySelector('.list');
+
+  for (let k = shown; k < end; k++){
+    const i = results[k];
+    if (grouped){
+      const key = dayKey(CHATS[i].ts);
+      if (key !== groupKey){
+        groupKey = key;
+        const list = h('div', { class:'list' });
+        group = list;
+        frag.append(h('section', { class:'daygroup', 'data-day':key },
+          h('div', { class:'dayhead' },
+            h('h2', {}, dayLabel(CHATS[i].ts)),
+            h('span', { class:'rule' }),
+            h('span', { class:'n', 'data-count':key }, '')),
+          list));
+      }
+      group.append(cardOf(i));
+    } else {
+      if (!group){ group = h('div', { class:'list' }); frag.append(group); }
+      group.append(cardOf(i));
+    }
+  }
+  listEl.append(frag);
+  shown = end;
+
+  // Tageszähler nachtragen
+  if (grouped) for (const sec of listEl.querySelectorAll('.daygroup')){
+    const n = sec.querySelectorAll('.card').length;
+    const el = sec.querySelector('.n');
+    if (el) el.textContent = n === 1 ? t('oneChat') : t('nChats', { n });
+  }
+
+  moreEl.hidden = shown >= results.length;
+  moreEl.textContent = shown >= results.length ? '' : t('nMore', { n:fmt(results.length - shown) });
+}
+
+new IntersectionObserver(e => { if (e[0].isIntersecting && shown < results.length) renderPage(); },
+  { rootMargin:'600px' }).observe(sentinel);
+
+/* --- Trigger-Labels & Chips ---------------------------------- */
+function labelFor(trigger, base, set, nameOf){
+  const el = trigger.querySelector('.lbl');
+  trigger.querySelector('.count')?.remove();
+  if (!set.size){ el.textContent = base; trigger.classList.remove('is-active'); }
+  else if (set.size === 1){ el.textContent = nameOf([...set][0]); trigger.classList.add('is-active'); }
+  else {
+    el.textContent = base; trigger.classList.add('is-active');
+    trigger.insertBefore(h('span', { class:'count' }, String(set.size)), trigger.querySelector('.chev'));
+  }
+}
+function dateLabel(){
+  if (state.from != null || state.to != null){
+    const f  = state.from != null ? DATE_FMT.format(state.from) : '…';
+    const to = state.to   != null ? DATE_FMT.format(state.to)   : t('today');
+    return `${f} – ${to}`;
+  }
+  return tx(DATE_PRESETS.find(p => p.id === state.datePreset)?.label) ?? t('allTime');
+}
+function renderChips(){
+  chipsEl.innerHTML = '';
+  const add = (label, value, onRemove) => chipsEl.append(h('span', { class:'chip' },
+    label + ' ', h('b', {}, value),
+    h('button', { class:'x', 'aria-label':t('chipRemove', { l:label, v:value }), onClick:onRemove },
+      icon('i-x', 11))));
+
+  const qm = LANG === 'de' ? ['„','“'] : ['“','”'];
+  if (state.q) add(tx(OP_BY_ID.get(state.op).label), qm[0] + state.q + qm[1],
+    () => { state.q=''; qInput.value=''; apply(); });
+  for (const id of state.models) add(t('chipModel'), MODEL_BY_ID.get(id).name,      () => { state.models.delete(id); apply(); });
+  for (const id of state.types)  add(t('chipType'),  tx(TYPE_BY_ID.get(id).short),  () => { state.types.delete(id); apply(); });
+  for (const id of state.cats)   add(t('chipCat'),   tx(CAT_BY_ID.get(id).name),    () => { state.cats.delete(id); apply(); });
+  for (const id of state.ampeln) add(t('chipAmpel'), tx(AMPEL_BY_ID.get(id).name),  () => { state.ampeln.delete(id); apply(); });
+  for (const tag of state.tags)  add(t('chipTag'),   '#' + tag,                     () => { state.tags.delete(tag); apply(); });
+  if (state.datePreset !== 'all' || state.from != null || state.to != null)
+    add(t('chipRange'), dateLabel(), () => { state.datePreset='all'; state.from=state.to=null; apply(); });
+}
+function activeFilterCount(){
+  return (state.q ? 1 : 0) + state.models.size + state.types.size + state.cats.size
+       + state.ampeln.size + state.tags.size
+       + (state.datePreset !== 'all' || state.from != null || state.to != null ? 1 : 0);
+}
+function resetFilters(rerender = true){
+  state.q = ''; qInput.value = ''; state.op = 'contains';
+  state.models = new Set(); state.types = new Set(); state.cats = new Set();
+  state.ampeln = new Set(); state.tags = new Set();
+  state.datePreset = 'all'; state.from = state.to = null; state.sort = 'new';
+  if (rerender) apply();
+}
+
+/* --- Hauptzyklus --------------------------------------------- */
+let rafPending = false;
+function apply(){
+  if (rafPending) return;
+  rafPending = true;
+  requestAnimationFrame(() => { rafPending = false; doApply(); });
+}
+
+function doApply(){
+  const t0 = performance.now();
+  results = runFilter(null);
+  results.sort(SORT_BY_ID.get(state.sort).cmp);
+  FACETS = facetCounts();
+  const ms = performance.now() - t0;
+
+  labelFor(document.getElementById('t-model'), t('allModels'),     state.models, id => MODEL_BY_ID.get(id).name);
+  labelFor(document.getElementById('t-type'),  t('allTypes'),      state.types,  id => tx(TYPE_BY_ID.get(id).short));
+  labelFor(document.getElementById('t-cat'),   t('allCategories'), state.cats,   id => tx(CAT_BY_ID.get(id).name));
+  labelFor(document.getElementById('t-ampel'), t('allAmpeln'),     state.ampeln, id => tx(AMPEL_BY_ID.get(id).name));
+  labelFor(document.getElementById('t-tag'),   t('allTags'),       state.tags,   x  => '#' + x);
+  dateTrigger.querySelector('.lbl').textContent = dateLabel();
+  dateTrigger.classList.toggle('is-active', state.datePreset !== 'all' || state.from != null || state.to != null);
+  sortTrigger.querySelector('.lbl').textContent = tx(SORT_BY_ID.get(state.sort).label);
+  exportTrigger.querySelector('.lbl').textContent = t('export');
+  opTrigger.textContent = tx(OP_BY_ID.get(state.op).label);
+  qInput.closest('.searchbox').classList.toggle('invalid', qError);
+
+  exportTrigger.querySelector('.count')?.remove();
+  if (results.length && results.length !== N)
+    exportTrigger.insertBefore(h('span', { class:'count' }, fmt(results.length)), exportTrigger.querySelector('.chev'));
+
+  renderChips();
+  document.getElementById('reset').hidden = activeFilterCount() === 0;
+  if (openPop) openPop.paint();
+
+  const turnCount = results.reduce((a,i) => a + CHATS[i].msgs, 0);
+  countEl.innerHTML = results.length
+    ? t('countLine', { n:fmt(results.length), total:fmt(N), t:fmt(turnCount) })
+    : t('countNone');
+  timingEl.textContent = `${ms.toFixed(1)} ms`;
+
+  listEl.innerHTML = ''; shown = 0;
+  if (!results.length){
+    moreEl.hidden = true;
+    listEl.append(h('div', { class:'empty' },
+      h('h3', {}, t('emptyTitle')),
+      h('p', {}, t('emptyText')),
+      h('button', { class:'btn btn-primary', onClick: () => resetFilters() }, t('emptyBtn'))));
+  } else renderPage();
+}
+
+/* --- Eingaben ------------------------------------------------ */
+let qTimer = 0;
+qInput.addEventListener('input', () => {
+  clearTimeout(qTimer);
+  qTimer = setTimeout(() => { state.q = qInput.value; apply(); }, qInput.value.length < 3 ? 0 : 70);
+});
+qInput.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && qInput.value){ e.stopPropagation(); qInput.value = ''; state.q = ''; apply(); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === '/' && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)){
+    e.preventDefault(); qInput.focus(); qInput.select();
+  }
+});
+document.getElementById('reset').addEventListener('click', () => resetFilters());
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL 12 · Sprache anwenden
+   Setzt alle statischen Texte und baut die Liste neu auf. Wird
+   beim Start und bei jedem Sprachwechsel aufgerufen.
+   ═══════════════════════════════════════════════════════════════ */
+
+function updateCorpusLine(){
+  const el = document.getElementById('corpus-line');
+  if (mockMode){
+    el.textContent = t('corpusLine', { n:fmt(N), m:MODELS.length - 1 });
+  } else {
+    const turns = CHATS.reduce((a,c) => a + c.msgs, 0);
+    const models = new Set(CHATS.map(c => c.modelId)).size;
+    el.textContent = t('corpusReal', { n:fmt(N), t:fmt(turns), m:models, g:ALL_TAGS.length });
+  }
+}
+
+/** Setzt die Anzeigedichte. Rein visuell — kein Neuaufbau der Liste nötig. */
+function applyDensity(){
+  document.documentElement.dataset.density = DENSITY;
+  for (const b of document.querySelectorAll('#density button')){
+    const on = b.dataset.density === DENSITY;
+    b.classList.toggle('on', on);
+    b.title = t(b.dataset.density === 'compact' ? 'densCompact' : 'densCosy');
+    b.setAttribute('aria-pressed', String(on));
+  }
+}
+function setDensity(d){
+  if (!DENSITIES.includes(d) || d === DENSITY) return;
+  DENSITY = d;
+  try { localStorage.setItem(DENSITY_KEY, d); } catch {}
+  applyDensity();
+}
+document.getElementById('density').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-density]');
+  if (btn) setDensity(btn.dataset.density);
+});
+
+function applyLang(){
+  document.documentElement.lang = LANG;
+  buildFormatters();
+
+  document.title = t('appTitle');
+  document.querySelector('.masthead h1').textContent = t('appTitle');
+  document.getElementById('srv').title = t('srvTitle');
+
+  qInput.placeholder = t('searchPlaceholder');
+  qInput.setAttribute('aria-label', t('searchAria'));
+  opTrigger.title = t('searchOpTitle');
+  document.querySelector('#reset span').textContent = t('reset');
+  document.querySelector('#import-btn span').textContent = t('importFiles');
+  document.querySelector('#dropzone h3').textContent = t('dropTitle');
+  document.querySelector('#dropzone p').textContent  = t('dropSub');
+
+  for (const b of document.querySelectorAll('#langswitch button'))
+    b.classList.toggle('on', b.dataset.lang === LANG);
+  applyDensity();               // Titel der Dichte-Knöpfe hängen an der Sprache
+
+  updateCorpusLine();
+  pingServer();
+  if (openPop) openPop.close();
+  apply();                       // baut Trigger-Labels, Chips und Liste neu
+}
+
+function setLang(lang){
+  if (!LANGS.includes(lang) || lang === LANG) return;
+  LANG = lang;
+  try { localStorage.setItem(LANG_KEY, lang); } catch {}
+  applyLang();
+}
+
+document.getElementById('langswitch').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-lang]');
+  if (btn) setLang(btn.dataset.lang);
+});
+
+/* --- Start --------------------------------------------------- */
+loadOverrides();
+reindex(buildMockCorpus(1200));
+document.getElementById('srv-txt').textContent = t('srvChecking');
+applyLang();
+setInterval(pingServer, 30000);
+</script>
+</body>
+</html>

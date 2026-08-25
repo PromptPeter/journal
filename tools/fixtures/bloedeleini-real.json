@@ -1,0 +1,26 @@
+[
+  {
+    "id": "e01",
+    "type": "WEG",
+    "text": "Spracheingabe (^⇧D)EinstellungenAktivitätenPrompt bearbeitenPrompt kopierenGute AntwortSchlechte AntwortAntwort kopierenMehrText maximierenAntwort stoppen",
+    "timestamp": "2026-08-19T19:19:49.180Z"
+  },
+  {
+    "id": "e02",
+    "type": "WEG",
+    "text": "Gemini hat gesagtES LEBT! 🎉Die Verbindung steht! Die Browser-Erweiterung hat erfolgreich erkannt, dass sich hier auf der Seite etwas getan hat, und ist sofort angesprungen. Das ist ein riesiger Meilenstein! (Und \"Blödeleini\" ist ein hervorragender Projektname 😂).Aber wenn du dir das zweite Bild ansiehst, hast du wahrscheinlich auch direkt gesehen, was da gerade Lustiges passiert ist:Schau dir mal den Text an, den die Erweiterung da automatisch eingefangen hat:\"Spracheingabe (^⇧D)EinstellungenA",
+    "timestamp": "2026-08-19T19:20:21.174Z"
+  },
+  {
+    "id": "e03",
+    "type": "ZWEIFEL",
+    "text": "Spracheingabe (^⇧D)EinstellungenAktivitätenPrompt bearbeitenPrompt kopierenGute AntwortSchlechte AntwortAntwort kopierenMehrText maximierenWiederholenSenden",
+    "timestamp": "2026-08-19T19:30:51.087Z"
+  },
+  {
+    "id": "e04",
+    "type": "SETZUNG",
+    "text": "Du hast gesagt das hört sich besser an und aber nicht so groß Refining CategorizationGemini hat gesagt",
+    "timestamp": "2026-08-19T19:33:14.521Z"
+  }
+]

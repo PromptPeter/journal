@@ -1,0 +1,18 @@
+[
+  { "id": "e01", "type": "MOTIV",   "text": "Journal soll Kontext ueber Monate hinweg nicht verlieren — weil Wissen sonst bei jedem Neustart verloren geht", "timestamp": "2026-04-25T09:00:00.000Z" },
+  { "id": "e02", "type": "WEG",     "text": "Erstes Datenmodell mit flachem JSON-Array versucht — weil das am schnellsten umzusetzen war", "timestamp": "2026-04-25T09:10:00.000Z", "ref": "e01" },
+  { "id": "e03", "type": "WAND",    "text": "Flaches Array macht Verdichtung unmoeglich — weil Zusammenhaenge zwischen Eintraegen fehlen", "timestamp": "2026-04-25T09:20:00.000Z", "ref": "e02" },
+  { "id": "e04", "type": "FUND",    "text": "Aehnliche Probleme loesen andere Tools ueber Graphen", "timestamp": "2026-04-25T09:30:00.000Z", "ref": "e01" },
+
+  { "id": "e05", "type": "WEG",     "text": "Typisierte Eintraege mit ref-Kette eingefuehrt — weil ein flacher Text die Wand nicht verhindert haette", "timestamp": "2026-07-14T10:00:00.000Z", "ref": "e03" },
+  { "id": "e06", "type": "SETZUNG", "text": "Sechs Eintragstypen werden fest eingefuehrt", "timestamp": "2026-07-14T10:10:00.000Z", "ref": "e05" },
+  { "id": "e07", "type": "FUND",    "text": "Auto-Tagger kann die Ampel automatisch vergeben", "timestamp": "2026-07-14T10:20:00.000Z", "ref": "e06" },
+
+  { "id": "e08", "type": "WEG",     "text": "Verdichtung nach Altersstufen entworfen — weil laufende Sitzungen sonst sofort mitverdichtet wurden", "timestamp": "2026-08-22T11:00:00.000Z", "ref": "e06" },
+  { "id": "e09", "type": "WAND",    "text": "Erste Fassung verdichtet auch die laufende Sitzung", "timestamp": "2026-08-22T11:10:00.000Z", "ref": "e08" },
+
+  { "id": "e10", "type": "ZWEIFEL", "text": "Reicht ein einziger Ampel-Wert pro Eintrag wirklich aus", "timestamp": "2026-08-20T08:00:00.000Z", "ref": "e06" },
+
+  { "id": "e11", "type": "WEG",     "text": "Vier Altersstufen mit compactByAge umgesetzt — weil SKILL.md das ausdruecklich vorsieht", "timestamp": "2026-08-23T09:00:00.000Z", "ref": "e07" },
+  { "id": "e12", "type": "FUND",    "text": "Testdatensatz mit fuenf Zeitebenen deckt alle Stufen ab", "timestamp": "2026-08-23T09:10:00.000Z", "ref": "e11" }
+]

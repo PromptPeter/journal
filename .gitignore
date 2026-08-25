@@ -1,0 +1,9 @@
+node_modules/
+*.log
+
+# Von den Test-Suiten erzeugte Wegwerf-Module (schreiben leider ins
+# Projektwurzelverzeichnis statt ins Scratchpad) und Smoke-Test-Reste
+core.mjs
+core-*.mjs
+probe.*
+_to_delete/
