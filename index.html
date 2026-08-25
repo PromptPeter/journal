@@ -96,6 +96,8 @@ button{cursor:pointer;background:none;border:none;padding:0}
   background:linear-gradient(145deg,var(--accent),#8b5cf6);display:grid;place-items:center;color:#fff;
   box-shadow:0 6px 20px -6px var(--accent)}
 .masthead h1{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.masthead .ver{margin-left:7px;font-size:10.5px;font-weight:500;color:var(--text-3);
+  letter-spacing:.01em;vertical-align:1px}
 .masthead p{margin:1px 0 0;font-size:12.5px;color:var(--text-3)}
 .masthead .spacer{flex:1}
 .langswitch{display:inline-flex;border:1px solid var(--line);border-radius:var(--r-pill);
@@ -550,7 +552,7 @@ mark{background:var(--accent-soft);color:#a9c2ff;border-radius:2px;padding:0 1px
   <header class="masthead">
     <div class="logo"><svg width="17" height="17"><use href="#i-spark"/></svg></div>
     <div>
-      <h1>PromptEngineer · Journal</h1>
+      <h1><span class="ttl">PromptEngineer · Journal</span><span class="ver" id="app-ver"></span></h1>
       <p id="corpus-line">Lade Korpus …</p>
     </div>
     <div class="spacer"></div>
@@ -659,6 +661,9 @@ let DENSITY = (() => {
   try { const s = localStorage.getItem(DENSITY_KEY); if (DENSITIES.includes(s)) return s; } catch {}
   return 'compact';
 })();
+
+/* Für GitHub-Releases/README: bei Aenderungen hier hochzaehlen (Semver). */
+const APP_VERSION = '1.0.0';
 
 const LANGS = ['en', 'de'];
 const LANG_KEY = 'promptengineer.lang';
@@ -4193,7 +4198,8 @@ function applyLang(){
   buildFormatters();
 
   document.title = t('appTitle');
-  document.querySelector('.masthead h1').textContent = t('appTitle');
+  document.querySelector('.masthead h1 .ttl').textContent = t('appTitle');
+  document.getElementById('app-ver').textContent = 'v' + APP_VERSION;
   document.getElementById('srv').title = t('srvTitle');
 
   qInput.placeholder = t('searchPlaceholder');
