@@ -490,6 +490,8 @@ mark{background:var(--accent-soft);color:#a9c2ff;border-radius:2px;padding:0 1px
   border-radius:var(--r-sm);padding:8px 10px;font-size:13px;color:var(--text);resize:vertical}
 .paste-field textarea{min-height:220px;font-family:var(--mono);line-height:1.5}
 .paste-field select:focus,.paste-field textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.paste-field button{align-self:flex-start;display:inline-flex;align-items:center;gap:6px}
+.paste-field button:disabled{opacity:.4;cursor:not-allowed}
 
 /* ---------- Toast ---------- */
 .toasts{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:600;
@@ -615,7 +617,7 @@ mark{background:var(--accent-soft);color:#a9c2ff;border-radius:2px;padding:0 1px
   <div class="toolbar">
     <span class="result-count" id="count">–</span>
     <span class="spacer"></span>
-    <button class="link-btn" id="import-btn"><svg width="13" height="13"><use href="#i-up"/></svg> <span></span></button>
+    <button class="link-btn" id="import-btn"><svg width="13" height="13"><use href="#i-dl"/></svg> <span></span></button>
     <span class="timing" id="timing"></span>
   </div>
 
@@ -814,6 +816,7 @@ const T = {
   pasteHint:       { en:'Copy the conversation text yourself from the provider\'s site and paste it below. Already-imported turns are recognised automatically and skipped — pasting the same chat again just adds what\'s new.',
                      de:'Kopiere den Gesprächstext selbst von der Anbieter-Seite und füge ihn unten ein. Bereits importierte Turns werden automatisch erkannt und übersprungen — erneutes Einfügen desselben Chats ergänzt nur das Neue.' },
   pasteProvider:   { en:'Provider',     de:'Anbieter' },
+  pasteOpenSite:   { en:'Open in small window', de:'In kleinem Fenster öffnen' },
   pasteText:       { en:'Chat text',    de:'Chat-Text' },
   pastePlaceholder:{ en:'Paste the copied conversation here…', de:'Hier den kopierten Gesprächsverlauf einfügen…' },
   pasteSubmit:     { en:'Import',       de:'Importieren' },
@@ -922,15 +925,15 @@ const LOCALE = () => (LANG === 'de' ? 'de-DE' : 'en-GB');
 
 const MODELS = [
   { id:'chatgpt',     name:'ChatGPT',     vendor:'OpenAI',      color:'#10a37f', icon:'🤖', w:20,
-    match:/chatgpt|openai|\bgpt-?[45o]?\b/i,  host:/chatgpt\.com|openai\.com/i },
+    match:/chatgpt|openai|\bgpt-?[45o]?\b/i,  host:/chatgpt\.com|openai\.com/i, siteUrl:'https://chatgpt.com' },
   { id:'claude',      name:'Claude',      vendor:'Anthropic',   color:'#d97757', icon:'🎭', w:18,
-    match:/claude|anthropic|opus|sonnet|haiku/i, host:/claude\.ai|anthropic\.com/i },
+    match:/claude|anthropic|opus|sonnet|haiku/i, host:/claude\.ai|anthropic\.com/i, siteUrl:'https://claude.ai' },
   { id:'gemini',      name:'Gemini',      vendor:'Google',      color:'#4285f4', icon:'✨', w:14,
-    match:/gemini|bard|google ai/i,           host:/gemini\.google\.com|bard\.google/i },
+    match:/gemini|bard|google ai/i,           host:/gemini\.google\.com|bard\.google/i, siteUrl:'https://gemini.google.com' },
   { id:'deepseek',    name:'Deepseek',    vendor:'DeepSeek',    color:'#4d6bfe', icon:'🧠', w:10,
-    match:/deepseek|\br1\b/i,                 host:/deepseek\.com/i },
+    match:/deepseek|\br1\b/i,                 host:/deepseek\.com/i, siteUrl:'https://chat.deepseek.com' },
   { id:'grok',        name:'Grok',        vendor:'xAI',         color:'#c9d1e0', icon:'🛰️', w:8,
-    match:/grok|\bxai\b/i,                    host:/grok\.com|x\.ai/i },
+    match:/grok|\bxai\b/i,                    host:/grok\.com|x\.ai/i, siteUrl:'https://grok.com' },
   { id:'kimi',        name:'Kimi',        vendor:'Moonshot',    color:'#8b5cf6', icon:'🌙', w:7,
     match:/kimi|moonshot/i,                   host:/kimi\.(moonshot|com)/i },
   { id:'glm',         name:'GLM',         vendor:'Zhipu AI',    color:'#4f46e5', icon:'🔷', w:6,
@@ -3107,11 +3110,26 @@ function openPasteDialog(){
     ...MODELS.filter(m => m.id !== 'unbekannt').map(m =>
       h('option', { value:m.id }, `${m.name} · ${m.vendor}`)));
 
+  // Öffnet die Anbieter-Seite in einem eigenen, kleinen Fenster -- reine
+  // Bequemlichkeit (Journal und Anbieter nebeneinander sehen), liest nichts
+  // aus. Der Login passiert dort ganz normal durch den Nutzer selbst.
+  const openSiteBtn = h('button', { type:'button', class:'btn btn-ghost', disabled:true },
+    icon('i-up', 13), ' ', t('pasteOpenSite'));
+  openSiteBtn.style.marginTop = '4px';
+  select.addEventListener('change', () => {
+    const m = MODEL_BY_ID.get(select.value);
+    openSiteBtn.disabled = !m?.siteUrl;
+  });
+  openSiteBtn.addEventListener('click', () => {
+    const m = MODEL_BY_ID.get(select.value);
+    if (m?.siteUrl) window.open(m.siteUrl, 'okf_provider_' + m.id, 'width=520,height=780,noopener');
+  });
+
   const textarea = h('textarea', { placeholder:t('pastePlaceholder'), spellcheck:'false' });
 
   const body = h('div', { class:'paste-body' },
     h('p', { class:'paste-hint' }, t('pasteHint')),
-    h('div', { class:'paste-field' }, h('label', {}, t('pasteProvider')), select),
+    h('div', { class:'paste-field' }, h('label', {}, t('pasteProvider')), select, openSiteBtn),
     h('div', { class:'paste-field' }, h('label', {}, t('pasteText')), textarea));
 
   pasteDlg = h('div', { class:'scrim', onClick: e => { if (e.target === pasteDlg) closePasteDialog(); } },
