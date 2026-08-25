@@ -616,7 +616,6 @@ mark{background:var(--accent-soft);color:#a9c2ff;border-radius:2px;padding:0 1px
     <span class="result-count" id="count">–</span>
     <span class="spacer"></span>
     <button class="link-btn" id="import-btn"><svg width="13" height="13"><use href="#i-up"/></svg> <span></span></button>
-    <button class="link-btn" id="paste-btn"><svg width="13" height="13"><use href="#i-paste"/></svg> <span></span></button>
     <span class="timing" id="timing"></span>
   </div>
 
@@ -689,6 +688,12 @@ const T = {
   export:          { en:'Export',                     de:'Export' },
   reset:           { en:'Reset',                      de:'Zurücksetzen' },
   importFiles:     { en:'Import files',               de:'Dateien importieren' },
+  importBtn:       { en:'Import',                     de:'Importieren' },
+  importMenuPaste:    { en:'Paste a chat',                    de:'Chat einfügen' },
+  importMenuPasteSub: { en:'Copy text from the provider — recommended',
+                        de:'Text vom Anbieter kopieren — empfohlen' },
+  importMenuFiles:    { en:'Choose files…',                   de:'Dateien auswählen…' },
+  importMenuFilesSub: { en:'Already-exported .md/.json files', de:'Bereits exportierte .md/.json-Dateien' },
 
   searchIn:        { en:'Search …',                   de:'Suchen …' },
   searchModel:     { en:'Find model …',               de:'Modell suchen …' },
@@ -3704,8 +3709,21 @@ window.addEventListener('drop', async e => {
   await importFiles(await collectFiles(e.dataTransfer));
 });
 
-document.getElementById('import-btn').addEventListener('click', () => document.getElementById('file-input').click());
-document.getElementById('paste-btn').addEventListener('click', openPasteDialog);
+/* Ein Knopf, zwei Wege: Chat einfügen (empfohlen, kein Datei-Dialog ohne
+   Erklärung) oder gezielt Dateien auswählen (für vorhandene Exporte). */
+const importTrigger = document.getElementById('import-btn');
+const importPop = new Popover(importTrigger, el => {
+  const list = h('ul', { class:'pop-list', role:'listbox' });
+  list.append(h('li', {}, h('button', {
+    class:'opt', role:'option',
+    onClick: () => { importPop.close(true); openPasteDialog(); },
+  }, icon('i-paste', 15), h('span', { class:'label' }, t('importMenuPaste'), h('span', { class:'sub' }, t('importMenuPasteSub'))))));
+  list.append(h('li', {}, h('button', {
+    class:'opt', role:'option',
+    onClick: () => { importPop.close(true); document.getElementById('file-input').click(); },
+  }, icon('i-up', 15), h('span', { class:'label' }, t('importMenuFiles'), h('span', { class:'sub' }, t('importMenuFilesSub'))))));
+  el.append(list);
+}, { width:260 });
 document.getElementById('file-input').addEventListener('change', async e => {
   await importFiles([...e.target.files]); e.target.value = '';
 });
@@ -4106,8 +4124,7 @@ function applyLang(){
   qInput.setAttribute('aria-label', t('searchAria'));
   opTrigger.title = t('searchOpTitle');
   document.querySelector('#reset span').textContent = t('reset');
-  document.querySelector('#import-btn span').textContent = t('importFiles');
-  document.querySelector('#paste-btn span').textContent = t('pasteBtn');
+  document.querySelector('#import-btn span').textContent = t('importBtn');
   document.querySelector('#dropzone h3').textContent = t('dropTitle');
   document.querySelector('#dropzone p').textContent  = t('dropSub');
 
