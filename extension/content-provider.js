@@ -35,16 +35,20 @@
     var candidates = [];
     var all = document.querySelectorAll('*');
     var minWidth = Math.min(480, window.innerWidth * 0.4);
+    var minHeight = window.innerHeight * 0.5;
     for (var i = 0; i < all.length; i++) {
       var el = all[i];
       var cs;
       try { cs = getComputedStyle(el); } catch (e) { continue; }
       if (!/(auto|scroll)/.test(cs.overflowY)) continue;
-      if (el.clientHeight < 100) continue;
-      if (el.clientWidth < minWidth) continue;
+      if (el.clientHeight < minHeight) continue; // zu kurz -> vermutlich Code-/Widget-Kasten
+      if (el.clientWidth < minWidth) continue;   // zu schmal -> vermutlich Seitenleiste
       candidates.push(el);
     }
     if (!candidates.length) return document.scrollingElement || document.documentElement;
+    candidates = candidates.filter(function (el) {
+      return !candidates.some(function (other) { return other !== el && other.contains(el); });
+    });
     candidates.sort(function (a, b) {
       return (b.clientWidth * b.clientHeight) - (a.clientWidth * a.clientHeight);
     });

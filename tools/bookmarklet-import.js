@@ -32,34 +32,50 @@
 
   /**
    * Sucht den Chat-Scrollbereich — NICHT die Chat-Liste in einer
-   * Seitenleiste. Beide sind scrollbar, aber eine Seitenleiste ist
-   * schmal (Chat-Titel passen in wenig Breite), der eigentliche
-   * Gesprächsverlauf nimmt den breiten Hauptbereich ein. Dieses Muster
-   * (schmale Seitenleiste + breiter Hauptbereich) gilt praktisch
-   * universell, nicht nur bei einem Anbieter.
+   * Seitenleiste und NICHT den internen Scroll-Kasten eines einzelnen
+   * Code-Blocks. Alle drei sind oft "overflow-y: auto", aber:
    *
-   * Deshalb zweistufig: erst nach echten Scroll-Containern filtern
-   * (overflow-y: auto/scroll) UND eine Mindestbreite verlangen (schließt
-   * Seitenleisten aus), dann unter den verbliebenen Kandidaten die
-   * größte Fläche wählen — NICHT einfach den größten aktuellen Überlauf,
-   * denn der kann im Moment des Klicks noch klein sein, wenn ältere
-   * Nachrichten erst beim Scrollen selbst nachgeladen werden (genau der
-   * Fall, den dieses Skript lösen soll).
+   *   - eine Seitenleiste ist SCHMAL (Chat-Titel brauchen wenig Breite)
+   *   - ein Code-Block-Kasten ist KURZ (auch ein langer Codeblock bleibt
+   *     meist auf ein paar hundert Pixel begrenzt, nie die volle
+   *     Fensterhoehe -- am 25.08.2026 an einem echten DeepSeek-Export
+   *     beobachtet: das Skript kopierte nur reinen Code, keinen
+   *     Gespraechstext, weil der Code-Kasten "gewann")
+   *   - ein Code-Block-Kasten liegt zudem meist INNERHALB des eigentlichen
+   *     Gespraechsbereichs, nie daneben
+   *
+   * Deshalb dreistufig: erst nach echten Scroll-Containern filtern
+   * (overflow-y: auto/scroll), Mindestbreite verlangen (schliesst
+   * Seitenleisten aus) UND Mindesthoehe relativ zum Fenster verlangen
+   * (schliesst Code-Kaesten aus). Liegt ein Kandidat innerhalb eines
+   * anderen, zaehlt nur der aeussere -- der eigentliche Gespraechsbereich
+   * umschliesst ja alles Weitere, auch einen internen Code-Scroller.
+   * Unter den verbliebenen dann die groesste Flaeche waehlen -- NICHT
+   * einfach den groessten aktuellen Ueberlauf, denn der kann im Moment
+   * des Klicks noch klein sein, wenn aeltere Nachrichten erst beim
+   * Scrollen selbst nachgeladen werden (genau der Fall, den dieses
+   * Skript loesen soll).
    */
   function findScrollable() {
     var candidates = [];
     var all = document.querySelectorAll('*');
     var minWidth = Math.min(480, window.innerWidth * 0.4);
+    var minHeight = window.innerHeight * 0.5;
     for (var i = 0; i < all.length; i++) {
       var el = all[i];
       var cs;
       try { cs = getComputedStyle(el); } catch (e) { continue; }
       if (!/(auto|scroll)/.test(cs.overflowY)) continue;
-      if (el.clientHeight < 100) continue;   // zu klein fuer den Hauptbereich
-      if (el.clientWidth < minWidth) continue; // zu schmal -> vermutlich Seitenleiste
+      if (el.clientHeight < minHeight) continue; // zu kurz -> vermutlich Code-/Widget-Kasten
+      if (el.clientWidth < minWidth) continue;   // zu schmal -> vermutlich Seitenleiste
       candidates.push(el);
     }
     if (!candidates.length) return document.scrollingElement || document.documentElement;
+    // Kandidaten, die innerhalb eines anderen Kandidaten liegen, verwerfen --
+    // nur den jeweils aeussersten behalten.
+    candidates = candidates.filter(function (el) {
+      return !candidates.some(function (other) { return other !== el && other.contains(el); });
+    });
     candidates.sort(function (a, b) {
       return (b.clientWidth * b.clientHeight) - (a.clientWidth * a.clientHeight);
     });
