@@ -166,6 +166,25 @@ no catch.
 
 ---
 
+## Follow the thread
+
+PromptPeter has social skills now — no idea how that happened either.
+
+<div align="center">
+
+[![X](https://img.shields.io/badge/X-@PromptPeterApp-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/PromptPeterApp)
+[![Discord](https://img.shields.io/badge/Discord-join%20the%20thread-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/REPLACE_ME)
+
+<sub>Reddit, YouTube, Instagram — brewing. This README updates the moment they exist.</sub>
+
+</div>
+
+Bug reports and "this broke on my chat export" reports travel fastest as a
+[GitHub issue](../../issues) — everything else (a build screenshot, a stray idea at
+1am, "does it handle *this* model") is exactly what the two links above are for.
+
+---
+
 ## Background
 
 This project grew out of `OKF_MD_LOG`, a server that transcribes AI conversations. Two
