@@ -51,7 +51,7 @@ chats, stores them, labels them and exports them.
 
 A single `index.html`, opened by double-clicking it. Shows the corpus
 chronologically, filters it in real time, opens individual conversations as a tree
-and exports the filtered set in nine formats.
+and exports the filtered set in eleven formats.
 
 Deliberately separate from the server: anyone who only wants to look something up
 and export it should not have to start anything first. When the server is running,
@@ -153,11 +153,21 @@ and with that, *PromptEngineer*.
 
 ## Still open
 
-- **Browser extension.** A popup acting as gatekeeper: live status (🟢/🔴), quick
-  capture, one button into the dashboard. Designed, not yet built.
-- **Capturing reasoning traces.** Display is done; capture at the source is not —
-  planned as a toggle in the extension, stored in the `thought_process` field.
-- **Real data.** `Chats_LMM/` so far holds only eight sorted files from two Gemini
-  projects; testing so far has used mock data and one real Gemini export.
+- **Agent / Skill / Workflow / Prompt library.** Turn the snippets already sitting
+  in the journal into reusable prompts, agent instructions, and workflows — not
+  started.
+- **Logo and visual identity.** No branding decided yet.
+- **Official data-export parsers.** Reading providers' own export formats (e.g.
+  ChatGPT's `conversations.json`) as a fourth, higher-fidelity import path,
+  alongside the manual paste/bookmarklet/extension paths that exist today.
+- **Real data.** `Chats_LMM/` so far holds only a handful of sorted files from a
+  couple of Gemini projects; testing has otherwise used mock data and real exports
+  fed through synthetic and real-project fixtures.
 - **Analysis.** Once there is enough material: which phrasings reliably produce
   usable answers? Which model is good for what?
+
+Done, as of 2026-08-25: a manual chat-import path exists — a paste dialog with
+duplicate detection, a one-click bookmarklet that scrolls a chat page to load its
+full history before copying it, and a browser extension (`extension/`) doing the
+same but delivering straight to an open Journal tab. Nothing runs automatically or
+in the background; nothing stores login credentials.

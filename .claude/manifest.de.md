@@ -52,7 +52,7 @@ entgegen, legt sie ab, verschlagwortet sie und exportiert sie.
 
 Eine einzelne `index.html`, per Doppelklick zu öffnen. Zeigt den Bestand
 chronologisch, filtert ihn in Echtzeit, öffnet einzelne Gespräche als Baum und
-exportiert die gefilterte Menge in neun Formate.
+exportiert die gefilterte Menge in elf Formate.
 
 Bewusst getrennt vom Server: Wer nur lesen und exportieren will, braucht nichts zu
 starten. Läuft der Server, erkennt die Oberfläche das und nutzt ihn zusätzlich.
@@ -148,11 +148,22 @@ für Prompt-Engineering — und damit *PromptEngineer*.
 
 ## Was noch offen ist
 
-- **Browser-Extension.** Popup als Türsteher: Live-Status (🟢/🔴), Quick-Capture,
-  ein Knopf ins Dashboard. Konzipiert, noch nicht gebaut.
-- **Denkflüsse mitloggen.** Die Anzeige steht, das Erfassen an der Quelle fehlt —
-  vorgesehen als Schalter in der Extension, gespeichert im Feld `thought_process`.
-- **Echte Daten.** In `Chats_LMM/` liegen bisher nur acht eingeordnete Dateien aus
-  zwei Gemini-Projekten; getestet wurde mit Mock-Daten und einem echten Gemini-Export.
+- **Agenten-/Skill-/Workflow-/Prompt-Bibliothek.** Die im Journal bereits
+  gesammelten Ausschnitte zu wiederverwendbaren Prompts, Agenten-Anweisungen und
+  Workflows machen — noch nicht begonnen.
+- **Logo und visuelle Identität.** Noch keine Markenentscheidung getroffen.
+- **Offizielle Export-Parser.** Die eigenen Export-Formate der Anbieter (z. B.
+  ChatGPTs `conversations.json`) als vierter, zuverlässigerer Importweg neben
+  Paste/Lesezeichen/Extension.
+- **Echte Daten.** In `Chats_LMM/` liegen bisher nur eine Handvoll eingeordneter
+  Dateien aus wenigen Gemini-Projekten; getestet wurde ansonsten mit Mock-Daten und
+  echten Exporten über synthetische und reale Referenzdatensätze.
 - **Auswertung.** Sobald genug Material da ist: Welche Formulierungen führen
   zuverlässig zu brauchbaren Antworten? Welches Modell taugt wofür?
+
+Erledigt, Stand 25.08.2026: Ein manueller Import-Weg existiert — ein
+Einfüge-Dialog mit Dopplerkontrolle, ein Ein-Klick-Lesezeichen, das eine Chat-Seite
+bis zum Verlaufsanfang hochscrollt, bevor es den Text kopiert, und eine
+Browser-Erweiterung (`extension/`), die dasselbe tut, aber direkt an einen
+offenen Journal-Tab liefert. Nichts läuft automatisch oder im Hintergrund,
+nirgends werden Zugangsdaten gespeichert.
