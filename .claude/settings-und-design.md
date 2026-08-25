@@ -606,6 +606,7 @@ Browser öffnen). Für spätere Erweiterungen naheliegend:
 
 | Datum | Was |
 |---|---|
+| 25.08.2026 | **Manueller Chat-Import statt Browser-Extension.** Ersetzt `OKF_MD_LOG/extension/` (dauerhafte Hintergrund-Beobachtung, Server-Pflicht) durch drei manuelle, nur-bei-Klick-aktive Bausteine: (1) „Chat einfügen"-Dialog im Journal mit Anbieter-Auswahl, Dopplerkontrolle über `chatKey()` (Modell+Startzeit+Titel) plus Text-Abgleich der Turns — Reimport desselben Chats ergänzt nur neue Turns; (2) Lesezeichen-Skript `tools/bookmarklet-import.js` — scrollt auf der Anbieter-Seite automatisch bis zum Verlaufsanfang (virtualisiertes Nachladen), kopiert in die Zwischenablage; unterscheidet dabei bewusst den breiten Gesprächsbereich von einer schmalen Chat-Listen-Seitenleiste (Fund an echter Gemini-Seite: ohne diese Unterscheidung wurde nur die Seitenleiste gescrollt); (3) Browser-Erweiterung `extension/` — dieselbe Scroll-Logik, aber löst direkt ans Journal (per `postMessage`-Brücke über ein Content-Script) statt über die Zwischenablage, mit Fallback auf Kopieren, falls kein Journal-Tab offen ist. Alle drei Wege sind anbieterunabhängig (Heuristik statt fester CSS-Selektoren), keiner läuft automatisch oder speichert Zugangsdaten. Import-Knopf ins Trigger-Design neben Export verschoben (Grün statt Blau) |
 | 23.08.2026 | Erste Fassung: Filterleiste, Popovers, Mock-Korpus, Filter-Engine |
 | 23.08.2026 | Datenmodell auf Chat→Turns umgestellt, Import, 6 Exportformate, PDF-Writer |
 | 23.08.2026 | Detailansicht von Drawer auf **Inline-Baum** geändert |
