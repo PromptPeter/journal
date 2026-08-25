@@ -19,7 +19,7 @@
 
 <div align="center">
 
-<img src="docs/screenshots/overview.png" width="820" alt="Filter bar and an expanded conversation tree, showing turns, tags, signal, and category" />
+<img src="docs/screenshots/demo.gif" width="820" alt="Live filtering across 1,200 chats, then a conversation expanding into its turn-by-turn tree" />
 
 </div>
 
