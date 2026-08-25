@@ -1,15 +1,25 @@
 # `compactor.js` gegen `SKILL.md` — Gesprächsgrundlage
 
+> **Erledigt am 25.08.2026.** Ursprünglich als Gesprächsgrundlage für Richard
+> gedacht — die Rückfragepflicht ist seit 25.08.2026 aufgehoben (Jens
+> entscheidet allein, siehe [[schreibrechte-nur-journal-repo]]). Alle vier
+> Abweichungen A–D sind jetzt in `compactor.js` behoben, gegen vier
+> Referenzdatensätze verifiziert (`tools/compaction-bench-report.md`: 4/4
+> fehlerfrei, identisch zur Journal-Implementierung `compactByAge()`) und
+> committed. Diese Datei bleibt als Analyse/Beleg stehen — die Beschreibungen
+> unten schildern den Zustand **vor** dem Fix.
+
 - **Stand:** 23.08.2026, Schlussabschnitt korrigiert am 24.08.2026
-- **Für:** Richard — Autor von `SKILL.md`
+- **Für:** ursprünglich Richard — Autor von `SKILL.md`
 - **Spezifikation:** `OKF_MD_LOG/SKILL.md`, Schicht 2, Regeln 1–7 und Altersstufen
 - **Umsetzung:** `OKF_MD_LOG/compactor.js`
 - **Belege:** `tools/dry-compaction.mjs` → `tools/dry-compaction-report.md`
   (führt den echten `compactor.js` mit abgefangenen Schreibvorgängen aus,
   verändert keine Datei)
 
-Nichts davon ist geändert worden. Der Skill ist deins; hier steht nur, was
-gemessen wurde, damit die Entscheidung auf Zahlen fußt statt auf Meinung.
+Ursprünglich war nichts davon geändert worden — die Analyse unten stammt aus
+der Zeit vor dem Fix und beschreibt bewusst nur, was gemessen wurde, ohne
+einzugreifen.
 
 ---
 
@@ -134,15 +144,16 @@ billig.
 
 ---
 
-## Fragen
+## Fragen — alle am 25.08.2026 entschieden und umgesetzt
 
-- [ ] **A** — Zeigt `ref` vom neueren auf den älteren Eintrag? Falls ja: Strang-Suche
-      auf eingehende Verweise umstellen. Falls nein: Erzeuger korrigieren.
-- [ ] **B** — Altersstufen nachrüsten, laufende Sitzung ausnehmen? ja / nein
-- [ ] **C** — `WAND` und offene `ZWEIFEL` in `isFolgenlos()` ausnehmen? ja / nein
-- [ ] **D** — Verweise nach dem Entfernen nachziehen? ja / nein
-- [ ] Sicherung vor `runCompaction()`? ja / nein
-- [ ] Wer setzt es um?
+- [x] **A** — `ref` zeigt vom neueren auf den älteren Eintrag; Strang-Suche
+      auf eingehende Verweise umgestellt (`findClosedStrand`, jetzt `incoming`).
+- [x] **B** — Altersstufen nachgerüstet (`compactByAge`), laufende Sitzung ausgenommen.
+- [x] **C** — `WAND` und offene `ZWEIFEL` in `KEEP_ALWAYS` (vormals `isFolgenlos()`) ausgenommen.
+- [x] **D** — Verweise werden nach dem Entfernen nachgezogen (`relinkRefs()`).
+- [x] Sicherung vor `runCompaction()` — war schon vorher da (`backupBefore()`,
+      `_backups/<Zeitstempel>/`), unabhängig von A–D.
+- [x] Wer setzt es um? — Jens, direkt in `compactor.js`, ohne Rückfrage bei Richard.
 
 Die Punkte A–D sind im Journal (`index.html`) inzwischen alle umgesetzt und
 gegen diese Daten getestet — `findStrand()` über eingehende Verweise,

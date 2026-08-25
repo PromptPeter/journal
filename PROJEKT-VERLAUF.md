@@ -18,7 +18,7 @@ laufenden Server — Nachschlagen sollte ohne Server möglich sein.
 **Wo wir stehen:** Versionskontrolle für alle Projekte unter `C:\DEV`
 eingerichtet (25.08.2026), OKF-Exportformate (`raw`/`data`/`compact`/`aged`/
 `VERLAUF.md`/LLM-Wiki-Bündel) fertig und gegen vier Referenzdatensätze
-getestet, `compactor.js`-Fix in `OKF_MD_LOG` als nächster Schritt freigegeben.
+getestet, `compactor.js`-Fix in `OKF_MD_LOG` umgesetzt und verifiziert.
 
 **Woran zuletzt gearbeitet:** Feldwechsel `kategorie` → `tags` in den
 JSON-Exporten (Googles OKF-Schema), Repos aufgeräumt, Sicherung-vor-Schreiben
@@ -32,7 +32,7 @@ als projektweite Regel festgelegt.
 |---|---|---|---|
 | S1 | Regel 4 (aufgelöster ZWEIFEL wandert in die auflösende SETZUNG) bewusst nicht automatisiert — die Information steht nur im Fließtext, nicht in den Daten | 23.08.2026 | ungelöst |
 | S2 | Natives OKF-Verzeichnisformat (MD+YAML als Speicherformat, nicht nur Exportziel) noch nicht gebaut — nur `toKarpathyVault()` als Export | 23.08.2026 | ungelöst |
-| S3 | `log.md`: ersetzt es künftig `VERLAUF.md` auf Richards Server oder laufen beide parallel? Betrifft seinen Server direkt | 25.08.2026 | ungelöst, jetzt ohne Rückfragepflicht klärbar |
+| S3 | `log.md`: ersetzt es künftig `VERLAUF.md` in `OKF_MD_LOG` oder laufen beide parallel? | 25.08.2026 | ungelöst |
 | S4 | Testsuite (`real.mjs`, `i18n.mjs`, `secrets.mjs`) hängt an einer Datei in `Downloads`, die dort fehlt — fragile externe Abhängigkeit | 25.08.2026 | ungelöst |
 
 ## Wände (WAND)
@@ -65,3 +65,4 @@ als projektweite Regel festgelegt.
 - SETZUNG: Verweisform im Verzeichnisformat bleibt Markdown-Link
 - SETZUNG: Nutzer entscheidet ab jetzt allein über das gesamte Projekt inklusive `OKF_MD_LOG` — Rückfragepflicht bei Richard entfällt
 - SETZUNG: Immer mit Sicherung planen, nie Rohdaten ohne Versionierung ändern; Versionskontrolle in alle Projekte unter `C:\DEV`
+- WEG → SETZUNG: `compactor.js` in `OKF_MD_LOG` direkt gefixt (A–D), Bench zeigt 4/4 fehlerfrei
