@@ -6,6 +6,8 @@
 
 **Your AI chat history, kept on your own disk — searchable, structured, and yours alone.**
 
+[![Try it live](https://img.shields.io/badge/try%20it-live%20demo-4d7cfe?style=for-the-badge)](https://promptpeter.github.io/journal/)
+
 [![version](https://img.shields.io/badge/version-1.0.0-4d7cfe)](#)
 [![local-first](https://img.shields.io/badge/local--first-no%20server%20required-3ecf8e)](#)
 [![license](https://img.shields.io/badge/license-MIT-3ecf8e)](LICENSE)
@@ -46,7 +48,10 @@ archive — and treats the *reasoning*, not just the answer, as the thing worth 
 
 ## Quick start
 
-No install, no build step, no server.
+**[Try it live](https://promptpeter.github.io/journal/)** — no install, runs straight in
+your browser, loaded with the demo corpus from the screenshot above.
+
+Or run it fully offline, same file either way:
 
 1. Download or clone this repo
 2. Double-click `index.html`
