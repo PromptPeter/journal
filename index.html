@@ -140,6 +140,9 @@ button{cursor:pointer;background:none;border:none;padding:0}
 .trigger.is-active{color:var(--text);border-color:#33415c;background:var(--surface-2)}
 .trigger.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .trigger.primary:hover{background:#5f8aff;border-color:#5f8aff}
+.trigger.import{background:var(--ok);border-color:var(--ok);color:#08150f}
+.trigger.import:hover{background:#57e0a3;border-color:#57e0a3}
+.trigger.import .chev{color:#08150f;opacity:.65}
 .trigger .chev{transition:transform .18s var(--ease);color:var(--text-3);margin-left:-2px}
 .trigger[aria-expanded="true"] .chev{transform:rotate(180deg);color:var(--text-2)}
 .trigger .count{font-size:11px;font-weight:600;line-height:1;background:var(--accent);color:#fff;
@@ -608,6 +611,10 @@ mark{background:var(--accent-soft);color:#a9c2ff;border-radius:2px;padding:0 1px
         <svg width="14" height="14"><use href="#i-dl"/></svg><span class="lbl"></span>
         <svg class="chev" width="14" height="14"><use href="#i-chev"/></svg></button>
 
+      <button class="trigger import" id="import-btn" aria-haspopup="listbox" aria-expanded="false">
+        <svg width="14" height="14"><use href="#i-dl"/></svg><span class="lbl"></span>
+        <svg class="chev" width="14" height="14"><use href="#i-chev"/></svg></button>
+
       <button class="link-btn" id="reset" hidden>
         <svg width="13" height="13"><use href="#i-reset"/></svg> <span></span></button>
     </div>
@@ -617,7 +624,6 @@ mark{background:var(--accent-soft);color:#a9c2ff;border-radius:2px;padding:0 1px
   <div class="toolbar">
     <span class="result-count" id="count">–</span>
     <span class="spacer"></span>
-    <button class="link-btn" id="import-btn"><svg width="13" height="13"><use href="#i-dl"/></svg> <span></span></button>
     <span class="timing" id="timing"></span>
   </div>
 
@@ -4171,7 +4177,7 @@ function applyLang(){
   qInput.setAttribute('aria-label', t('searchAria'));
   opTrigger.title = t('searchOpTitle');
   document.querySelector('#reset span').textContent = t('reset');
-  document.querySelector('#import-btn span').textContent = t('importBtn');
+  importTrigger.querySelector('.lbl').textContent = t('importBtn');
   document.querySelector('#dropzone h3').textContent = t('dropTitle');
   document.querySelector('#dropzone p').textContent  = t('dropSub');
 
