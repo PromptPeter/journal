@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PromptPeter — mascot mark, finalised 25.08.2026.
+  Loose, hand-drawn ballpoint style (each line drawn twice, slightly
+  offset, via an SVG turbulence/displacement filter standing in for a
+  shaky hand — see .claude/settings-und-design.md for the design story).
+  The thread-loop at the collar is the one deliberate brand nod, tying
+  back to the "Thread" mark concept (see brand/mark-concepts note).
+  Colors are hardcoded (not CSS custom properties) so this file renders
+  correctly standalone — as a README image, a GitHub avatar, a favicon
+  source — without depending on an external stylesheet.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="420" viewBox="0 0 440 420">
+  <defs>
+    <filter id="wobble" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.022 0.045" numOctaves="2" seed="7" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="8.5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="wobble2" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.026 0.05" numOctaves="2" seed="31" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="9" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="wobble3" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03 0.055" numOctaves="2" seed="52" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+
+  <g id="peterlines" fill="none" stroke="#2e2b26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#wobble)">
+    <!-- shoulders / shirt -->
+    <path d="M120 300 C 110 260, 130 220, 165 205 C 145 240, 150 280, 150 320 L150 400 M320 300 C 330 260, 310 220, 275 205 C 295 240, 290 280, 290 320 L290 400"/>
+    <path d="M150 400 C 150 340, 155 300, 165 280 M290 400 C 290 340, 285 300, 275 280"/>
+    <path d="M165 205 C 185 185, 255 185, 275 205"/>
+    <!-- collar -->
+    <path d="M195 210 L220 235 L245 210"/>
+    <!-- neck -->
+    <path d="M200 205 C 200 190, 205 178, 220 178 C 235 178, 240 190, 240 205"/>
+
+    <!-- head outline, slightly asymmetric on purpose -->
+    <path d="M167 130 C 165 90, 190 60, 222 60 C 256 58, 278 88, 276 128 C 278 155, 268 178, 248 190 C 232 200, 210 200, 194 190 C 176 178, 166 156, 167 130 Z"/>
+
+    <!-- ears -->
+    <path d="M167 118 C 158 116, 156 130, 165 136"/>
+    <path d="M276 118 C 285 116, 288 130, 278 136"/>
+
+    <!-- big round glasses -->
+    <circle cx="200" cy="122" r="26"/>
+    <circle cx="252" cy="122" r="26"/>
+    <path d="M223 120 Q226 124 229 120"/>
+    <path d="M174 118 L167 112"/>
+    <path d="M278 118 L286 112"/>
+
+    <!-- wide, blank stare -->
+    <circle cx="200" cy="122" r="10" fill="#2e2b26"/>
+    <circle cx="252" cy="122" r="10" fill="#2e2b26"/>
+
+    <!-- eyebrows, slightly worried -->
+    <path d="M182 90 C 190 84, 200 84, 208 88"/>
+    <path d="M244 88 C 252 84, 262 84, 270 90"/>
+
+    <!-- small nose -->
+    <path d="M223 132 C 220 145, 218 152, 224 155"/>
+
+    <!-- flat, deadpan mouth -->
+    <path d="M204 172 C 214 176, 234 176, 244 172"/>
+
+    <!-- a little hair -->
+    <path d="M175 78 C 185 62, 210 55, 225 56 C 245 56, 262 64, 270 80"/>
+
+    <!-- collar tie: a single thread-loop, the one brand nod -->
+    <path d="M220 235 C 210 232, 204 240, 210 246 C 202 252, 210 260, 220 254 C 230 260, 238 252, 230 246 C 236 240, 230 232, 220 235 Z"
+      stroke="#3a63e0"/>
+  </g>
+  <!-- retraced pass: real ink lines get gone over more than once, never perfectly aligned -->
+  <use href="#peterlines" filter="url(#wobble3)" opacity="0.5"/>
+
+  <!-- hands, held up, deadpan surprise -->
+  <g id="peterhands" fill="none" stroke="#2e2b26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" filter="url(#wobble2)">
+    <path d="M120 300 C 95 290, 70 292, 55 305"/>
+    <path d="M55 305 C 48 300, 40 302, 40 310 M55 305 C 50 296, 42 296, 40 303 M55 305 C 54 314, 46 316, 43 310"/>
+    <path d="M320 300 C 345 292, 368 296, 380 310"/>
+    <path d="M380 310 C 388 306, 394 310, 392 317 M380 310 C 386 302, 394 304, 392 311 M380 310 C 380 320, 388 322, 390 315"/>
+  </g>
+  <use href="#peterhands" filter="url(#wobble)" opacity="0.5"/>
+</svg>

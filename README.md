@@ -1,12 +1,23 @@
 <div align="center">
 
+<img src="brand/promptpeter.svg" width="140" alt="PromptPeter, looking mildly alarmed" />
+
 # PromptEngineer · Journal
 
 **Your AI chat history, kept on your own disk — searchable, structured, and yours alone.**
 
 [![version](https://img.shields.io/badge/version-1.0.0-4d7cfe)](#)
 [![local-first](https://img.shields.io/badge/local--first-no%20server%20required-3ecf8e)](#)
-[![license](https://img.shields.io/badge/license-TBD-e6a44e)](#license)
+[![license](https://img.shields.io/badge/license-MIT-3ecf8e)](LICENSE)
+
+</div>
+
+> **Hi, I'm PromptPeter.** That's the face I made the day I counted 400-something ChatGPT
+> conversations sitting in my browser history that I swore I'd revisit — the good prompt,
+> the reasoning that actually worked, all of it gone the moment the tab closed. This repo
+> is what I built instead of a 401st tab.
+
+<div align="center">
 
 <!-- TODO before publishing: replace this line with a real screenshot or short GIF —
      repos with a visible screenshot get meaningfully more stars. A screenshot of the
@@ -148,9 +159,9 @@ request.
 
 ## License
 
-**TBD** — a license will be added before this repo is meant to be forked or redistributed
-in earnest. Until then, all rights are reserved. If you're reading this on GitHub and no
-`LICENSE` file exists yet, ask before assuming you can reuse the code.
+[MIT](LICENSE) — do what you want with it, including building a business on it. No
+attribution required (though a mention is always appreciated), no share-alike clause,
+no catch.
 
 ---
 
@@ -160,3 +171,7 @@ This project grew out of `OKF_MD_LOG`, a server that transcribes AI conversation
 things changed its shape: the realisation that a model's *reasoning trace* is often more
 useful than its answer, and the decision that looking something up shouldn't require
 starting a server first. That second insight is this repo.
+
+<div align="center">
+<sub><em>PromptPeter keeps the thread. ⭐ if that face looks familiar.</em></sub>
+</div>

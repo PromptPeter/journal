@@ -32,9 +32,15 @@ zunächst das Strengere.
 **Falls AGPL:** Es braucht eine Beitragsvereinbarung (CLA oder DCO), sonst lassen
 sich fremde Beiträge später nicht kommerziell lizenzieren.
 
-- [ ] Lizenz gewählt: ______________
-- [ ] `LICENSE`-Datei angelegt, Badge angeglichen
-- [ ] Beitragsvereinbarung nötig? ja / nein
+- [x] Lizenz gewählt: **MIT** (25.08.2026, Jens allein entschieden) — Begründung: die Journal-App
+      selbst ist technisch leicht nachbaubar (Client-seitige Filter-/Export-Logik, kein
+      Server), das Kernversprechen „lokal, kostenlos" verträgt sich ohnehin schlecht mit
+      klassischer Enterprise-Monetarisierung. Eine spätere Agent/Skill/Workflow-Bibliothek
+      oder eine gehostete Team-Version wären der eigentliche Hebel für Enterprise — die
+      können bei Bedarf eine eigene, strengere Lizenz/ein eigenes Geschäftsmodell bekommen,
+      unabhängig von diesem Repo.
+- [x] `LICENSE`-Datei angelegt, Badge angeglichen
+- [x] Beitragsvereinbarung nötig? **nein** — bei MIT nicht erforderlich (nur bei AGPL relevant)
 
 ---
 
