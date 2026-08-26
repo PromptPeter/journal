@@ -156,6 +156,12 @@ moves.
 - ⬜ **Agent / Skill / Workflow / Prompt library** — take the snippets already sitting in
   your journal and turn them into reusable prompts, agent instructions, and workflows,
   without leaving the app
+- ⬜ **Graph view** — the OKF reasoning graph (Motive → Path → Wall/Decision) as connected
+  nodes, not just a list. Starting scoped to one conversation, not the whole archive.
+- ⬜ **Quick compress, no typing required** — a fast, purely mechanical pass over
+  `raw.okf.json` (deduplicate, trim redundant re-pastes) that needs zero OKF
+  categorization, with a one-click export straight from that pass. For "capture and go"
+  workflows, not just the fully-typed graph.
 - ⬜ Official data-export parsers (e.g. ChatGPT's `conversations.json`) as a fourth,
   higher-fidelity import path
 - ⬜ Community-suggested formats, filters, and OKF types — see [Contributing](#contributing)
