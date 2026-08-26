@@ -4,7 +4,8 @@
 
 # PromptEngineer · Journal
 
-**Your AI chat history, kept on your own disk — searchable, structured, and yours alone.**
+**Your own LLM conversations, sorted offline — clean enough to build real code from,
+exportable straight to OKF.**
 
 [![Try it live](https://img.shields.io/badge/try%20it-live%20demo-4d7cfe?style=for-the-badge)](https://promptpeter.github.io/journal/)
 
@@ -36,6 +37,9 @@ browser tabs you'll eventually lose.
 
 **PromptEngineer Journal** turns your chat history into a permanent, searchable, local
 archive — and treats the *reasoning*, not just the answer, as the thing worth keeping.
+Sorted that way, a messy pile of chats becomes something you can actually build from:
+what was tried, what broke, what held — see [The OKF format](#the-okf-format) below for
+how that structure turns into decisions you can code against.
 
 - **Nothing leaves your machine.** No account, no server, no cloud dependency that gets
   shut down next year. Open one HTML file, that's the whole app.
