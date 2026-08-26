@@ -147,7 +147,7 @@ so it doesn't break every time a provider redesigns their UI.
 ## Roadmap
 
 Nothing below is started unless marked ✅. No promised dates — open source moves when it
-moves.
+moves. 💭 marks an early idea being turned over, not a committed item.
 
 - ✅ Filter engine, tree view, eleven export formats, OKF read/write
 - ✅ Manual chat import: paste dialog, bookmarklet, browser extension — with duplicate
@@ -165,6 +165,12 @@ moves.
 - ⬜ Official data-export parsers (e.g. ChatGPT's `conversations.json`) as a fourth,
   higher-fidelity import path
 - ⬜ Community-suggested formats, filters, and OKF types — see [Contributing](#contributing)
+- 💭 **A shared, self-hosted "company brain"** — a separate product on the same OKF core,
+  where a team's collective chat history becomes one merged reasoning graph instead of
+  N private ones. Opt-in per entry only, same as today — nothing collected in the
+  background, ever. Self-hosted first (a Docker image a company runs on its own
+  infrastructure), with a managed-hosting option considered later. Early idea, no repo
+  yet, no timeline.
 
 Have an idea that's not here? Open an issue — that's exactly what this list is for.
 
