@@ -56,7 +56,10 @@ how that structure turns into decisions you can code against.
 
 Two layers, answering two different questions.
 
-**`raw.okf.json`** — *what was said*: role, text, timestamp, model. Never modified.
+**`raw.okf.json`** — *what was said*: role, text, timestamp, model. Never modified. This
+layer needs no categorization at all — paste a chat and it's captured, deduplicated
+against what's already in, instantly. Typing it into the graph below is a step you take
+when (or if) you want it, not a toll you pay to get in.
 
 **`data.okf.json`** — *what follows from it*. Each entry gets one of six types and may
 point to an earlier entry, forming a graph of reasoning threads:
