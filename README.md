@@ -47,6 +47,38 @@ how that structure turns into decisions you can code against.
   labels (tags, category, signal) can change — never the content.
 - **Works across every model you use.** ChatGPT, Claude, Gemini, DeepSeek, Grok, Kimi,
   GLM, MiniMax, ManusAI, HuggingFace — one format, one journal, actually comparable.
+- **Structured, not just saved.** Every entry gets typed into **OKF** — Motive, Path,
+  Wall, Decision, Doubt — and exports straight into a ready-to-use **Obsidian vault**.
+
+---
+
+## The OKF format
+
+Two layers, answering two different questions.
+
+**`raw.okf.json`** — *what was said*: role, text, timestamp, model. Never modified.
+
+**`data.okf.json`** — *what follows from it*. Each entry gets one of six types and may
+point to an earlier entry, forming a graph of reasoning threads:
+
+| Type | Shown as | Guiding question |
+|---|---|---|
+| `MOTIV` | Motive | Why are we doing this at all? |
+| `FUND` | Finding | What is the case? |
+| `WEG` | Path | What are we trying? |
+| `WAND` | Wall | What did it run into? |
+| `SETZUNG` | Decision | What holds now? |
+| `ZWEIFEL` | Doubt | What is still nagging? |
+
+A `MOTIV` is never compacted away. A path that hit a wall doesn't vanish — the wall
+absorbs it along with the reasoning that led there. What's left, after compaction, is
+the actual history of a project: motives, walls, decisions, open doubts — without the
+repetition.
+
+**One click, and this graph becomes an LLM wiki bundle** — a ZIP that unpacks into a
+ready-to-use **Obsidian vault**: every `MOTIV`, `WEG`, `WAND`, and `SETZUNG` as a linked
+note, cross-referenced by the same graph you see in the app. The `SETZUNG` (Decision)
+notes are exactly what you'd code against.
 
 ---
 
@@ -106,31 +138,6 @@ so it doesn't break every time a provider redesigns their UI.
 <div align="center">
 <img src="docs/screenshots/paste-dialog.png" width="480" alt="The Paste a chat dialog, with provider picker and one-time bookmarklet" />
 </div>
-
----
-
-## The OKF format
-
-Two layers, answering two different questions.
-
-**`raw.okf.json`** — *what was said*: role, text, timestamp, model. Never modified.
-
-**`data.okf.json`** — *what follows from it*. Each entry gets one of six types and may
-point to an earlier entry, forming a graph of reasoning threads:
-
-| Type | Shown as | Guiding question |
-|---|---|---|
-| `MOTIV` | Motive | Why are we doing this at all? |
-| `FUND` | Finding | What is the case? |
-| `WEG` | Path | What are we trying? |
-| `WAND` | Wall | What did it run into? |
-| `SETZUNG` | Decision | What holds now? |
-| `ZWEIFEL` | Doubt | What is still nagging? |
-
-A `MOTIV` is never compacted away. A path that hit a wall doesn't vanish — the wall
-absorbs it along with the reasoning that led there. What's left, after compaction, is
-the actual history of a project: motives, walls, decisions, open doubts — without the
-repetition.
 
 ---
 
