@@ -1,6 +1,9 @@
 node_modules/
 *.log
 
+# Reddit-API-Zugangsdaten fuers Post-Skript -- niemals versionieren
+.reddit-credentials
+
 # Von den Test-Suiten erzeugte Wegwerf-Module (schreiben leider ins
 # Projektwurzelverzeichnis statt ins Scratchpad) und Smoke-Test-Reste
 core.mjs
