@@ -533,6 +533,69 @@ mark{background:var(--accent-soft);color:#a9c2ff;border-radius:2px;padding:0 1px
   .tree-wrap{grid-template-rows:1fr!important}
   .leaf-wrap{grid-template-rows:1fr!important}
 }
+
+/* ---------- Steuerzentrale / Adminboard ---------- */
+.masthead #sz-btn{margin-right:10px}
+.sz-panel{width:min(1120px,calc(100vw - 32px));height:min(86vh,860px);display:flex;flex-direction:column;
+  background:var(--panel);border-radius:var(--r-lg);box-shadow:var(--shadow-pop);
+  transform:translateY(8px) scale(.99);transition:transform .2s var(--ease)}
+.scrim.open .sz-panel{transform:none}
+.sz-head{display:flex;align-items:center;gap:12px;padding:16px 22px 12px;border-bottom:1px solid var(--line-soft);flex-wrap:wrap}
+.sz-head h2{margin:0;font-size:16px;font-weight:600;flex:1;min-width:220px}
+.sz-sub{font-size:11.5px;color:var(--text-3);line-height:1.5;flex-basis:100%;margin:0}
+.sz-tabs{display:flex;gap:4px;padding:8px 18px 0;border-bottom:1px solid var(--line-soft);overflow-x:auto}
+.sz-tabs button{font-size:12.5px;font-weight:600;color:var(--text-3);padding:9px 13px;border-radius:var(--r-sm) var(--r-sm) 0 0;
+  border-bottom:2px solid transparent;white-space:nowrap}
+.sz-tabs button:hover{color:var(--text)}
+.sz-tabs button.on{color:var(--text);border-bottom-color:var(--accent)}
+.sz-body{flex:1;overflow-y:auto;padding:18px 22px 24px;display:flex;flex-direction:column;gap:16px}
+.sz-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.sz-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:var(--r-md);padding:13px 15px;
+  display:flex;flex-direction:column;gap:8px;min-width:0}
+.sz-card h3{margin:0;font-size:13.5px;font-weight:650;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sz-card p,.sz-card li{margin:0;font-size:12.5px;line-height:1.5;color:var(--text-2)}
+.sz-card ul{margin:0;padding-left:17px}
+.sz-k{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)}
+.sz-chip{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:650;padding:2px 8px;border-radius:var(--r-pill);
+  background:var(--surface-3);color:var(--text-2);max-width:100%;overflow-wrap:anywhere;line-height:1.4}
+.sz-chip.ok{background:#3ecf8e22;color:#7be0b3}
+.sz-chip.mid{background:#e6a44e22;color:#f0c384}
+.sz-chip.bad{background:#f2555a26;color:#ffb4b6}
+.sz-chip.off{background:var(--surface-3);color:var(--text-3)}
+.sz-chips{display:flex;flex-wrap:wrap;gap:6px}
+.sz-h{margin:0;font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3)}
+.sz-empty{padding:26px;border:1px dashed var(--line);border-radius:var(--r-md);text-align:center;font-size:13px;color:var(--text-3);line-height:1.6}
+.sz-note{font-size:12px;line-height:1.55;color:var(--text-3);margin:0}
+.sz-warn{font-size:12px;line-height:1.55;color:#f0c384;background:#e6a44e14;border:1px solid #e6a44e40;border-radius:var(--r-sm);padding:8px 11px;margin:0}
+.sz-danger{color:#ffb4b6;background:#f2555a14;border-color:#f2555a40}
+.sz-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.sz-table th{text-align:left;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-3);padding:6px 10px;border-bottom:1px solid var(--line)}
+.sz-table td{padding:7px 10px;border-bottom:1px solid var(--line-soft);color:var(--text-2);vertical-align:top}
+.sz-table code,.sz-md code,.sz-code{font-family:var(--mono);font-size:11.5px;background:var(--surface-3);padding:1px 5px;border-radius:4px;color:var(--text)}
+.sz-pre{margin:0;font-family:var(--mono);font-size:11.5px;line-height:1.5;background:var(--surface);border:1px solid var(--line-soft);
+  border-radius:var(--r-sm);padding:10px 12px;overflow:auto;max-height:260px;white-space:pre-wrap;color:var(--text-2)}
+.sz-md h3,.sz-md h4,.sz-md h5{margin:12px 0 6px;font-size:13px;color:var(--text)}
+.sz-md p,.sz-md li{font-size:12.5px;line-height:1.55;color:var(--text-2);margin:4px 0}
+.sz-md ul,.sz-md ol{margin:4px 0;padding-left:20px}
+.sz-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sz-row input[type=text],.sz-row input[type=number],.sz-field{background:var(--surface);border:1px solid var(--line);color:var(--text);
+  border-radius:var(--r-sm);padding:7px 10px;font-size:12.5px;font-family:inherit;min-width:0}
+.sz-row input[type=text]{flex:1;min-width:200px}
+.sz-bar{height:6px;border-radius:var(--r-pill);background:var(--surface-3);overflow:hidden}
+.sz-bar i{display:block;height:100%;width:0;border-radius:inherit;transition:width .25s var(--ease)}
+.sz-bar i.ok{background:var(--ok)}.sz-bar i.mid{background:var(--warn)}.sz-bar i.bad{background:var(--danger)}
+.sz-quota{display:grid;grid-template-columns:70px 1fr;gap:6px 8px;align-items:center}
+.sz-quota input{width:100%}
+.sz-quota label{font-size:11px;color:var(--text-3)}
+.sz-task{border:1px solid var(--line-soft);border-radius:var(--r-md);background:var(--surface);overflow:hidden}
+.sz-task > button{display:flex;align-items:center;gap:10px;width:100%;padding:10px 13px;text-align:left;flex-wrap:wrap}
+.sz-task > button:hover{background:var(--surface-2)}
+.sz-task .nm{font-size:13px;color:var(--text);font-weight:600;flex:1;min-width:160px}
+.sz-task .det{padding:0 13px 13px;display:flex;flex-direction:column;gap:8px}
+.sz-check{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;line-height:1.5;color:var(--text-2)}
+.sz-check input{margin-top:3px}
+.sz-link{color:var(--accent);font-size:12px}
+.sz-link:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -566,6 +629,7 @@ mark{background:var(--accent-soft);color:#a9c2ff;border-radius:2px;padding:0 1px
       <p id="corpus-line">Lade Korpus …</p>
     </div>
     <div class="spacer"></div>
+    <button class="trigger" id="sz-btn" type="button"><svg width="14" height="14"><use href="#i-folder"/></svg><span class="lbl"></span></button>
     <div class="langswitch" role="group" id="density" aria-label="Density">
       <button data-density="compact" type="button">
         <svg width="13" height="13"><use href="#i-dense"/></svg></button>
@@ -651,6 +715,7 @@ mark{background:var(--accent-soft);color:#a9c2ff;border-radius:2px;padding:0 1px
 </div></div>
 
 <input type="file" id="file-input" multiple accept=".md,.markdown,.txt,.json" hidden>
+<input type="file" id="sz-folder" webkitdirectory multiple hidden>
 <div class="toasts" id="toasts"></div>
 
 <script>
@@ -673,7 +738,7 @@ let DENSITY = (() => {
 })();
 
 /* Für GitHub-Releases/README: bei Aenderungen hier hochzaehlen (Semver). */
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 
 const LANGS = ['en', 'de'];
 const LANG_KEY = 'promptengineer.lang';
@@ -4211,6 +4276,8 @@ function applyLang(){
   document.querySelector('.masthead h1 .ttl').textContent = t('appTitle');
   document.getElementById('app-ver').textContent = 'v' + APP_VERSION;
   document.getElementById('srv').title = t('srvTitle');
+  document.querySelector('#sz-btn .lbl').textContent = t('szBtn');
+  if (sz.dlg) szRender();
 
   qInput.placeholder = t('searchPlaceholder');
   qInput.setAttribute('aria-label', t('searchAria'));
@@ -4241,6 +4308,536 @@ document.getElementById('langswitch').addEventListener('click', e => {
   const btn = e.target.closest('button[data-lang]');
   if (btn) setLang(btn.dataset.lang);
 });
+
+/* ═══════════════════════════════════════════════════════════════
+   TEIL S · Steuerzentrale (Adminboard)
+   Zeigt Besatzung, Routing, Aufträge, Brief, API-Status und Gedächtnis.
+   Datenquellen: ein vom Nutzer gewählter Projektordner (es werden nur
+   AGENTS.md, VERLAUF.md und crew/* gelesen) sowie localStorage für
+   handgepflegte Quoten. Es gibt hier kein Eingabefeld für Schlüssel;
+   der API-Status stammt aus crew/status.json, die ein lokales Skript
+   (node crew/status.mjs) aus Umgebungsvariablen erzeugt.
+   ═══════════════════════════════════════════════════════════════ */
+
+Object.assign(T, {
+  szBtn:       { en:'Control center', de:'Steuerzentrale' },
+  szTitle:     { en:'Control center · Admin board', de:'Steuerzentrale · Adminboard' },
+  szClose:     { en:'Close', de:'Schließen' },
+  szLoad:      { en:'Load project folder', de:'Projektordner laden' },
+  szLoaded:    { en:'{root} · {t} tasks · {r} results', de:'{root} · {t} Aufträge · {r} Ergebnisse' },
+  szPrivacy:   { en:'Reads only AGENTS.md, VERLAUF.md and crew/*. Nothing leaves this device. No key is ever entered here.',
+                 de:'Liest nur AGENTS.md, VERLAUF.md und crew/*. Nichts verlässt dieses Gerät. Hier wird nie ein Schlüssel eingegeben.' },
+  szTabCrew:   { en:'Crew & routing', de:'Besatzung & Routing' },
+  szTabTasks:  { en:'Tasks & results', de:'Aufträge & Ergebnisse' },
+  szTabBrief:  { en:'Brief', de:'Brief' },
+  szTabApi:    { en:'APIs & status', de:'APIs & Status' },
+  szTabMem:    { en:'Memory', de:'Gedächtnis' },
+  szNoFolder:  { en:'No project folder loaded yet. Load it to see live workers, tasks, results, the brief and API status.',
+                 de:'Noch kein Projektordner geladen. Lade ihn, um Worker, Aufträge, Ergebnisse, Brief und API-Status live zu sehen.' },
+  szDoes:      { en:'Does', de:'Aufgabe' },
+  szNot:       { en:'Not his job', de:'Nicht seine Aufgabe' },
+  szRouting:   { en:'Routing: who gets which task', de:'Routing: wer bekommt welche Aufgabe' },
+  szTask:      { en:'Task', de:'Aufgabe' },
+  szWho:       { en:'Who', de:'Wer' },
+  szFallback:  { en:'Fallback when a limit is reached: offizier → offizier-api → wasser. Claude never stands in for empty free quotas.',
+                 de:'Fallback bei erreichtem Limit: offizier → offizier-api → wasser. Claude springt nie für leere Gratis-Kontingente ein.' },
+  szEscalate:  { en:'Escalate to Claude when', de:'Eskalation an Claude, wenn' },
+  szTodoWorker:{ en:'Model not set yet in crew/workers.json', de:'Modell in crew/workers.json noch nicht eingetragen' },
+  szManual:    { en:'manual', de:'manuell' },
+  szOpen:      { en:'open', de:'offen' },
+  szDone:      { en:'done', de:'erledigt' },
+  szNoTasks:   { en:'No tasks in crew/tasks yet. Create one with /delegieren in Claude Code.',
+                 de:'Noch keine Aufträge in crew/tasks. Lege einen mit /delegieren in Claude Code an.' },
+  szOrphan:    { en:'Results without a task', de:'Ergebnisse ohne Auftrag' },
+  szFirstLines:{ en:'first 40 lines', de:'erste 40 Zeilen' },
+  szQuestion:  { en:'Question for Claude', de:'Frage an Claude' },
+  szCopyCmd:   { en:'Copy command', de:'Befehl kopieren' },
+  szCopied:    { en:'Copied', de:'Kopiert' },
+  szCopyFail:  { en:'Copy failed. Select the text manually.', de:'Kopieren fehlgeschlagen. Text von Hand markieren.' },
+  szBriefLong: { en:'Brief has {n} lines. Limit is 60. Shorten it before Claude reads it.',
+                 de:'Der Brief hat {n} Zeilen. Grenze ist 60. Kürze ihn, bevor Claude ihn liest.' },
+  szNoBrief:   { en:'No crew/BRIEF.md and no VERLAUF.md found.', de:'Weder crew/BRIEF.md noch VERLAUF.md gefunden.' },
+  szHead:      { en:'Head', de:'Kopf' },
+  szTensions:  { en:'Open tensions', de:'Offene Spannungen' },
+  szWalls:     { en:'Walls', de:'Wände' },
+  szStatusFile:{ en:'Status file', de:'Statusdatei' },
+  szNoStatus:  { en:'No crew/status.json found. Create it on your PC and reload the folder:',
+                 de:'Keine crew/status.json gefunden. Erzeuge sie auf deinem PC und lade den Ordner neu:' },
+  szStale:     { en:'Status is older than one hour. Run the command again.', de:'Der Status ist älter als eine Stunde. Führe den Befehl erneut aus.' },
+  szKeyNote:   { en:'Keys stay in environment variables on your PC. This board only reads the result file, which contains no key and no account name.',
+                 de:'Schlüssel bleiben in Umgebungsvariablen auf deinem PC. Dieses Board liest nur die Ergebnisdatei, die weder Schlüssel noch Kontonamen enthält.' },
+  szAgeMin:    { en:'{n} min ago', de:'vor {n} Min.' },
+  szAgeH:      { en:'{n} h ago', de:'vor {n} Std.' },
+  szAgeD:      { en:'{n} d ago', de:'vor {n} Tg.' },
+  szUsedPct:   { en:'Used %', de:'Belegt %' },
+  szWindow:    { en:'Window', de:'Fenster' },
+  szNote:      { en:'Note', de:'Notiz' },
+  szManualOnly:{ en:'manual', de:'manuell' },
+  szAuto:      { en:'automatic', de:'automatisch' },
+  szUsedBy:    { en:'Used by workers', de:'Genutzt von Workern' },
+  szOpenPage:  { en:'Open page', de:'Seite öffnen' },
+  szUnknown:   { en:'unknown', de:'unbekannt' },
+  szProvKey:   { en:'PROVISIONING KEY: can create new keys. Revoke it and see the emergency note.',
+                 de:'PROVISIONING-KEY: kann neue Schlüssel anlegen. Widerrufen und Notfall-Anleitung beachten.' },
+  szLocal:     { en:'Local services', de:'Lokale Dienste' },
+  szOkfServer: { en:'OKF server (port 31337)', de:'OKF-Server (Port 31337)' },
+  szMemUrl:    { en:'claude-mem worker URL (printed at startup, e.g. http://localhost:PORT)',
+                 de:'claude-mem-Worker-URL (wird beim Start angezeigt, z. B. http://localhost:PORT)' },
+  szMemViewer: { en:'Open viewer', de:'Viewer öffnen' },
+  szMemTest:   { en:'Test connection', de:'Verbindung testen' },
+  szMemOk:     { en:'reachable', de:'erreichbar' },
+  szMemNo:     { en:'not reachable', de:'nicht erreichbar' },
+  szMemInfo:   { en:'claude-mem records tool use automatically, compresses it with a second model (the observer) and injects relevant context in later sessions. Data stays in ~/.claude-mem. Memory injection starts in the second session of a project.',
+                 de:'claude-mem zeichnet Werkzeugnutzung automatisch auf, verdichtet sie mit einem zweiten Modell (dem Observer) und spielt in späteren Sitzungen passenden Kontext ein. Die Daten bleiben in ~/.claude-mem. Die Einspielung beginnt in der zweiten Sitzung eines Projekts.' },
+  szMemObserver:{ en:'Choose your own Gemini or OpenRouter key as observer provider. The option "your Anthropic plan" probably draws on your Claude Pro quota (metering not confirmed).',
+                  de:'Wähle als Observer einen eigenen Gemini- oder OpenRouter-Schlüssel. Die Option „dein Anthropic-Abo" verbraucht wahrscheinlich dein Claude-Pro-Kontingent (Abrechnung nicht bestätigt).' },
+  szMemRule:   { en:'Memory does not replace the log: decisions (SETZUNG), walls (WAND) and open doubts (ZWEIFEL) still go into VERLAUF.md, deliberately and with the why.',
+                 de:'Das Gedächtnis ersetzt das Logbuch nicht: Entscheidungen (SETZUNG), Wände (WAND) und offene Zweifel (ZWEIFEL) gehören weiter bewusst und mit dem Weil in die VERLAUF.md.' },
+  szMemChecks: { en:'Setup checklist', de:'Einrichtungs-Checkliste' },
+});
+
+const SZ_KEY = 'promptengineer.sz';
+let szStore = (() => {
+  try { return Object.assign({ budget:{}, memUrl:'', checks:{} }, JSON.parse(localStorage.getItem(SZ_KEY)) || {}); }
+  catch { return { budget:{}, memUrl:'', checks:{} }; }
+})();
+const szSave = () => { try { localStorage.setItem(SZ_KEY, JSON.stringify(szStore)); } catch {} };
+const sz = { dlg:null, tab:'crew', files:null, openTasks:new Set() };
+
+const SZ_TABS = ['crew', 'tasks', 'brief', 'api', 'mem'];
+const SZ_TAB_KEY = { crew:'szTabCrew', tasks:'szTabTasks', brief:'szTabBrief', api:'szTabApi', mem:'szTabMem' };
+
+/* ---------- Stammdaten ---------- */
+const SZ_CREW = [
+  { id:'claude', workers:[],
+    role:{ en:'Control center', de:'Steuerzentrale' }, who:'Claude (Pro · Sonnet default)',
+    does:{ en:'Decide, write tasks, review results, confirm SETZUNGEN, resolve ZWEIFEL', de:'Entscheiden, Aufträge schreiben, Ergebnisse prüfen, SETZUNGEN bestätigen, ZWEIFEL auflösen' },
+    not:{ en:'Read raw data, write bulk code', de:'Rohdaten lesen, Massen-Code schreiben' } },
+  { id:'offizier', workers:['offizier', 'offizier-api'],
+    role:{ en:'First officer', de:'1. Offizier' }, who:'Gemini (Antigravity · Pro)',
+    does:{ en:'Read a lot, write briefs, type chats, condense VERLAUF, first drafts', de:'Viel lesen, Briefe schreiben, Chats typisieren, VERLAUF verdichten, Erstentwürfe' },
+    not:{ en:'Final decisions', de:'Endgültige Entscheidungen' } },
+  { id:'wasser', workers:['wasser'],
+    role:{ en:'Water carrier', de:'Wasserträger' }, who:'DeepSeek / OpenRouter :free',
+    does:{ en:'Reformat, tag, tests, boilerplate, translate, tidy up', de:'Umformatieren, Tagging, Tests, Boilerplate, Übersetzen, Aufräumen' },
+    not:{ en:'Decisions, security-relevant work', de:'Entscheidungen, Sicherheitsrelevantes' } },
+  { id:'spezialist', workers:['spezialist'],
+    role:{ en:'Specialist · code control', de:'Spezialist · Code-Kontrolle' }, who:'DeepSeek',
+    does:{ en:'Review code and diffs, hunt bugs and edge cases, check tests, scan for secrets and risky patterns; reports findings with file and line',
+           de:'Code und Diffs prüfen, Bugs und Randfälle suchen, Tests kontrollieren, nach Geheimnissen und riskanten Mustern suchen; meldet Funde mit Datei und Zeile' },
+    not:{ en:'Change code, decide what gets fixed', de:'Code ändern, entscheiden was behoben wird' } },
+];
+const SZ_ROUTES = [
+  [{ en:'Explore codebase, read docs and logs, type chats', de:'Codebase erkunden, Doku und Logs sichten, Chats typisieren' }, 'offizier'],
+  [{ en:'Write the brief for Claude', de:'Brief für Claude schreiben' }, 'offizier'],
+  [{ en:'Condense VERLAUF, rewrite the head', de:'VERLAUF verdichten, Kopf neu schreiben' }, 'offizier'],
+  [{ en:'Boilerplate, tests, renaming, formatting, tagging', de:'Boilerplate, Tests, Umbenennen, Formatieren, Tagging' }, 'wasser'],
+  [{ en:'Code review, bug hunt, test and secret check (first pass)', de:'Code-Review, Bugsuche, Test- und Geheimnis-Kontrolle (erste Instanz)' }, 'spezialist'],
+  [{ en:'Judge the findings, decide what gets fixed', de:'Funde bewerten, entscheiden was behoben wird' }, 'Claude'],
+  [{ en:'Architecture, design decisions, security, final review', de:'Architektur, Designentscheidung, Sicherheit, finales Review' }, 'Claude'],
+  [{ en:'Bug after two failed worker attempts', de:'Bug nach zwei gescheiterten Worker-Versuchen' }, 'Claude'],
+];
+const SZ_ESCALATE = [
+  { en:'an architecture or design decision is due', de:'eine Architektur- oder Designentscheidung ansteht' },
+  { en:'a worker fails twice on the same problem', de:'ein Worker zweimal am selben Problem scheitert' },
+  { en:'security, data model or public API are affected', de:'Sicherheit, Datenmodell oder öffentliche API betroffen sind' },
+  { en:'a worker reports itself unsure', de:'ein Worker sich selbst als unsicher meldet' },
+  { en:'the specialist reports a high-severity finding', de:'der Spezialist einen Fund mit Schwere hoch meldet' },
+];
+const SZ_PROVIDERS = [
+  { id:'claude', name:'Claude Pro', kind:'sub', link:'https://claude.ai/settings/usage',
+    hint:{ en:'5-hour window plus weekly cap, shared by claude.ai and Claude Code. Check with /status in Claude Code.',
+           de:'5-Stunden-Fenster plus Wochengrenze, gemeinsam für claude.ai und Claude Code. Prüfen mit /status in Claude Code.' } },
+  { id:'geminiPro', name:'Gemini Pro (Antigravity)', kind:'sub', link:null,
+    hint:{ en:'Antigravity shows the remaining quota. Multi-day lockouts for Pro users were reported (not confirmed by Google).',
+           de:'Antigravity zeigt die Restquote. Mehrtägige Sperren bei Pro-Nutzern wurden berichtet (von Google nicht bestätigt).' } },
+  { id:'gemini', name:'Gemini API (AI Studio)', kind:'api', env:'GEMINI_API_KEY', prefixes:['google', 'gemini'], link:'https://aistudio.google.com/apikey',
+    hint:{ en:'Limits per project in the AI Studio rate-limit view. The Pro subscription does not apply to the API key.',
+           de:'Limits pro Projekt in der AI-Studio-Ratenansicht. Das Pro-Abo gilt nicht für den API-Key.' } },
+  { id:'openrouter', name:'OpenRouter', kind:'api', env:'OPENROUTER_API_KEY', prefixes:['openrouter'], link:'https://openrouter.ai/settings/keys',
+    hint:{ en:':free models: reportedly 50 requests/day, 1000 after buying credits (unverified, check the official page).',
+           de:':free-Modelle: laut Drittquellen 50 Anfragen/Tag, 1000 nach einer Aufladung (ungeprüft, offizielle Seite beachten).' } },
+  { id:'deepseek', name:'DeepSeek', kind:'api', env:'DEEPSEEK_API_KEY', prefixes:['deepseek'], link:'https://platform.deepseek.com/api_keys',
+    hint:{ en:'Pay as you go, cheap. No free quota confirmed.', de:'Pay-as-you-go, günstig. Kein Gratis-Kontingent bestätigt.' } },
+  { id:'huggingface', name:'Hugging Face', kind:'api', env:'HF_TOKEN', prefixes:['huggingface'], link:null,
+    hint:{ en:'HuggingChat is chat only, not an agent backend.', de:'HuggingChat ist nur Chat, kein Agent-Backend.' } },
+];
+const SZ_MEM_CHECKS = [
+  { id:'install', text:{ en:'Installed in Claude Code (/plugin marketplace add thedotmack/claude-mem, then /plugin install claude-mem, restart)',
+                         de:'In Claude Code installiert (/plugin marketplace add thedotmack/claude-mem, dann /plugin install claude-mem, neu starten)' } },
+  { id:'observer', text:{ en:'Observer provider is my own Gemini or OpenRouter key, not the Anthropic plan', de:'Observer läuft über meinen eigenen Gemini- oder OpenRouter-Schlüssel, nicht über das Anthropic-Abo' } },
+  { id:'telemetry', text:{ en:'Telemetry switched off (npx claude-mem telemetry disable)', de:'Telemetrie ausgeschaltet (npx claude-mem telemetry disable)' } },
+  { id:'doctor', text:{ en:'npx claude-mem doctor reports no problem (Windows)', de:'npx claude-mem doctor meldet kein Problem (Windows)' } },
+  { id:'private', text:{ en:'Sensitive text is wrapped in <private> tags', de:'Sensibler Text steht in <private>-Tags' } },
+  { id:'log', text:{ en:'Decisions and walls still go into VERLAUF.md', de:'Entscheidungen und Wände gehen weiter in die VERLAUF.md' } },
+];
+
+/* ---------- Kleine Helfer ---------- */
+const szChip = (text, kind = '') => h('span', { class:`sz-chip ${kind}` }, text);
+const szEmpty = msg => h('div', { class:'sz-empty' }, msg);
+const szHead = (key, extra) => h('h3', { class:'sz-h' }, t(key), extra || null);
+function szCopy(text){
+  const done = () => toast(t('szCopied'), 'ok');
+  const fail = () => toast(t('szCopyFail'), 'err');
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done, fail); else fail();
+}
+function szCmd(text){
+  return h('div', { class:'sz-row' }, h('code', { class:'sz-code' }, text),
+    h('button', { class:'btn btn-ghost', type:'button', onClick:() => szCopy(text) }, t('szCopyCmd')));
+}
+function szAge(iso){
+  const ms = Date.now() - new Date(iso).getTime();
+  if (!Number.isFinite(ms)) return '?';
+  const min = Math.max(0, Math.round(ms / 60000));
+  if (min < 60) return t('szAgeMin', { n:min });
+  if (min < 1440) return t('szAgeH', { n:Math.round(min / 60) });
+  return t('szAgeD', { n:Math.round(min / 1440) });
+}
+function szLinkOut(href, label){
+  return h('a', { class:'sz-link', href, target:'_blank', rel:'noopener noreferrer' }, label);
+}
+
+/* ---------- Mini-Markdown (nur Textknoten, kein innerHTML) ---------- */
+function szInline(s){
+  const out = []; const re = /(`[^`]+`|\*\*[^*]+\*\*)/g; let last = 0, m;
+  while ((m = re.exec(s))){
+    if (m.index > last) out.push(s.slice(last, m.index));
+    const tok = m[0];
+    out.push(tok[0] === '`' ? h('code', {}, tok.slice(1, -1)) : h('strong', {}, tok.slice(2, -2)));
+    last = m.index + tok.length;
+  }
+  if (last < s.length) out.push(s.slice(last));
+  return out;
+}
+function szMd(text){
+  const root = h('div', { class:'sz-md' });
+  const lines = String(text).replace(/\r/g, '').split('\n');
+  const isTable = l => /^\s*\|.*\|\s*$/.test(l);
+  const isItem = l => /^\s*([-*]|\d+\.)\s+/.test(l);
+  let i = 0;
+  while (i < lines.length){
+    const ln = lines[i];
+    if (/^```/.test(ln)){
+      const buf = []; i++;
+      while (i < lines.length && !/^```/.test(lines[i])) buf.push(lines[i++]);
+      i++; root.append(h('pre', { class:'sz-pre' }, buf.join('\n'))); continue;
+    }
+    let m = /^(#{1,4})\s+(.*)$/.exec(ln);
+    if (m){ root.append(h('h' + Math.min(5, m[1].length + 2), {}, szInline(m[2]))); i++; continue; }
+    if (isTable(ln)){
+      const rows = [];
+      while (i < lines.length && isTable(lines[i])) rows.push(lines[i++]);
+      const cells = r => r.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+      const head = cells(rows[0]);
+      const body = rows.slice(/^[\s|:-]+$/.test(rows[1] || '') ? 2 : 1).map(cells);
+      root.append(h('table', { class:'sz-table' },
+        h('thead', {}, h('tr', {}, head.map(c => h('th', {}, szInline(c))))),
+        h('tbody', {}, body.map(r => h('tr', {}, r.map(c => h('td', {}, szInline(c))))))));
+      continue;
+    }
+    if (isItem(ln)){
+      const ordered = /^\s*\d+\./.test(ln); const items = [];
+      while (i < lines.length && isItem(lines[i])) items.push(lines[i++].replace(/^\s*([-*]|\d+\.)\s+/, ''));
+      root.append(h(ordered ? 'ol' : 'ul', {}, items.map(x => h('li', {}, szInline(x))))); continue;
+    }
+    if (!ln.trim()){ i++; continue; }
+    const buf = [lines[i++]];
+    while (i < lines.length && lines[i].trim() && !/^(#{1,4}\s|```)/.test(lines[i]) && !isTable(lines[i]) && !isItem(lines[i])) buf.push(lines[i++]);
+    root.append(h('p', {}, szInline(buf.join(' '))));
+  }
+  return root;
+}
+function szSections(text, names){
+  const out = {}; let cur = null;
+  for (const ln of String(text).replace(/\r/g, '').split('\n')){
+    const m = /^##\s+(.*)$/.exec(ln);
+    if (m){
+      cur = names.find(n => m[1].toLowerCase().startsWith(n.toLowerCase())) || null;
+      if (cur) out[cur] = [];
+      continue;
+    }
+    if (cur) out[cur].push(ln);
+  }
+  return out;
+}
+
+/* ---------- Ordner lesen (nur feste Pfade, Dateien bis 2 MB) ---------- */
+async function szReadFolder(list){
+  const out = { root:'', agents:null, verlauf:null, brief:null, workers:null, status:null, tasks:[], results:[] };
+  const MAX = 2 * 1024 * 1024;
+  for (const f of list){
+    const parts = (f.webkitRelativePath || f.name).split('/');
+    const rel = parts.slice(1).join('/');
+    if (!out.root) out.root = parts[0];
+    if (f.size > MAX) continue;
+    if (rel === 'AGENTS.md') out.agents = await f.text();
+    else if (rel === 'VERLAUF.md') out.verlauf = await f.text();
+    else if (rel === 'crew/BRIEF.md') out.brief = await f.text();
+    else if (rel === 'crew/workers.json'){ try { out.workers = JSON.parse(await f.text()); } catch {} }
+    else if (rel === 'crew/status.json'){ try { out.status = JSON.parse(await f.text()); } catch {} }
+    else if (/^crew\/tasks\/[^/]+\.md$/.test(rel) && !parts.at(-1).startsWith('_'))
+      out.tasks.push({ name:parts.at(-1).replace(/\.md$/i, ''), text:await f.text(), mtime:f.lastModified });
+    else if (/^crew\/results\/[^/]+\.md$/.test(rel))
+      out.results.push({ name:parts.at(-1).replace(/\.md$/i, ''), text:await f.text(), mtime:f.lastModified, size:f.size });
+  }
+  out.tasks.sort((a, b) => a.name.localeCompare(b.name));
+  out.results.sort((a, b) => a.name.localeCompare(b.name));
+  return out;
+}
+
+/* ---------- Tab: Besatzung & Routing ---------- */
+function szWorkerChip(name){
+  const w = sz.files?.workers?.[name];
+  if (!sz.files) return szChip(name);
+  if (!w) return szChip(`${name} · ?`, 'off');
+  if (w.mode === 'manual') return szChip(`${name} · ${t('szManual')}`, 'ok');
+  if (/TODO/i.test(String(w.model || ''))) return szChip(`${name} · TODO`, 'mid');
+  return szChip(`${name} · ${w.model}`, 'ok');
+}
+function szTabCrew(){
+  const body = h('div', { class:'sz-body-in', style:'display:flex;flex-direction:column;gap:16px' });
+  if (!sz.files) body.append(h('p', { class:'sz-note' }, t('szNoFolder')));
+  body.append(h('div', { class:'sz-grid' }, SZ_CREW.map(c =>
+    h('div', { class:'sz-card' },
+      h('h3', {}, tx(c.role)), h('p', {}, c.who),
+      h('div', {}, h('div', { class:'sz-k' }, t('szDoes')), h('p', {}, tx(c.does))),
+      tx(c.not) ? h('div', {}, h('div', { class:'sz-k' }, t('szNot')), h('p', {}, tx(c.not))) : null,
+      c.workers.length ? h('div', { class:'sz-chips' }, c.workers.map(szWorkerChip)) : null))));
+  if (sz.files?.workers){
+    const todo = Object.entries(sz.files.workers).filter(([, w]) => w.mode === 'cli' && /TODO/i.test(String(w.model || ''))).map(([k]) => k);
+    if (todo.length) body.append(h('p', { class:'sz-warn' }, `${t('szTodoWorker')}: ${todo.join(', ')}`));
+  }
+  body.append(h('div', {}, szHead('szRouting'),
+    h('table', { class:'sz-table' },
+      h('thead', {}, h('tr', {}, h('th', {}, t('szTask')), h('th', {}, t('szWho')))),
+      h('tbody', {}, SZ_ROUTES.map(([task, who]) => h('tr', {}, h('td', {}, tx(task)), h('td', {}, h('code', {}, who))))))));
+  body.append(h('p', { class:'sz-note' }, t('szFallback')));
+  body.append(h('div', { class:'sz-card' }, h('h3', {}, t('szEscalate')),
+    h('ul', {}, SZ_ESCALATE.map(e => h('li', {}, tx(e))))));
+  if (sz.files?.agents) body.append(h('details', {}, h('summary', { class:'sz-h', style:'cursor:pointer' }, 'AGENTS.md'), szMd(sz.files.agents)));
+  return body;
+}
+
+/* ---------- Tab: Aufträge & Ergebnisse ---------- */
+function szPreview(text){ return h('pre', { class:'sz-pre' }, String(text).split('\n').slice(0, 40).join('\n')); }
+function szTabTasks(){
+  const f = sz.files;
+  if (!f) return h('div', {}, szEmpty(t('szNoFolder')));
+  if (!f.tasks.length && !f.results.length) return h('div', {}, szEmpty(t('szNoTasks')));
+  const used = new Set();
+  const body = h('div', { style:'display:flex;flex-direction:column;gap:10px' });
+  for (const task of f.tasks){
+    const res = f.results.filter(r => r.name.startsWith(task.name + '.'));
+    res.forEach(r => used.add(r.name));
+    const worker = (/\*\*Worker:\*\*\s*(.+)/.exec(task.text) || [])[1]?.trim() || '';
+    const open = sz.openTasks.has(task.name);
+    const row = h('div', { class:'sz-task' },
+      h('button', { type:'button', 'aria-expanded':String(open), onClick:() => {
+        open ? sz.openTasks.delete(task.name) : sz.openTasks.add(task.name); szRender(); } },
+        h('span', { class:'nm' }, task.name),
+        worker ? h('span', { class:'sz-chip' }, worker) : null,
+        res.map(r => szChip(`${r.name.slice(task.name.length + 1)} · ${(r.size / 1024).toFixed(1)} kB`, 'ok')),
+        szChip(res.length ? t('szDone') : t('szOpen'), res.length ? 'ok' : 'mid')));
+    if (open){
+      row.append(h('div', { class:'det' },
+        h('div', { class:'sz-k' }, `${task.name} · ${t('szFirstLines')}`), szPreview(task.text),
+        res.map(r => h('div', {}, h('div', { class:'sz-k' }, `${r.name} · ${new Date(r.mtime).toLocaleString(LOCALE())}`), szPreview(r.text)))));
+    }
+    body.append(row);
+  }
+  const orphans = f.results.filter(r => !used.has(r.name));
+  if (orphans.length) body.append(h('div', {}, szHead('szOrphan'), h('div', { class:'sz-chips' }, orphans.map(r => szChip(r.name)))));
+  return body;
+}
+
+/* ---------- Tab: Brief ---------- */
+function szTabBrief(){
+  const f = sz.files;
+  const body = h('div', { style:'display:flex;flex-direction:column;gap:14px' });
+  const q = h('input', { type:'text', placeholder:t('szQuestion'), 'aria-label':t('szQuestion') });
+  body.append(h('div', { class:'sz-row' }, q,
+    h('button', { class:'btn btn-primary', type:'button', onClick:() => szCopy(`/brief ${q.value.trim()}`.trim()) }, t('szCopyCmd'))));
+  if (!f) { body.append(szEmpty(t('szNoFolder'))); return body; }
+  if (f.brief){
+    const n = f.brief.replace(/\r/g, '').split('\n').length;
+    if (n > 60) body.append(h('p', { class:'sz-warn' }, t('szBriefLong', { n })));
+    body.append(h('div', { class:'sz-card' }, h('h3', {}, 'crew/BRIEF.md'), szMd(f.brief)));
+  }
+  if (f.verlauf){
+    const sec = szSections(f.verlauf, ['Kopf', 'Offene Spannungen', 'Wände']);
+    const map = [['Kopf', 'szHead'], ['Offene Spannungen', 'szTensions'], ['Wände', 'szWalls']];
+    for (const [name, key] of map) if (sec[name]) body.append(h('div', { class:'sz-card' }, h('h3', {}, t(key)), szMd(sec[name].join('\n'))));
+  }
+  if (!f.brief && !f.verlauf) body.append(szEmpty(t('szNoBrief')));
+  return body;
+}
+
+/* ---------- Tab: APIs & Status ---------- */
+const SZ_STATE = {
+  ok:{ kind:'ok', en:'connected', de:'verbunden' }, invalid:{ kind:'bad', en:'key invalid', de:'Schlüssel ungültig' },
+  'rate-limited':{ kind:'mid', en:'rate limited', de:'Limit erreicht' }, unreachable:{ kind:'bad', en:'unreachable', de:'nicht erreichbar' },
+  error:{ kind:'bad', en:'error', de:'Fehler' }, 'not-configured':{ kind:'off', en:'no key set', de:'kein Schlüssel gesetzt' },
+};
+function szWorkersFor(p){
+  const ws = sz.files?.workers; if (!ws) return [];
+  return Object.entries(ws).filter(([name, w]) => {
+    if (w.mode === 'manual') return p.id === 'geminiPro' && name === 'offizier';
+    const pre = String(w.model || '').split('/')[0].toLowerCase();
+    return (p.prefixes || []).includes(pre);
+  }).map(([name]) => name);
+}
+function szDetailLines(id, d){
+  if (!d) return [];
+  const L = [];
+  if (id === 'openrouter'){
+    if (d.usage != null) L.push(`Usage: ${d.usage}`);
+    if (d.limit != null) L.push(`Limit: ${d.limit}`);
+    if (d.limitRemaining != null) L.push(`Remaining: ${d.limitRemaining}`);
+    if (d.freeTier != null) L.push(`Free tier: ${d.freeTier ? 'yes' : 'no'}`);
+  } else if (id === 'deepseek'){
+    if (d.available != null) L.push(`Available: ${d.available ? 'yes' : 'no'}`);
+    (d.balances || []).forEach(b => L.push(`Balance: ${b.total} ${b.currency}`));
+  } else if (id === 'gemini'){
+    if (d.modelsSeen != null) L.push(`Models seen: ${d.modelsSeen}`);
+  } else if (id === 'huggingface'){
+    if (d.accountType) L.push(`Account: ${d.accountType}`);
+  }
+  return L;
+}
+function szQuota(id){
+  const v = szStore.budget[id] || (szStore.budget[id] = { used:0, window:'', note:'' });
+  const fill = h('i');
+  const bar = h('div', { class:'sz-bar' }, fill);
+  const paint = () => {
+    const u = Math.max(0, Math.min(100, Number(v.used) || 0));
+    fill.style.width = u + '%';
+    fill.className = u >= 85 ? 'bad' : u >= 60 ? 'mid' : 'ok';
+  };
+  const put = k => e => { v[k] = e.target.value; szSave(); if (k === 'used') paint(); };
+  paint();
+  return h('div', { style:'display:flex;flex-direction:column;gap:6px' }, bar,
+    h('div', { class:'sz-quota' },
+      h('label', {}, t('szUsedPct')), h('input', { class:'sz-field', type:'number', min:'0', max:'100', value:String(v.used ?? 0), onInput:put('used') }),
+      h('label', {}, t('szWindow')), h('input', { class:'sz-field', type:'text', value:v.window ?? '', onInput:put('window') }),
+      h('label', {}, t('szNote')), h('input', { class:'sz-field', type:'text', value:v.note ?? '', onInput:put('note') })));
+}
+function szProviderCard(p){
+  const st = sz.files?.status?.providers?.[p.id];
+  const card = h('div', { class:'sz-card' });
+  const meta = st ? SZ_STATE[st.state] || { kind:'off', en:st.state, de:st.state } : { kind:'off', en:t('szUnknown'), de:t('szUnknown') };
+  card.append(h('h3', {}, p.name,
+    szChip(p.kind === 'sub' ? t('szManualOnly') : t('szAuto')),
+    p.kind === 'api' ? szChip(tx(meta), meta.kind) : null));
+  if (st?.latencyMs != null) card.append(h('p', { class:'sz-note' }, `${st.latencyMs} ms · HTTP ${st.httpStatus}`));
+  if (p.env) card.append(h('p', { class:'sz-note' }, h('code', {}, p.env)));
+  szDetailLines(p.id, st?.details).forEach(l => card.append(h('p', {}, l)));
+  if (st?.details?.provisioningKey) card.append(h('p', { class:'sz-warn sz-danger' }, t('szProvKey')));
+  card.append(h('p', { class:'sz-note' }, tx(p.hint)));
+  const ws = szWorkersFor(p);
+  if (ws.length) card.append(h('div', { class:'sz-chips' }, h('span', { class:'sz-k' }, t('szUsedBy')), ws.map(w => szChip(w))));
+  card.append(szQuota(p.id));
+  if (p.link) card.append(szLinkOut(p.link, t('szOpenPage')));
+  return card;
+}
+function szTabApi(){
+  const body = h('div', { style:'display:flex;flex-direction:column;gap:14px' });
+  const s = sz.files?.status;
+  const bar = h('div', { class:'sz-card' }, h('h3', {}, t('szStatusFile'),
+    s ? szChip(szAge(s.generatedAt), (Date.now() - new Date(s.generatedAt).getTime()) > 3600000 ? 'mid' : 'ok') : szChip(t('szUnknown'), 'off')));
+  if (!sz.files) bar.append(h('p', { class:'sz-note' }, t('szNoFolder')));
+  else if (!s) bar.append(h('p', { class:'sz-note' }, t('szNoStatus')));
+  else if (Date.now() - new Date(s.generatedAt).getTime() > 3600000) bar.append(h('p', { class:'sz-warn' }, t('szStale')));
+  bar.append(szCmd('node crew/status.mjs'));
+  bar.append(h('p', { class:'sz-note' }, t('szKeyNote')));
+  body.append(bar);
+  body.append(h('div', { class:'sz-grid' }, SZ_PROVIDERS.map(szProviderCard)));
+  body.append(h('div', { class:'sz-card' }, h('h3', {}, t('szLocal')),
+    h('div', { class:'sz-chips' }, szChip(t('szOkfServer') + ': ' + (serverOnline ? t('srvOnline') : t('srvOffline')), serverOnline ? 'ok' : 'bad'))));
+  return body;
+}
+
+/* ---------- Tab: Gedächtnis (claude-mem) ---------- */
+function szViewerUrl(){
+  try {
+    const u = new URL(szStore.memUrl);
+    if (!/^https?:$/.test(u.protocol) || !['localhost', '127.0.0.1'].includes(u.hostname)) return null;
+    return u.origin;
+  } catch { return null; }
+}
+function szTabMem(){
+  const body = h('div', { style:'display:flex;flex-direction:column;gap:14px' });
+  body.append(h('p', { class:'sz-note' }, t('szMemInfo')));
+  body.append(h('p', { class:'sz-warn' }, t('szMemObserver')));
+  const result = h('span', {});
+  const url = h('input', { type:'text', value:szStore.memUrl, placeholder:'http://localhost:PORT', 'aria-label':t('szMemUrl'),
+    onInput:e => { szStore.memUrl = e.target.value.trim(); szSave(); viewer.disabled = test.disabled = !szViewerUrl(); } });
+  const viewer = h('button', { class:'btn btn-primary', type:'button', onClick:() => { const o = szViewerUrl(); if (o) window.open(o + '/viewer', '_blank', 'noopener'); } }, t('szMemViewer'));
+  const test = h('button', { class:'btn btn-ghost', type:'button', onClick:async () => {
+    const o = szViewerUrl(); if (!o) return;
+    result.replaceChildren();
+    try {
+      const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 2000);
+      await fetch(o + '/viewer', { mode:'no-cors', signal:ctl.signal }); clearTimeout(to);
+      result.append(szChip(t('szMemOk'), 'ok'));
+    } catch { result.append(szChip(t('szMemNo'), 'bad')); }
+  } }, t('szMemTest'));
+  viewer.disabled = test.disabled = !szViewerUrl();
+  body.append(h('div', { class:'sz-card' }, h('div', { class:'sz-k' }, t('szMemUrl')),
+    h('div', { class:'sz-row' }, url, viewer, test, result)));
+  body.append(h('div', { class:'sz-card' }, h('h3', {}, t('szMemChecks')),
+    SZ_MEM_CHECKS.map(c => h('label', { class:'sz-check' },
+      h('input', { type:'checkbox', checked:!!szStore.checks[c.id], onChange:e => { szStore.checks[c.id] = e.target.checked; szSave(); } }),
+      h('span', {}, tx(c.text)))),
+    szCmd('npx claude-mem telemetry disable'), szCmd('npx claude-mem doctor')));
+  body.append(h('p', { class:'sz-note' }, t('szMemRule')));
+  return body;
+}
+
+/* ---------- Rahmen ---------- */
+const SZ_RENDER = { crew:szTabCrew, tasks:szTabTasks, brief:szTabBrief, api:szTabApi, mem:szTabMem };
+function szRender(){
+  if (!sz.dlg) return;
+  const panel = sz.dlg.querySelector('.sz-panel');
+  const head = panel.querySelector('.sz-head'), tabs = panel.querySelector('.sz-tabs'), body = panel.querySelector('.sz-body');
+  const keep = body.scrollTop;
+  head.replaceChildren(
+    h('h2', {}, t('szTitle')),
+    sz.files ? szChip(t('szLoaded', { root:sz.files.root, t:sz.files.tasks.length, r:sz.files.results.length }), 'ok') : null,
+    h('button', { class:'btn btn-ghost', type:'button', onClick:() => document.getElementById('sz-folder').click() }, icon('i-folder', 13), ' ', t('szLoad')),
+    h('button', { class:'btn btn-ghost', type:'button', onClick:szClose }, t('szClose')),
+    h('p', { class:'sz-sub' }, t('szPrivacy')));
+  tabs.replaceChildren(...SZ_TABS.map(id => h('button', { type:'button', role:'tab', class:sz.tab === id ? 'on' : '',
+    'aria-selected':String(sz.tab === id), onClick:() => { sz.tab = id; szRender(); } }, t(SZ_TAB_KEY[id]))));
+  body.replaceChildren(SZ_RENDER[sz.tab]());
+  body.scrollTop = keep;
+}
+function szKey(e){ if (e.key === 'Escape'){ e.stopPropagation(); szClose(); } }
+function szOpen(){
+  if (sz.dlg) return;
+  sz.dlg = h('div', { class:'scrim', onClick:e => { if (e.target === sz.dlg) szClose(); } },
+    h('div', { class:'sz-panel', role:'dialog', 'aria-modal':'true', 'aria-label':t('szTitle') },
+      h('div', { class:'sz-head' }), h('div', { class:'sz-tabs', role:'tablist' }), h('div', { class:'sz-body' })));
+  document.body.append(sz.dlg);
+  requestAnimationFrame(() => sz.dlg.classList.add('open'));
+  document.addEventListener('keydown', szKey, true);
+  pingServer().then(szRender);
+  szRender();
+}
+function szClose(){
+  if (!sz.dlg) return;
+  const el = sz.dlg; sz.dlg = null;
+  document.removeEventListener('keydown', szKey, true);
+  el.classList.remove('open');
+  setTimeout(() => el.remove(), 200);
+}
+document.getElementById('sz-btn').addEventListener('click', szOpen);
+document.getElementById('sz-folder').addEventListener('change', async e => {
+  const files = [...e.target.files]; e.target.value = '';
+  if (!files.length) return;
+  sz.files = await szReadFolder(files);
+  szRender();
+});
+
 
 /* --- Start --------------------------------------------------- */
 loadOverrides();
